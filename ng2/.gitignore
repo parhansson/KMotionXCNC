@@ -1,0 +1,4 @@
+/dist
+/node_modules
+/ngfactory
+.DS_Store

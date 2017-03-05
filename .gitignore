@@ -27,3 +27,9 @@
 *.exe
 *.out
 *.app
+
+bin/
+
+config\.mak
+
+config\.h
