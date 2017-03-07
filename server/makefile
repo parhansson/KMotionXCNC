@@ -2,7 +2,7 @@ include $(BUILD_ROOT)/config.mak
 #DEFS+=-DDEBUG
 SOURCES=utils.cpp frozen.cpp mongoose.cpp json.cpp handler.cpp webserver.cpp
 SOURCES+=MessageQueue.cpp AbstractController.cpp FileStatus.cpp KmxController.cpp WebController.cpp
-
+IDIR+=$(includedir)/kmx/DSP_KFLOP
 IDIR+=$(includedir)/kmx/KMotionX
 IDIR+=$(includedir)/kmx/KMotion
 IDIR+=$(includedir)/kmx/GCodeInterpreter

@@ -18,13 +18,6 @@ INSTALL=install
 install: subdirs
 	mkdir -p "$(bindir)"
 	$(INSTALL) -m755 $(addprefix $(BUILD_ROOT)/bin/,$(KMXPROGS)) "$(bindir)"
-ifeq ($(OSNAME),Linux)
-	
-else ifeq ($(OSNAME),Darwin)
-	install_name_tool -change $(BUILD_ROOT)/bin/libKMotion$(LIBEXT) @rpath/libKMotion$(LIBEXT) "$(bindir)/kmxWeb$(EXESUF)"
-	install_name_tool -change $(BUILD_ROOT)/bin/libKMotionX$(LIBEXT) @rpath/libKMotionX$(LIBEXT) "$(bindir)/kmxWeb$(EXESUF)"
-	install_name_tool -change $(BUILD_ROOT)/bin/libGCodeInterpreter$(LIBEXT) @rpath/libGCodeInterpreter$(LIBEXT) "$(bindir)/kmxWeb$(EXESUF)"	
-endif
 
 
 uninstall:
