@@ -1,0 +1,73 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug kmxWeb",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceRoot}/bin/kmxWeb",
+      "args": ["-document_root","../"],
+      "stopAtEntry": false,
+      "cwd": "${workspaceRoot}",
+      "environment": 
+        [
+          {"name":"KMOTION_BIN","value":"/usr/local/bin"},
+          {"name":"KMOTION_ROOT","value":"${workspaceRoot}/../KMotionX"}
+        ],
+      "externalConsole": true,
+      "linux": {
+        "MIMode": "gdb",
+        "setupCommands": [
+          {
+            "description": "Enable pretty-printing for gdb",
+            "text": "-enable-pretty-printing",
+            "ignoreFailures": true
+          }
+        ]
+      },
+      "osx": {
+        "MIMode": "lldb"
+      },
+      "windows": {
+        "MIMode": "gdb",
+        "setupCommands": [
+          {
+            "description": "Enable pretty-printing for gdb",
+            "text": "-enable-pretty-printing",
+            "ignoreFailures": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "C++ Attach",
+      "type": "cppdbg",
+      "request": "attach",
+      "program": "${workspaceRoot}/bin/kmxWeb",
+      "processId": "${command:pickProcess}",
+      "linux": {
+        "MIMode": "gdb",
+        "setupCommands": [
+          {
+            "description": "Enable pretty-printing for gdb",
+            "text": "-enable-pretty-printing",
+            "ignoreFailures": true
+          }
+        ]
+      },
+      "osx": {
+        "MIMode": "lldb"
+      },
+      "windows": {
+        "MIMode": "gdb",
+        "setupCommands": [
+          {
+            "description": "Enable pretty-printing for gdb",
+            "text": "-enable-pretty-printing",
+            "ignoreFailures": true
+          }
+        ]
+      }
+    }
+  ]
+}
