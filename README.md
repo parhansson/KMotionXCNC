@@ -34,13 +34,6 @@ Install project (some platforms require 'sudo make install')
 make install
 ```
 
-Before running
-Need to set environment variables
-```
-export KMOTION_BIN=/usr/local/bin
-export KMOTION_ROOT=/path/to/KMotionX
-```
-
 Start server
 ```
 kmxWeb -document_root ./
