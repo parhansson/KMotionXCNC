@@ -63,7 +63,7 @@ export class TransformerService {
     if (typeof source === 'string') {
       //asume gcode text do not transform
       subject.next(source);
-    } else if (typeof source === 'ArrayBuffer') {
+    } else if (source instanceof ArrayBuffer) {
       //gcode file do not transform
       subject.next(KMXUtil.ab2str(source));
     } else {
