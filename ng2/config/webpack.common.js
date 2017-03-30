@@ -104,7 +104,7 @@ module.exports = {
         test: /\.css$/,
         exclude: helpers.root('src', 'app'),
         //use: ExtractTextPlugin.extract({ fallbackLoader: 'style-loader', loader: 'css?sourceMap'})
-        loader: ExtractTextPlugin.extract({ fallbackLoader: 'style-loader', loader: 'css-loader' })
+        loader: ExtractTextPlugin.extract({ fallback: 'style-loader', use: 'css-loader' })
       },
       {
         test: /\.css$/,
@@ -115,6 +115,15 @@ module.exports = {
   },
 
   plugins: [
+    // Workaround for angular/angular#11580
+    new webpack.ContextReplacementPlugin(
+      // The (\\|\/) piece accounts for path separators in *nix and Windows
+      ///angular(\\|\/)core(\\|\/)(esm(\\|\/)src|src)(\\|\/)linker/,
+      /angular(\\|\/)core(\\|\/)@angular/,
+      helpers.root('./src'), // location of your src
+      {} // a map of your routes
+    ),
+    
     new webpack.optimize.CommonsChunkPlugin({
       names: ['app', 'vendor', 'polyfills', 'manifest']
     }),
@@ -135,13 +144,7 @@ module.exports = {
       options: {
         tslint: tslintOptions
       }
-    }),
-
-    // Fixes Angular 2 error
-    new webpack.ContextReplacementPlugin(
-      /angular(\\|\/)core(\\|\/)(esm(\\|\/)src|src)(\\|\/)linker/,
-      __dirname
-    )
+    })
   ]
 
 };

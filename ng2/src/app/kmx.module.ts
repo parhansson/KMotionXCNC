@@ -4,7 +4,8 @@ import { enableProdMode } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { HttpModule } from '@angular/http';
 import { RouteReuseStrategy } from '@angular/router';
-import { TabsModule, DropdownModule } from 'ng2-bootstrap';
+import { BsDropdownModule } from 'ng2-bootstrap/dropdown';
+import { TabsModule } from 'ng2-bootstrap/tabs';
 import { routing, appRoutingProviders } from './kmx.routing';
 import { BackendService } from './backend/backend.service';
 import { KFlopBackendService } from './backend/kflop/kflop.backend.service';
@@ -31,7 +32,7 @@ import { CustomReuseStrategy } from './route-reuse.strategy'
     BrowserModule,
     HttpModule,
     TabsModule.forRoot(),
-    DropdownModule.forRoot(),
+    BsDropdownModule.forRoot(),
     FormsModule,
 
     SharedModule,

@@ -8,7 +8,7 @@ import {
   ViewChild,
   AfterViewChecked
 } from '@angular/core';
-import { Observable, Subscription } from 'rxjs'
+import { Observable, Subscription } from 'rxjs/Rx'
 import { LogService, LogMessage } from './log.service'
 import { LogSubject } from './log-subject'
 import { LimitBuffer } from '../util'
