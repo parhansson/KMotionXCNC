@@ -59,23 +59,29 @@ export class GCodeScreenComponent {
 
   private machineBounds: THREE.Object3D = null;
   private machineBackground: THREE.Object3D = null;
+  private machineGrid: THREE.Object3D = null;
 
   renderMachineObject(machine: Machine) {
 
-
+    if (this.machineGrid != null) {
+      this.threeComp.removeAuxObject(this.machineGrid);
+    }
     if (this.machineBounds != null) {
-      this.threeComp.auxiliaryGroup.remove(this.machineBounds);
+      this.threeComp.removeAuxObject(this.machineBounds);
     }
     if (this.machineBackground != null) {
-      this.threeComp.auxiliaryGroup.remove(this.machineBackground);
+      this.threeComp.removeAuxObject(this.machineBackground);
     }
     let x = machine.dimX;
     let y = machine.dimY;
     let z = machine.dimZ;
     this.machineBounds = this.createMachineBounds(x, y, z);
     this.machineBackground = this.renderBackground(x, y, z);
-    this.threeComp.auxiliaryGroup.add(this.machineBounds);
-    this.threeComp.auxiliaryGroup.add(this.machineBackground);
+    this.machineGrid = this.renderGrid(x, y, z);
+    this.threeComp.addAuxObject(this.machineBounds);
+    this.threeComp.addAuxObject(this.machineBackground);
+    this.threeComp.addAuxObject(this.machineGrid);
+    
     this.threeComp.requestTick()
 
   }
@@ -88,6 +94,32 @@ export class GCodeScreenComponent {
       new THREE.EdgesGeometry(boxGeom as any, undefined),
       material);
     return edges;
+  }
+  
+  private renderGrid(x, y, z):THREE.Object3D{
+    const sizeX = x
+    const sizeY = y
+    const step = 10;
+
+    var geometry = new THREE.Geometry();
+    var material = new THREE.LineBasicMaterial( { color: 0x999999, opacity: 0.7, linewidth:1 } );
+
+    for ( var i = -sizeY; i <= sizeY; i += step ) {
+
+        geometry.vertices.push( new THREE.Vector3( - sizeX, i,0 ) );
+        geometry.vertices.push( new THREE.Vector3(   sizeX, i,0 ) );
+
+    }
+    for ( var i = -sizeX; i <= sizeX; i += step ) {
+
+        geometry.vertices.push( new THREE.Vector3( i, -sizeY,0 ) );
+        geometry.vertices.push( new THREE.Vector3( i,   sizeY , 0) );
+
+    }
+
+    geometry.translate(x / 2, y / 2, 0);
+    var line = new THREE.LineSegments( geometry, material);
+    return line
   }
 
   private renderBackground(x, y, z) {

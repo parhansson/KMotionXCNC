@@ -21,8 +21,15 @@ export class ThreeViewComponent {
   private modelDetector: RaycastDetector
   private machineDetector: RaycastDetector
   private modelGroup = new THREE.Group()
-  public auxiliaryGroup = new THREE.Group()
+  private auxiliaryGroup = new THREE.Group()
   private currentModelObject: THREE.Object3D = null
+
+  addAuxObject(object: THREE.Object3D){
+    this.auxiliaryGroup.add(object);
+  }
+  removeAuxObject(object: THREE.Object3D){
+    this.auxiliaryGroup.remove(object);
+  }
 
 
   set model(model: THREE.Object3D) {
