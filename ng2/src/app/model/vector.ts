@@ -62,93 +62,83 @@ export class GCodeVector {
 
   }
 }
-
-export class GCodeCurve3 {
-  aX: number
-  aY: number
-  xRadius: number
-  yRadius: number
-  aStartAngle: number
-  aEndAngle: number
-  aClockwise: boolean
+export class EllipseCurve3 {
   height: number
   sZ: number
-  constructor(startPoint: GCodeVector, endPoint: GCodeVector, args: MoveArcArguments, clockWise) {
-
-
-    var centerX = startPoint.x + (args.I || 0);
-    var centerY = startPoint.y + (args.J || 0);
-    // centerZ is only used in other planes
-    var centerZ = startPoint.z + (args.K || 0); //TODO Helical not correct implemented yet, i guess...
-    var startAngle;
-    var endAngle;
-    var radius = Math.sqrt((args.I * args.I) + (args.J * args.J));  //should use pythagoras
-    if (startPoint.x == endPoint.x && startPoint.y == endPoint.y) {
-      //full circle
-      startAngle = 0;
-      endAngle = Math.PI * 2;
-    } else {
-      startAngle = -Math.atan2(endPoint.y - centerY, endPoint.x - centerX);
-      endAngle = Math.atan2(args.J, args.I);
-    }
-
-    //console.info("Curve ax, ay, radius, startangle, endangle",aX, aY, radius,aStartAngle,  aEndAngle);
-
-    this.init(
-      centerX, centerY,                  // ax, aY
-      radius, radius,           // xRadius, yRadius
-      startAngle, endAngle,  // aStartAngle, aEndAngle
-      clockWise                     // aClockwise
-    );
-    this.sZ = startPoint.z;
-    this.height = endPoint.z - startPoint.z;
-
-  }
-
-  private init(aX, aY, xRadius, yRadius, aStartAngle, aEndAngle, aClockwise) {
-    //Kept this function since it is the same as the THREE.EllipseCurve
-    this.aX = aX;
-    this.aY = aY;
-
-    this.xRadius = xRadius;
-    this.yRadius = yRadius;
-
-    this.aStartAngle = aStartAngle;
-    this.aEndAngle = aEndAngle;
-
-    this.aClockwise = aClockwise;
-
+  aastartDeg:number
+  aaendDeg:number
+  constructor(private aX:number, 
+    private aY:number, 
+    private xRadius:number, 
+    private yRadius:number,
+    private aStartAngle:number,
+    private aEndAngle:number,
+    private aClockwise:boolean,
+    private aRotation:number
+  ) {
+    //Not used only for humans
+    this.aastartDeg = aStartAngle * (180/Math.PI)
+    this.aaendDeg = aEndAngle * (180/Math.PI)
+    
   };
 
-  getPoint(t: number, h: number) {
-
+  getPoint(t: number, h: number){
+    const twoPi = Math.PI * 2;
     let deltaAngle = this.aEndAngle - this.aStartAngle;
+    const samePoints = Math.abs( deltaAngle ) < Number.EPSILON;
 
-    if (deltaAngle < 0) deltaAngle += Math.PI * 2;
-    if (deltaAngle > Math.PI * 2) deltaAngle -= Math.PI * 2;
+    // ensures that deltaAngle is 0 .. 2 PI
+    while ( deltaAngle < 0 ) deltaAngle += twoPi;
+    while ( deltaAngle > twoPi ) deltaAngle -= twoPi;
 
-    let angle;
+    if ( deltaAngle < Number.EPSILON ) {
 
-    if (this.aClockwise === true) {
+      if ( samePoints ) {
 
-      angle = this.aEndAngle + (1 - t) * (Math.PI * 2 - deltaAngle);
+        deltaAngle = 0;
 
-    } else {
+      } else {
 
-      angle = this.aStartAngle + t * deltaAngle;
+        deltaAngle = twoPi;
+
+      }
 
     }
 
-    const vector = new GCodeVector();
+    if ( this.aClockwise === true && ! samePoints ) {
 
-    vector.x = this.aX + this.xRadius * Math.cos(angle);
-    vector.y = this.aY + this.yRadius * Math.sin(angle);
-    vector.z = this.sZ + h;
-    return vector;
+      if ( deltaAngle === twoPi ) {
 
-  };
+        deltaAngle = - twoPi;
 
+      } else {
 
+        deltaAngle = deltaAngle - twoPi;
+
+      }
+
+    }
+
+    let angle = this.aStartAngle + t * deltaAngle;
+    let x = this.aX + this.xRadius * Math.cos( angle );
+    let y = this.aY + this.yRadius * Math.sin( angle );
+
+    if ( this.aRotation !== 0 ) {
+
+      let cos = Math.cos( this.aRotation );
+      let sin = Math.sin( this.aRotation );
+
+      let tx = x - this.aX;
+      let ty = y - this.aY;
+
+      // Rotate the point about the center of the ellipse.
+      x = tx * cos - ty * sin + this.aX;
+      y = tx * sin + ty * cos + this.aY;
+
+    }
+
+    return new GCodeVector(x,y,this.sZ + h);
+  }
 
   getPoints(divisions: number) {
 
@@ -167,5 +157,78 @@ export class GCodeCurve3 {
     return pts;
 
   };
+
+}
+
+export class GCodeCurve3 extends EllipseCurve3{
+  constructor(startPoint: GCodeVector, endPoint: GCodeVector, args: MoveArcArguments, clockWise) {
+
+    let I = args.I || 0
+    let J = args.J || 0
+    let K = args.K || 0
+    let R = args.R || 0
+    let centerX
+    let centerY
+    // centerZ is only used in other planes
+    //let centerZ = startPoint.z + K; //TODO Helical not correct implemented yet, i guess...
+    let startAngle;
+    let endAngle;
+    let radius
+
+    const fullCirce = (Math.abs(startPoint.x - endPoint.x) < Number.EPSILON && Math.abs(startPoint.y - endPoint.y) < Number.EPSILON)
+    if (fullCirce) {
+      console.log('full circle',startPoint, endPoint);
+    }
+    const twoPi = Math.PI*2
+    
+    if(R != 0){
+      // R has precedence over IJK, need to check what klfop does
+      if (fullCirce) {
+        console.error('Full circle not allowed with R');
+      }
+      radius = R 
+      let h = Math.hypot(startPoint.x - endPoint.x,startPoint.y - endPoint.y) / 2
+      const hSq = h*h
+      const xSq = radius*radius
+      const x = Math.sqrt(xSq)
+      const ySq = xSq-hSq
+      const y = Math.sqrt(ySq)
+      centerX = startPoint.y+x
+      centerY = startPoint.x+y
+      let angle =  Math.atan2(startPoint.y - endPoint.y, startPoint.x - endPoint.x)
+      centerX = centerX + radius * Math.cos( angle );
+      centerY = centerY + radius * Math.sin( angle );
+
+      startAngle = Math.atan2(startPoint.y - centerY, startPoint.x - centerX);
+      endAngle = Math.atan2(endPoint.y - centerY, endPoint.x - centerX);
+    } else {
+      //IJK
+      radius = Math.hypot(I, J)  //when I and J is relative
+      centerX = startPoint.x + I;
+      centerY = startPoint.y + J;
+      startAngle = Math.atan2(startPoint.y - centerY, startPoint.x - centerX);
+      //radius += 5
+      if (fullCirce) {
+        endAngle = startAngle + Math.PI * 2;
+      } else {
+        endAngle = Math.atan2(endPoint.y - centerY, endPoint.x - centerX);
+      }
+    }
+
+    //console.info("Curve ax, ay, radius, startangle, endangle",aX, aY, radius,aStartAngle,  aEndAngle);
+
+    super(
+      centerX, centerY,                  // ax, aY
+      radius, radius,           // xRadius, yRadius
+      startAngle, endAngle,  // aStartAngle, aEndAngle
+      clockWise,                     // aClockwise,
+      0                               //rotation
+    );
+    this.sZ = startPoint.z;
+    this.height = endPoint.z - startPoint.z;
+    console.log(startPoint, endPoint, this);
+  }
+
+
 
 }

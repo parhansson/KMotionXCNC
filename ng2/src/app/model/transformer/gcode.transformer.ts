@@ -45,7 +45,7 @@ export class ModalGroup {
 export class GCodeState {
   moveGroup = new ModalGroup('G0', ['G0', 'G1', 'G2', 'G3', 'G80', 'G81', 'G82', 'G83', 'G84', 'G85', 'G86', 'G87', 'G88', 'G89'])
   planeGroup = new ModalGroup('G17', ['G17', 'G18', 'G19'])
-  //distance mode defaults to absolut
+  //distance mode defaults to absolute
   distanceGroup = new ModalGroup('G90', ['G90', 'G91'])
   //spindle speed mode
   spindleSpeedGroup = new ModalGroup(null, ['G93', 'G94'])
@@ -212,10 +212,13 @@ export abstract class GCodeTransformer<ShapeType, OutputType> extends ModelTrans
     const position = this.state.position;
 
 
-    if (this.state.moveGroup.changed || currentShape == null) {
+    if (this.state.moveGroup.changed || currentShape == null 
+      //hack to create new shape on arcs
+      || this.state.moveGroup.code === 'G2' || this.state.moveGroup.code === 'G3') 
+      {
       currentShape = this.state.currentShape = this.createShapeType();
       if (this.state.moveGroup.code === 'G0' || this.state.moveGroup.code === 'G1') {
-        //det här kan man inte göra på en curve
+        // add startpoint on linear shapes
         this.addLinearPoint(position, currentShape);
       }
     }
@@ -239,7 +242,13 @@ export abstract class GCodeTransformer<ShapeType, OutputType> extends ModelTrans
 
     this.state.position = newPosition;
   };
+  
   private createCurve(args: MoveArcArguments, position: GCodeVector, newPosition: GCodeVector, clockWise: boolean, currentShape) {
+    const scale = this.state.scale;
+    args.I *= scale
+    args.J *= scale
+    args.K *= scale
+    args.R *= scale
     let curve = new GCodeCurve3(
       position,
       newPosition,
@@ -273,6 +282,9 @@ export abstract class GCodeTransformer<ShapeType, OutputType> extends ModelTrans
     return newPosition
   }
   private containsMoveData(args: any) {
-    return args.X !== undefined || args.Y !== undefined || args.Z !== undefined || args.A !== undefined || args.B !== undefined || args.C !== undefined
+    return args.X !== undefined || args.Y !== undefined || args.Z !== undefined 
+           || args.A !== undefined || args.B !== undefined || args.C !== undefined
+           || args.I !== undefined || args.J !== undefined || args.K !== undefined
+           || args.R !== undefined
   }
 }
