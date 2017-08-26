@@ -20,15 +20,16 @@ import 'pdfjs-dist/build/pdf.js'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap/dist/css/bootstrap-theme.min.css'
 import '../public/css/style.css'
+
+//https://stackoverflow.com/questions/35968047/using-webpack-threejs-examples-and-typescript
 //THREE is modular but not the TrackballControls example
-//import 'script-loader!three/build/three.module.js';
-import 'script-loader!three/build/three.js'
-import 'script-loader!three/examples/js/controls/TrackballControls.js'
+// imports-loader provides THREE to the TrackballControls example
+// exports-loader gets THREE.TrackballControls
+import * as THREE from 'three';
+//import THREE from 'three';
+import 'imports-loader?THREE=three!three/examples/js/controls/TrackballControls';
 
 import 'script-loader!dxf-parser/dist/dxf-parser.js'
-
-//import THREE from 'three/build/three.module.js';
-//import 'imports?THREE=three!three/examples/js/controls/DeviceOrientationControls';
 
 //Modular ace implementation
 import 'brace'

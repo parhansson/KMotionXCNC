@@ -1,5 +1,6 @@
 
-import { Component, ElementRef, HostListener } from '@angular/core';
+import { Component, ElementRef, HostListener } from '@angular/core'
+import * as THREE from 'three'
 
 @Component({
   selector: 'three-viewer',
@@ -7,7 +8,7 @@ import { Component, ElementRef, HostListener } from '@angular/core';
   //     <div (window:resize)="onResize2($event)">
   //     </div>    
   //   `
-  template: ''
+  template: '<div></div>'
 })
 export class ThreeViewComponent {
   private renderer: THREE.WebGLRenderer
@@ -202,7 +203,7 @@ element.on( 'mouseleave', function(){
     //this.requestTick()
   }
 
-  getMouseVector(event) {
+  private getMouseVector(event) {
     let height = this.height();
     let width = this.width();
     // calculate mouse position in normalized device coordinates
@@ -227,7 +228,7 @@ element.on( 'mouseleave', function(){
 }
 
 // Find mouse intersection objects!
-export class RaycastDetector {
+class RaycastDetector {
   currentObject: any //THREE.Object3D;
   previousPoint = new THREE.Vector3(0, 0, 0);
   raycaster = new THREE.Raycaster();

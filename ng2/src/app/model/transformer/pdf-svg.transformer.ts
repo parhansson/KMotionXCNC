@@ -1,6 +1,6 @@
-import { Observer } from 'rxjs/Rx';
-import { ModelSettingsService, ModelSettings } from '../model.settings.service';
-import { ModelTransformer } from './model.transformer';
+import { Observer } from 'rxjs/Rx'
+import { ModelSettingsService, ModelSettings } from '../model.settings.service'
+import { ModelTransformer } from './model.transformer'
 
 
 export class Pdf2SvgTransformer extends ModelTransformer<ArrayBuffer, SVGElement> {
@@ -22,7 +22,7 @@ export class Pdf2SvgTransformer extends ModelTransformer<ArrayBuffer, SVGElement
     //
     let transformerSettings = this.transformerSettings
 
-    PDFJS.getDocument(source).then(function (pdf) {
+    PDFJS.getDocument(source as any).then(function (pdf) {
       let numPages = pdf.numPages;
       // Using promise to fetch the page
 
