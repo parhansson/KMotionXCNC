@@ -9,9 +9,9 @@ KMotionX
 NodeJS
 
 
-##Install KMotionXCNC
+## Install KMotionXCNC
 
-######1. Build KMotionXCNC server
+###### 1. Build KMotionXCNC server
 
 Clone repository
 ```
@@ -39,7 +39,7 @@ Start server
 kmxWeb -document_root ./
 ```
 
-######1. Build KMotionXCNC Angular app
+###### 2. Build KMotionXCNC Angular app
 
 This instruction is for development only.
 Instructions will be updated for production builds later
