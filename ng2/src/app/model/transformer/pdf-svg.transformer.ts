@@ -21,7 +21,7 @@ export class Pdf2SvgTransformer extends ModelTransformer<ArrayBuffer, SVGElement
     // Fetch the PDF document from the URL using promises
     //
     let transformerSettings = this.transformerSettings
-
+    let transformer = this;
     PDFJS.getDocument(source as any).then(function (pdf) {
       let numPages = pdf.numPages;
       // Using promise to fetch the page
@@ -45,6 +45,7 @@ export class Pdf2SvgTransformer extends ModelTransformer<ArrayBuffer, SVGElement
             return page.getOperatorList().then(opList => {
               let svgGfx = <PDFJSExtra.SVGGraphics>new PDFJS.SVGGraphics(page.commonObjs, page.objs);
               return svgGfx.getSVG(opList, viewport).then(svg => {
+                transformer.logSvg(svg);
                 targetObserver.next(svg)
                 //svgObserver.complete()
                 pdf.destroy(); //Destroy worker
@@ -54,6 +55,12 @@ export class Pdf2SvgTransformer extends ModelTransformer<ArrayBuffer, SVGElement
         }.bind(null, i, anchor));
       }
     });
+  }
+  private logSvg(svg: SVGElement){
+    if(true == true) return
+    var container = document.createElement('div');
+    container.appendChild(svg);
+    console.log('PDF-SVG', container.innerHTML);
   }
   createContainer(pageNum, width, height) {
     var container = document.createElement('div');

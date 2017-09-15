@@ -1,36 +1,25 @@
 import { Component, Inject, Input, Output, ViewChild, ElementRef } from '@angular/core';
-import { StaticTransformer } from '../model/transformers'
 import { IGM } from '../model/IGM'
 import { MitreBox } from '../model/tool/mitre-box'
+import { SvgPreviewComponent } from './svg-preview.component'
 
 @Component({
-  selector: 'box-creator',
-  templateUrl: './box-creator.component.html'
+  selector: 'mitre-box-wizard',
+  templateUrl: './mitrebox-wizard.component.html'
 })
-export class BoxCreatorComponent {
+export class MitreBoxWizardComponent {
   box: MitreBox
 
-  @ViewChild('preview')
-  private previewContainer: ElementRef
+  @ViewChild(SvgPreviewComponent)
+  private previewContainer: SvgPreviewComponent
 
-  constructor(private staticTransformer: StaticTransformer) {
+  constructor() {
     this.box = new MitreBox(70, 70, 30, 3);
   }
 
   render() {
     let svg = this.toSVG(this.box.generate());
-    //Open in new window
-    //let blob = new Blob([svg], { type: 'image/svg+xml' });
-    //window.open(window.URL.createObjectURL(blob));
-    let doc = new DOMParser().parseFromString(svg, 'image/svg+xml').documentElement as any as SVGElement;
-    let node = this.previewContainer.nativeElement as Element
-    while (node.firstChild) {
-      node.removeChild(node.firstChild);
-    }
-    node.appendChild(doc);
-
-    //TODO only content of currently loaded gcode file is changed not the file name
-    this.staticTransformer.transform('image/svg+xml', svg)
+    this.previewContainer.render(svg)
   }
 
   toSVG(model: IGM) {
