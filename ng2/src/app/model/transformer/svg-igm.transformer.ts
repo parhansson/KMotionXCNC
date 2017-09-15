@@ -21,9 +21,11 @@ function createAnchor(name, url) {
   document.body.appendChild(anchor);
   return anchor;
 }
-type Point = Array<number> //
+type Point = [number,number]
+type Subpath = Point[]
+
 class SvgNode {
-  path: Array<Array<Point>>
+  path: Subpath[]
   xformToWorld = [1, 0, 0, 1, 0, 0] //2d Transformation vector
   xform = [1, 0, 0, 1, 0, 0]//2d Transformation vector
   id: string
@@ -842,7 +844,7 @@ class SvgParser implements ISVGParser {
     var cmdPrev = '';
     var xPrevCp;
     var yPrevCp;
-    var subpath: Point[] = [];
+    var subpath: Subpath = [];
 
     while (d.length > 0) {
       var cmd = getNext();
@@ -886,12 +888,16 @@ class SvgParser implements ISVGParser {
         case 'z':  // closepath
           // loop and finalize subpath
           if (subpath.length > 0) {
-            subpath.push(subpath[0]);  // close
+            //we can not reference first subpath subpath.push(subpath[0]) without cloning values
+            //due to transformations, which will be applied multiple times
+            subpath.push([subpath[0][0],subpath[0][1]]);
             node.path.push(subpath);
             x = subpath[subpath.length - 1][0];
             y = subpath[subpath.length - 1][1];
+            console.log('close path svg Z or z',node,subpath);
             subpath = [];
           }
+          //I think there is an error here
           break
         case 'L':  // lineto absolute
           while (nextIsNum()) {
@@ -1236,7 +1242,7 @@ class SvgParser implements ISVGParser {
     if (sweep && delta < 0) { delta += Math.PI * 2; }
     if (!sweep && delta > 0) { delta -= Math.PI * 2; }
 
-    function getVertex(pct) {
+    function getVertex(pct) : Point {
       var theta = psi + delta * pct;
       var ct = Math.cos(theta);
       var st = Math.sin(theta);
@@ -1245,7 +1251,7 @@ class SvgParser implements ISVGParser {
 
     // let the recursive fun begin
     //
-    function recursiveArc(parser, t1, t2, c1, c5, level, tolerance2) {
+    function recursiveArc(parser, t1, t2, c1:Point, c5:Point, level, tolerance2) {
       if (level > 18) {
         // protect from deep recursion cases
         // max 2**18 = 262144 segments
