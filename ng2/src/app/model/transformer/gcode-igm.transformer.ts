@@ -12,11 +12,15 @@ export class Gcode2IgmTransformer extends GCodeTransformer<IgmObject, IGM>{
     return new IGM()
   }
 
-  protected createShapeType() {
+  protected startShape() {
     const shape = new IgmObject();
     //shape.userData = { lineNo: this.state.lineNo }
     this.output.addToLayerObject('layer1',shape)
     return shape;
+  }
+
+  protected endShape(){
+    
   }
 
   protected addLinearPoint(newPosition: GCodeVector, shape: IgmObject) {

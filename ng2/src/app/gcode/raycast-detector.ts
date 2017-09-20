@@ -11,7 +11,7 @@ export class RaycastDetector {
     this.raycaster.linePrecision = 0.5;
     markerObject.visible = false;
   }
-  
+
   detect(mouseVector) {
     //save previous intersected object
     let prevIntersect = this.currentObject;
@@ -34,7 +34,7 @@ export class RaycastDetector {
 
       //ensure intersected object is not marker sphere
       if (this.markerObject !== this.currentObject) {
-        if (this.currentObject.userData.lineNo !== undefined) {
+        if (Object.getOwnPropertyNames(this.currentObject.userData).length > 0) {
           console.log(this.currentObject.userData);
         }
         //console.info(intersects[ 0 ].point);

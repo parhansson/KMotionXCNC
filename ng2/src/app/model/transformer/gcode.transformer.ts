@@ -120,7 +120,8 @@ export abstract class GCodeTransformer<ShapeType, OutputType> extends ModelTrans
 
   constructor(protected disableWorker?: boolean) { super() }
   protected abstract createOutput(): OutputType
-  protected abstract createShapeType(): ShapeType
+  protected abstract startShape(): ShapeType
+  protected abstract endShape()
   protected abstract addLinearPoint(newPosition: GCodeVector, shape: ShapeType)
   protected abstract addCurve(curve: GCodeCurve3, shape: ShapeType)
 
@@ -212,15 +213,18 @@ export abstract class GCodeTransformer<ShapeType, OutputType> extends ModelTrans
     const position = this.state.position;
 
 
-    if (this.state.moveGroup.changed || currentShape == null 
+    if (this.state.moveGroup.changed 
+      || currentShape == null 
       //hack to create new shape on arcs
-      || this.state.moveGroup.code === 'G2' || this.state.moveGroup.code === 'G3') 
+      || this.state.moveGroup.code === 'G2' 
+      || this.state.moveGroup.code === 'G3') 
       {
-      currentShape = this.state.currentShape = this.createShapeType();
-      if (this.state.moveGroup.code === 'G0' || this.state.moveGroup.code === 'G1') {
-        // add startpoint on linear shapes
-        this.addLinearPoint(position, currentShape);
-      }
+        this.endShape()
+        currentShape = this.state.currentShape = this.startShape()
+        if (this.state.moveGroup.code === 'G0' || this.state.moveGroup.code === 'G1') {
+          // add startpoint on linear shapes
+          this.addLinearPoint(position, currentShape)
+        }
     }
 
     //TODO if args X Y and Z is undefined then there is no vector in this Parameter object

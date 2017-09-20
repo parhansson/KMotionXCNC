@@ -49,14 +49,20 @@ export class Gcode2ThreeTransformer extends GCodeTransformer<THREE.Geometry, THR
     return output
   }
 
-  protected createShapeType() {
+  protected startShape() {
     const data = this.getShapeData()
     const lineGeometry = new THREE.Geometry();
     const shape = new THREE.Line(lineGeometry, data.material);
-    shape.userData = { lineNo: this.state.lineNo }
+    shape.userData = { startLine: this.state.lineNo }
     this.output.add(shape);
     //console.log("new line");
     return lineGeometry;
+  }
+
+  protected endShape(){
+    if(this.output.children.length > 0){
+      this.output.children[this.output.children.length -1].userData.endLine =  this.state.lineNo
+    }
   }
 
   private getShapeData() {
