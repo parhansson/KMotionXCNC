@@ -11,8 +11,8 @@ import 'rxjs';
 // Other vendors for example jQuery, Lodash or Bootstrap
 // You can import js, ts, css, sass, ...
 
-import 'ng2-bootstrap/dropdown'
-import 'ng2-bootstrap/tabs'
+import 'ngx-bootstrap/dropdown'
+import 'ngx-bootstrap/tabs'
 
 import 'opentype.js'
 import 'pdfjs-dist/build/pdf.js'

@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { TabsModule } from 'ng2-bootstrap/tabs';
+import { TabsModule } from 'ngx-bootstrap/tabs';
 import { MitreBoxWizardComponent } from './mitrebox-wizard.component'
 import { TextWizardComponent } from './text-wizard.component'
 import { JigsawWizardComponent } from './jigsaw-wizard.component'
