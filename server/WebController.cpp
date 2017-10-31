@@ -315,11 +315,11 @@ bool WebController::isApiRequest(struct mg_connection *conn){
   return strstr(conn->uri, "/api") == conn->uri;
 }
 bool WebController::isRegisteredRoute(struct mg_connection *conn){
-  if(strstr(conn->uri, "/ng2/gcode") == conn->uri || 
-      strstr(conn->uri, "/ng2/debug") == conn->uri || 
-      strstr(conn->uri, "/ng2/ccode") == conn->uri ||
-      strstr(conn->uri, "/ng2/laser-calc") == conn->uri ||
-      strstr(conn->uri, "/ng2/settings") == conn->uri){
+  if(strstr(conn->uri, "/kmx/gcode") == conn->uri || 
+      strstr(conn->uri, "/kmx/debug") == conn->uri || 
+      strstr(conn->uri, "/kmx/ccode") == conn->uri ||
+      strstr(conn->uri, "/kmx/laser-calc") == conn->uri ||
+      strstr(conn->uri, "/kmx/settings") == conn->uri){
       //printf("%s\n", conn->uri);
       return true;
   }

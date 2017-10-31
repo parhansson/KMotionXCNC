@@ -88,6 +88,9 @@ int KmxController::Initialize(){
 }
 
 int KmxController::readStatus(){
+  //TODO need to get status with HOST_JOB_ACTIVE_BIT set 
+  //to prevent jogging and such
+  //if (ThreadIsExecuting) HostStatus += HOST_JOB_ACTIVE_BIT;
   int result = km->GetStatus(main_status,false); //already locked
   if(result){
       connected = false;

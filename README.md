@@ -50,4 +50,4 @@ npm run serve
 ```
 
 Open browser and enter 
-http://localhost:8081/ng2/dist
+http://localhost:8081/kmx

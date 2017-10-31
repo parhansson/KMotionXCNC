@@ -9,7 +9,7 @@ module.exports = webpackMerge(commonConfig, {
   output: {
     path: helpers.root('dist'),
     pathinfo: true,
-    publicPath: "/ng2/dist/",
+    publicPath: "/kmx/",
     filename: '[name].js',
     chunkFilename: '[id].chunk.js'
   },
@@ -22,7 +22,9 @@ module.exports = webpackMerge(commonConfig, {
   ],
 
   devServer: {
-    historyApiFallback: true,
+    historyApiFallback: {
+      index: '/kmx/'
+    },
     stats: 'minimal',
     proxy: [
       {
