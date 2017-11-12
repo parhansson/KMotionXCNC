@@ -7,9 +7,9 @@ import { GCodeScreenComponent } from './gcode-screen.component';
 import { UserButtonsComponent } from './user-buttons.component';
 import { ThreeViewComponent } from './view.component';
 import { GCodeEditorComponent } from './gcode-editor.component'
-import { LogModule } from '../log/log.module';
-import { EditorModule } from '../editor/editor.module';
-import { ResourceModule } from '../resources/resource.module'
+import { LogModule } from '../log';
+import { EditorModule } from '../editor';
+import { ResourceModule } from '../resources'
 @NgModule({
   imports: [CommonModule,
     LogModule,

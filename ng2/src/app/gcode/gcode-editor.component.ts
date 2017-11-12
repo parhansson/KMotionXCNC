@@ -1,7 +1,7 @@
 import { Component, ViewChild, SkipSelf, Inject } from '@angular/core';
-import { FileResource, Payload, FileServiceToken, IFileBackend } from '../resources'
-import { AceEditorComponent, FileStoreToken, FileStore } from '../editor'
-import { TransformingFileStore } from './transforming-file-store.service'
+import { FileResource, Payload, FileServiceToken, IFileBackend, FileStoreToken, FileStore } from '../resources'
+import { AceEditorComponent} from '../editor'
+import { TransformingFileStore } from '../model/transforming-file-store.service'
 import { SocketService } from '../backend/socket.service';
 import { BackendService } from '../backend/backend.service'
 
@@ -18,9 +18,10 @@ export class GCodeEditorComponent {
   @ViewChild(AceEditorComponent)
   editorComponent: AceEditorComponent;
 
-  constructor( @Inject(FileStoreToken) private fileStore: TransformingFileStore,
-    private socketService: SocketService,
-    @Inject(FileServiceToken) private fileBackend: BackendService) {
+  constructor( 
+    @Inject(FileStoreToken) private fileStore: TransformingFileStore,
+    @Inject(FileServiceToken) private fileBackend: BackendService,
+    private socketService: SocketService) {
 
   }
   ngAfterViewInit() {

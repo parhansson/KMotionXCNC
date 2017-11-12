@@ -3,30 +3,28 @@ import { NgModule } from '@angular/core';
 import { enableProdMode } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { HttpModule } from '@angular/http';
+import { FormsModule } from '@angular/forms';
 import { RouteReuseStrategy } from '@angular/router';
 import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
 import { TabsModule } from 'ngx-bootstrap/tabs';
 import { routing, appRoutingProviders } from './kmx.routing';
 import { BackendService } from './backend/backend.service';
 import { KFlopBackendService } from './backend/kflop/kflop.backend.service';
+import { SocketService } from './backend/socket.service'
 import { LogService } from './log';
 import { KmxComponent } from './kmx.component'
-import { SocketService } from './backend/socket.service'
-import { SettingsService } from './settings/settings.service'
 import { ModelSettingsService } from './model/model.settings.service';
 import { StaticTransformer } from './model/transformers'
-import { FileServiceToken } from './resources'
-import { SharedModule } from './shared/shared.module'
-import { FormsModule } from '@angular/forms';
-import { GCodeModule } from './gcode/gcode.module'
-import { CCodeModule } from './ccode/ccode.module'
-import { LogModule } from './log/log.module';
-import { EditorModule } from './editor/editor.module';
-import { ResourceModule } from './resources/resource.module'
-import { SettingsModule } from './settings/settings.module'
-import { DebugModule } from './debug/debug.module'
-import { LaserModule } from './laser/laser.module'
-import { CustomReuseStrategy } from './route-reuse.strategy'
+import { SharedModule } from './shared'
+import { GCodeModule } from './gcode'
+import { CCodeModule } from './ccode'
+import { LogModule } from './log';
+import { EditorModule } from './editor';
+import { ResourceModule, FileServiceToken } from './resources'
+import { SettingsModule, SettingsService } from './settings'
+import { DebugModule } from './debug'
+import { LaserModule } from './laser'
+import { CustomReuseStrategy1 as CustomReuseStrategy } from './route-reuse.strategy'
 @NgModule({
   imports: [
     BrowserModule,

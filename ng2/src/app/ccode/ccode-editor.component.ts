@@ -1,6 +1,6 @@
 import { Component, Inject, ViewChild } from '@angular/core';
-import { AceEditorComponent, FileStoreToken, FileStore, DefaultFileStore } from '../editor'
-import { FileResource } from '../resources'
+import { AceEditorComponent } from '../editor'
+import { FileResource, FileStoreToken, FileStore, DefaultFileStore } from '../resources'
 
 
 @Component({

@@ -1,3 +1,4 @@
+export { GCodeModule } from './gcode.module';
 export { ControlButtonsComponent } from './control-buttons.component';
 export { DroComponent } from './dro.component';
 export { GCodeScreenComponent } from './gcode-screen.component';

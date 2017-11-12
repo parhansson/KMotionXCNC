@@ -1,6 +1,5 @@
 import { Component, Inject, Input, ViewChild } from '@angular/core';
 import { AceDirective } from './ace.directive';
-import { FileStoreToken, FileStore } from './file-store';
 import { KMXUtil } from '../util/kmxutil'
 import {
   DropZoneDirective,
@@ -9,7 +8,9 @@ import {
   FileResource,
   IFileBackend,
   FileServiceToken,
-  Payload
+  Payload,
+  FileStoreToken,
+  FileStore
 } from '../resources'
 
 export interface OnFileEventHandler {

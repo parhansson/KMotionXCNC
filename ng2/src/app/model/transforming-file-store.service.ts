@@ -1,16 +1,17 @@
 import { Injectable, Inject, SkipSelf } from '@angular/core';
 import { Observable, Subject } from 'rxjs/Rx'
-import { FileResource, Payload, IFileBackend, FileServiceToken } from '../resources'
+import { FileResource, Payload, IFileBackend, FileServiceToken, FileStore } from '../resources'
 import { BackendService } from '../backend/backend.service'
-import { FileStore } from '../editor'
-import { StaticTransformer } from '../model/transformers'
+import { StaticTransformer } from './transformers'
 
 @Injectable()
 export class TransformingFileStore implements FileStore {
   payloadSubject = new Subject<Payload>()
   textSubject = new Subject<string>();
 
-  constructor( @Inject(FileServiceToken) private fileBackend: BackendService,
+  //private staticTransformer: StaticTransformer
+  constructor(
+    @Inject(FileServiceToken) private fileBackend: BackendService,
     private staticTransformer: StaticTransformer
   ) {
     this.payloadSubject.subscribe(
