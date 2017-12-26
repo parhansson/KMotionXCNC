@@ -1,5 +1,4 @@
 import { Injectable, Inject } from '@angular/core';
-import { Http } from '@angular/http';
 import { BackendService } from '../backend/backend.service';
 import { IFileBackend, FileServiceToken } from '../resources'
 import { KMXUtil } from '../util/kmxutil';
@@ -130,7 +129,7 @@ export class TPlanner {
 export class SettingsService {
   private machine: Machine
   public subject: Subject<Machine>
-  constructor(private http: Http,
+  constructor(
     private kmxBackend: BackendService,
     @Inject(FileServiceToken) private fileBackend: IFileBackend) {
     this.machine = new Machine();
@@ -154,7 +153,7 @@ export class SettingsService {
       },
       err => console.error(err),
       () => console.log('File loaded: ' + file)
-    );;
+    )
   }
   public fileName(): string {
     return 'settings/machines/' + this.machine.name + '.cnf';

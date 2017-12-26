@@ -39,6 +39,7 @@ export class BufferReader {
     return val;
   }
 
+  /* tslint:disable:no-bitwise */
   private readUtf8String(array: Uint8Array, offset: number, chars: number) {
     let out: string, i: number, len: number;
     let char1: number, char2: number, char3: number;

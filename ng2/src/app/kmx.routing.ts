@@ -5,6 +5,8 @@ import { GCodeScreenComponent } from './gcode';
 import { CCodeScreenComponent } from './ccode';
 import { DebugScreenComponent } from './debug';
 import { SettingsScreenComponent } from './settings';
+import { ImportWizardComponent } from './wizard'
+
 
 
 const appRoutes: Routes = [
@@ -28,6 +30,10 @@ const appRoutes: Routes = [
     path: 'debug',
     component: DebugScreenComponent
   },
+  {
+    path: 'import',
+    component: ImportWizardComponent
+  },  
   {
     path: '',
     redirectTo: '/gcode',

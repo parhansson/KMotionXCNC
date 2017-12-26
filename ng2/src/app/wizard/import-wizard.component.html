@@ -1,0 +1,34 @@
+<file-dialog #fd (selectedFile)="onFileRaw($event)" [resource]="resource">
+</file-dialog>
+<file-path [resource]="resource"></file-path>
+<div class="row">
+  <span class="glyphButtonBar">
+    <span class="btn btn-primary glyphicon glyphicon-folder-open" title="Open" (click)="fd.show()"></span>
+    <span class="btn btn-primary glyphicon glyphicon-floppy-save" title="Save"></span>
+  </span>
+</div>
+<div class="row">
+  <div class="col-xs-6">
+
+    <div class="dropzone" file-dropzone (dropped)="onFileRaw($event)">
+      Drop to import raw file
+      <span *ngIf="dirty">*</span>
+    </div>
+  </div>
+  <div class="col-xs-6">
+
+    <div class="dropzone" file-dropzone (dropped)="onFileTransform($event)">
+      Drop to import file and transform to G-Code
+      <span *ngIf="dirty">*</span>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class="col-xs-6">
+    <svg-preview></svg-preview>
+  </div>
+  <div class="col-xs-6" style="height: 80vh;overflow-y: scroll;">
+    <pre>{{textContent}}</pre>
+  </div>
+
+</div>

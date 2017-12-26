@@ -9,20 +9,25 @@ import { SvgEditor } from './svg-editor'
 export class SvgPreviewComponent {
   @ViewChild('preview')
   private previewContainer: ElementRef
-  private svgEditor:SvgEditor
+  private svgEditor: SvgEditor
 
   constructor(private staticTransformer: StaticTransformer) {
     this.svgEditor = new SvgEditor();
   }
 
-  render(svg: string) {
+  render(svg: string | SVGElement) {
 
     //Open in new window
     //let blob = new Blob([svg], { type: 'image/svg+xml' });
     //window.open(window.URL.createObjectURL(blob));
-    let doc = new DOMParser().parseFromString(svg, 'image/svg+xml').documentElement as any as SVGElement;
+    let doc: SVGElement
+    if (typeof svg  === 'string') {
+       doc = new DOMParser().parseFromString(svg, 'image/svg+xml').documentElement as any as SVGElement;
+    } else {
+      doc = svg
+    }
 
-    let node = this.previewContainer.nativeElement as Element
+    const node = this.previewContainer.nativeElement as Element
     while (node.firstChild) {
       node.removeChild(node.firstChild)
     }

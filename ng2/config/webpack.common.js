@@ -23,26 +23,10 @@ module.exports = {
         enforce: "pre",
         loader: 'tslint-loader',
         options: {
-            configuration: {
-              extends: "tslint:recommended",
-              defaultSeverity: "error",
-              rules: {
-                  quotemark: [true, "single"],
-                  //"callable-types": true,
-                  "max-line-length": {
-                      options: 200,
-                      severity: "warning"
-                  }
-              },
-              jsRules: {
-                "max-line-length": {
-                  "options": [20]
-                }
-              }
-            },
-            emitErrors: false,
-            failOnHint: true
-        }
+          configFile: './tslint.json',
+          emitErrors: false,
+          failOnHint: false
+      }
       },
       {
         test: /\.component.ts$/,
@@ -105,7 +89,8 @@ module.exports = {
     new webpack.ContextReplacementPlugin(
       // The (\\|\/) piece accounts for path separators in *nix and Windows
       ///angular(\\|\/)core(\\|\/)(esm(\\|\/)src|src)(\\|\/)linker/,
-      /angular(\\|\/)core(\\|\/)@angular/,
+      ///angular(\\|\/)core(\\|\/)@angular/,
+      /\@angular(\\|\/)core(\\|\/)esm5/, 
       helpers.root('./src'), // location of your src
       {} // a map of your routes
     ),

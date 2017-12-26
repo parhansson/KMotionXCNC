@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Http, Response } from '@angular/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable, Observer, Subject, AsyncSubject } from 'rxjs/Rx';
 import { FileResource, Payload, IFileBackend, DirList } from '../../resources'
 import { BackendService } from '../backend.service'
@@ -7,7 +7,7 @@ import { BackendService } from '../backend.service'
 
 @Injectable()
 export class KFlopBackendService extends BackendService implements IFileBackend {
-  constructor(private http: Http) { super() }
+  constructor(private http: HttpClient) { super() }
 
   public listDir(path: string): Observable<DirList> {
     return this.onEvent('listDir', path);
@@ -27,7 +27,7 @@ export class KFlopBackendService extends BackendService implements IFileBackend 
         formData.append('file' + i, files[i], files[i].name);
       }
     } else {
-      //Some browsers (Safari) does not support File constructor. 
+      //Some browsers (Safari) does not support File constructor.
       var blob = new Blob([content], { type: 'plain/text', endings: 'transparent' });
       formData.append('file', blob, name);
 
@@ -64,54 +64,36 @@ export class KFlopBackendService extends BackendService implements IFileBackend 
 
   loadFile(path: string): Observable<Payload> {
 
-    let url = '/api/kmx/' + 'openFile';
-    let data = { 'params': path };
+    let url = '/api/kmx/openFile';
+    let data = { params: path };
 
-    let builtin = false;
-    if (builtin) {
-      return this.http.post(url, JSON.stringify(data))
-        .map((res: Response) => { 
-          return new Payload(res.arrayBuffer(), res.headers.get('Content-Type'))
-        })
-
-    } else {
-
-      let observable = new AsyncSubject<Payload>()
-      let oReq = new XMLHttpRequest();
-      oReq.open('POST', url, true);
-      oReq.responseType = 'arraybuffer';
-
-      oReq.onload = (oEvent) => {
-        let arrayBuffer = oReq.response as ArrayBuffer; // Note: not oReq.responseText
-        if (arrayBuffer) {
-          observable.next(new Payload(arrayBuffer, oReq.getResponseHeader('Content-Type')))
-          observable.complete()
-        }
-      };
-
-      oReq.send(JSON.stringify(data));
-      return observable;
-    }
-
-
+    return this.http.post(url, JSON.stringify(data),
+      {
+        responseType: 'arraybuffer',
+        observe: 'response'
+      })
+      .map((res) => {
+        return new Payload(res.body, res.headers.get('Content-Type'))
+      })
     //return this.onEvent('openFile', { 'params': path });
   }
 
-  protected onEvent(eventName: string, parameters?: any) {
-    let url = '/api/kmx/' + eventName;
-    let payload: any
+  protected onEvent<R>(eventName: string, parameters?: any): Observable<R> {
+    const url = '/api/kmx/' + eventName;
+    let payload: string
     if (parameters === undefined) {
       payload = JSON.stringify({});
     } else {
       payload = JSON.stringify({ params: parameters });
     }
-    let obs = this.http.post(url, payload).map((res: Response) => res.json())
-    obs.subscribe(
+    // TODO make cold hot to prevent reposting
+    const coldObservable = this.http.post(url, payload)
+    coldObservable.subscribe(
       data => { },
       err => console.error('There was an error on event: ' + eventName, err),
       () => console.log(eventName + ' Complete')
     );
-    return obs;
+    return coldObservable as Observable<R>;
   }
 
 }

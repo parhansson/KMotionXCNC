@@ -19,7 +19,7 @@
       </li>
     </ul>
   </div>
-  <div #scrollContainer class="status_message status_small {{id}}">
+  <div #scrollContainer class="status_message status_small {{consoleId}}">
     <div class="log-post" *ngFor="let log of logs;">
       <span [attr.class]="log.styleClass">{{log.message}}</span>
     </div>

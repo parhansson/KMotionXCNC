@@ -35,9 +35,9 @@ export class FileDialogComponent {
   @Input() resource: FileResource
   @Output() selectedFile = new EventEmitter<FileResource | Payload>()
 
-  private files: FileEntry[] = []
+  public files: FileEntry[] = []
+  public modalDisplay: string = 'none'
   private showModal: boolean = false
-  private modalDisplay: string = 'none'
 
   constructor( @Inject(FileServiceToken) private fileBackend: IFileBackend) {
 
@@ -79,7 +79,7 @@ export class FileDialogComponent {
     console.log('Imported file')
     this.selectedFile.emit(payload)
   }
-  protected setFileResource(file: FileResource) {
+  public setFileResource(file: FileResource) {
     this.selectedFile.emit(file)
     this.hide()
   }
@@ -87,7 +87,7 @@ export class FileDialogComponent {
     this.setFileResource(this.resource);
   }
 
-  private listDir() {
+  public listDir() {
     this.fileBackend.listDir(this.resource.dir).subscribe(
       data => {
         this.files = data.files

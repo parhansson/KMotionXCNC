@@ -2,7 +2,7 @@
 import { NgModule } from '@angular/core';
 import { enableProdMode } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { HttpModule } from '@angular/http';
+import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { RouteReuseStrategy } from '@angular/router';
 import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
@@ -28,7 +28,7 @@ import { CustomReuseStrategy1 as CustomReuseStrategy } from './route-reuse.strat
 @NgModule({
   imports: [
     BrowserModule,
-    HttpModule,
+    HttpClientModule,
     TabsModule.forRoot(),
     BsDropdownModule.forRoot(),
     FormsModule,

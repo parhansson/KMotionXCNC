@@ -28,20 +28,20 @@ export class Payload {
    * Returns the body as a string, presuming `toString()` can be called on the response body.
    */
   text(): string {
-    if (this.value instanceof String) {
-      return this.value as string
+    if (typeof this.value === 'string') {
+      return this.value
     } else {
-      return KMXUtil.ab2str(this.value as ArrayBuffer)
+      return KMXUtil.ab2str(this.value)
     }
   }
   /**
    * Not yet implemented
    */
   arrayBuffer(): ArrayBuffer {
-    if (this.value instanceof ArrayBuffer) {
-      return this.value as ArrayBuffer
-    } else {
+    if (typeof this.value === 'string') {
       return KMXUtil.str2ab(this.value as string)
+    } else {
+      return this.value
     }
   }
 

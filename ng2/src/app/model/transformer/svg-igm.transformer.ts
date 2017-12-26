@@ -21,8 +21,10 @@ function createAnchor(name, url) {
   document.body.appendChild(anchor);
   return anchor;
 }
-type Point = [number,number]
+
+type Point = [number, number]
 type Subpath = Point[]
+type PathDValue = string | number
 
 class SvgNode {
   path: Subpath[]
@@ -38,18 +40,19 @@ class SvgNode {
   fillOpacity: number
   strokeOpacity: number
   unsupported: boolean
+  defs:boolean = false
   href: string
   fontBlob: string
   text: string = null
+  fontSize :number = 1
   children: SvgNode[]
 
   constructor() {
     this.path = [];
     this.children = []
   }
-  inherit() {
+  clone() {
     let node = new SvgNode();
-    this.children.push(node);
     node.path = [];
     node.xform = [1, 0, 0, 1, 0, 0];
     node.opacity = this.opacity;
@@ -60,9 +63,17 @@ class SvgNode {
     node.color = this.color;
     node.fillOpacity = this.fillOpacity;
     node.strokeOpacity = this.strokeOpacity;
+    node.fontSize = this.fontSize
+    node.defs = this.defs;
     node.unsupported = this.unsupported;
     node.text = null //cannot inherit text
     return node;
+
+  }
+  inherit() {
+    let node = this.clone()
+    this.children.push(node);
+    return node
   }
 }
 
@@ -89,40 +100,32 @@ export class Svg2IgmTransformer extends ModelTransformer<SVGElement, IGM>{
     let igm = new IGM();
 
 
-    // var glyph = font.charToGlyph('K');
-    // var path = glyph.getPath(100, 100, 72);
-    // var decimalPlaces = 3;
-    // var d = path.toPathData(decimalPlaces);
-    // console.log('path', d);
-    // console.log('path svg', path.toSVG(decimalPlaces));
-
-    // tempParser.addPath(d, node);
-
-
     // let the fun begin
-    var node = new SvgNode();
-    node.stroke = [255, 0, 0];
-    node.xformToWorld = [1, 0, 0, 1, 0, 0]
     let cssFilterAllowed = ['svg', 'g', 'defs', 'style', 'use'];
     let cssFilter = (element: SVGElement) => {
       return cssFilterAllowed.indexOf(element.localName) > -1
     }
     let igmText = new IGM()
 
-    this.font = null //disable text rendering
-    new SvgParser(cssFilter, this.font).parse(svgRootElement, node, igmText)
+    //this.font = null //disable text rendering
+    //new SvgParser(cssFilter, this.font).accept(svgRootElement, node/*, igmText*/)
     //console.log(igmText)
 
-    let contentFilterDissalowed = ['style', 'defs'];
+    let contentFilterDissalowed = [
+      'style', 
+      //'defs'
+    ];
     let contentFilter = (element: SVGElement) => {
       return contentFilterDissalowed.indexOf(element.localName) < 0;
     };
-    new SvgParser(contentFilter, this.font).parse(svgRootElement, node, igm)
-    this.makeModel(node, igm);
+    let parser = new SvgParser(contentFilter, this.font)
+    let node2 = parser.parse(svgRootElement)    
+    this.makeModel(node2, igm);
     targetObserver.next(igm)
   }
 
   private makeModel(node: SvgNode, igm: IGM) {
+    if(node.defs) return
     this.makeShape(node, igm);
     for (let child of node.children) {
       this.makeModel(child, igm);
@@ -200,18 +203,48 @@ interface ElementFilter {
 
   ToDo:
     * check for out of bounds geometry
+    * Only basic text rendering is currently supported
+    * Load different fonts
+    * complete defs an use
 */
 
 interface ISVGParser {
   font: opentype.Font
-  addPath(d: string | any[], node: SvgNode)
+  addPath(d: string | PathDValue[], node: SvgNode)
   parseUnit(val: string)
   matrixMult(mA: number[], mB: number[])
   strip(val: string);
 }
+abstract class SVGElementWalker<T> {
 
-class SvgParser implements ISVGParser {
+  constructor(protected elementFilter: ElementFilter) {
 
+  }
+
+  accept(parentElement: SVGElement,parentData:T) {
+    //domNode.childNodes will not return text node
+    for (let i = 0; i < parentElement.children.length; i++) {
+     let element = parentElement.children.item(i) as SVGElement
+
+    //  for (let i = 0; i < parentElement.childNodes.length; i++) {
+    //    let element = parentElement.childNodes.item(i) as SVGElement
+      if (!this.elementFilter(element)) {
+        continue
+      }
+      //if (element.childNodes) {
+        let resultData = this.onElement(element,parentData)
+        // recursive call
+        this.accept(element,resultData)
+      //}
+    }
+  }
+  protected abstract onElement(element: SVGElement, parentData:T):T
+}
+interface SvgNodeMap { [id: string]: SvgNode; }
+
+class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
+
+  globalNodes: SvgNodeMap = { };
   // output path flattened (world coords)
   // hash of path by color
   // each path is a list of subpaths
@@ -222,63 +255,84 @@ class SvgParser implements ISVGParser {
   // max tollerance when tesselating curvy shapes
   tolerance_squared: number
 
-  constructor(private elementFilter: ElementFilter, public font: opentype.Font) {
+  constructor(elementFilter: ElementFilter, public font: opentype.Font) {
+    super(elementFilter)
     this.tolerance_squared = Math.pow(this.tolerance, 2);
   }
-
-  parse(currentElement: SVGElement, parentNode: SvgNode, igm: IGM) {
+  parse(rootElement: SVGElement){
+    let result = new SvgNode();
+    result.stroke = [255, 0, 0];
+    result.xformToWorld = [1, 0, 0, 1, 0, 0]
+    this.accept(rootElement,result)
+    return result
+  }
+  protected onElement(element: SVGElement, parentNode: SvgNode){
     /*
     if (!this.elementFilter(domNode)) {
       return;
     }
     */
-    //domNode.childNodes will not return text nodes
-    for (let i = 0; i < currentElement.childNodes.length; i++) {
-      let tag = currentElement.childNodes.item(i) as SVGElement
-      if (!this.elementFilter(tag)) {
-        continue
-      }
-      if (tag.childNodes) {
 
-        let node: SvgNode
-        // exclude textnodes, might check for tag.nodeName ===  "#text" or tag.nodeType === 3 instead
-        // but that would include to check several types
-        if (tag.localName) {
+       //let node: SvgNode
+       // exclude textnodes, might check for tag.nodeName ===  "#text" or tag.nodeType === 3 instead
+       // but that would include to check several types
+       //if (element.localName) {
+        
           // we are looping here through
           // all nodes with child nodes
           // others are irrelevant
-
+      if(element.nodeName ===  '#text'){
+        console.log(element)
+      }
           // 1.) setup a new node
           // and inherit from parent
-          node = parentNode.inherit()
+          let currentNode = parentNode.inherit()
+
+          // var ns = 'http://www.w3.org/1999/xlink';
+          // let href = element.getAttributeNS(ns, 'href')
+          // if(href){
+          //   let useElement = this.globalNodes[href]
+          //   if (useElement.attributes) {
+          //     for (let j = 0; j < useElement.attributes.length; j++) {
+          //       let attr = useElement.attributes[j]
+          //       if (attr.nodeName && attr.nodeValue && this.SVGAttributeMapping[attr.nodeName]) {
+          //         console.log(attr.nodeName, attr.nodeValue)
+          //         this.SVGAttributeMapping[attr.nodeName](this, currentNode, attr.nodeValue, useElement)
+          //       }
+          //     }
+          //   }
+          //   //TODO call accept on useElement
+          // }
 
           // 2.) parse own attributes and overwrite
-          if (tag.attributes) {
-            for (let j = 0; j < tag.attributes.length; j++) {
-              let attr = tag.attributes[j]
+          if (element.attributes) {
+            for (let j = 0; j < element.attributes.length; j++) {
+              let attr = element.attributes[j]
               if (attr.nodeName && attr.nodeValue && this.SVGAttributeMapping[attr.nodeName]) {
-                this.SVGAttributeMapping[attr.nodeName](this, node, attr.nodeValue)
+                //console.log(attr.nodeName, attr.nodeValue)
+                this.SVGAttributeMapping[attr.nodeName](this, currentNode, attr.nodeValue, element)
               }
             }
           }
 
+          
           // 3.) accumulate transformations
-          node.xformToWorld = this.matrixMult(parentNode.xformToWorld, node.xform)
+          currentNode.xformToWorld = this.matrixMult(parentNode.xformToWorld, currentNode.xform)
 
           // 4.) parse tag
           // with current attributes and transformation
           // changed from tagName to localName to handle svg files with namespace prefix svg:svg, svg:path etc;
-          if (this.SVGTagMapping[tag.localName]) {
+          if (this.SVGTagMapping[element.localName]) {
             //if (node.stroke[0] == 255 && node.stroke[1] == 0 && node.stroke[2] == 0) {
-            this.SVGTagMapping[tag.localName](this, tag, node)
+            this.SVGTagMapping[element.localName](this, element, currentNode)
             //}
           }
 
 
           // TODO this does not work due to asynchronous operation
 
-          if (node.fontBlob) {
-            console.log('fontblob', node.fontBlob);
+          if (currentNode.fontBlob) {
+            console.log('fontblob', currentNode.fontBlob);
             //   var tempParser = this;
             ///settings/RawengulkPcs.otf
             //   opentype.load(node.fontBlob, function(err, font) {
@@ -296,38 +350,29 @@ class SvgParser implements ISVGParser {
             //       }
             //   });
           }
-          if (node.text) {
+          if (currentNode.text) {
 
             //console.log(node)
           }
           // 5.) compile boundarys
           // before adding all path data convert to world coordinates
-          for (let subpath of node.path) {
+          for (let subpath of currentNode.path) {
             for (let point of subpath) {
               //TODO clip on clipPath here. this will be extremely difficult
-              let transformed = this.matrixApply(node.xformToWorld, point);
+              let transformed = this.matrixApply(currentNode.xformToWorld, point);
               point[0] = transformed[0] //new Vec2(tmp[0], tmp[1]);
               point[1] = transformed[1]
             }
-
-            if (node.unsupported === true) {
-              igm.unsupported.push(subpath);
-            }
           }
 
-          if (node.href) {
+          if (currentNode.href) {
             //createAnchor('bulle',node.href);
             //console.log(node.href.length, node.href);
           }
-
-        }
-
-        // recursive call
-        this.parse(tag, node, igm)
-      }
-    }
-  }
-
+          return currentNode;
+        //}
+        //return parentNode;
+   }
 
 
 
@@ -338,21 +383,22 @@ class SvgParser implements ISVGParser {
     DEG_TO_RAD: Math.PI / 180,
     RAD_TO_DEG: 180 / Math.PI,
 
-    id: function (parser, node: SvgNode, val) {
+    id: (parser: ISVGParser, node: SvgNode, val: string, element?:SVGElement) => {
       node.id = val
+      this.globalNodes['#'+val] = node;
     },
 
-    transform: function (parser: ISVGParser, node: SvgNode, val: string) {
+    transform: (parser: ISVGParser, node: SvgNode, val: string) => {
       // http://www.w3.org/TR/SVG11/coords.html#EstablishingANewUserSpace
-      var xforms: number[][] = []
-      var segs = val.match(/[a-z]+\s*\([^)]*\)/ig)
+      let xforms: number[][] = []
+      let segs = val.match(/[a-z]+\s*\([^)]*\)/ig)
       for (var i = 0; i < segs.length; i++) {
-        var kv = segs[i].split('(');
-        var xformKind = parser.strip(kv[0]);
-        var paramsTemp = parser.strip(kv[1]).slice(0, -1);
-        var params = paramsTemp.split(/[\s,]+/).map(parseFloat)
+        let kv = segs[i].split('(');
+        let xformKind = parser.strip(kv[0]);
+        let paramsTemp = parser.strip(kv[1]).slice(0, -1);
+        let params = paramsTemp.split(/[\s,]+/).map(parseFloat)
         // double check params
-        for (var j = 0; j < params.length; j++) {
+        for (let j = 0; j < params.length; j++) {
           if (isNaN(params[j])) {
             console.warn('warning', 'transform skipped; contains non-numbers');
             continue  // skip this transform
@@ -371,12 +417,12 @@ class SvgParser implements ISVGParser {
           // rotate
         } else if (xformKind == 'rotate') {
           if (params.length == 3) {
-            var angle = params[0] * this.DEG_TO_RAD
+            var angle = params[0] * this.SVGAttributeMapping.DEG_TO_RAD
             xforms.push([1, 0, 0, 1, params[1], params[2]])
             xforms.push([Math.cos(angle), Math.sin(angle), -Math.sin(angle), Math.cos(angle), 0, 0])
             xforms.push([1, 0, 0, 1, -params[1], -params[2]])
           } else if (params.length == 1) {
-            var angle = params[0] * this.DEG_TO_RAD
+            var angle = params[0] * this.SVGAttributeMapping.DEG_TO_RAD
             xforms.push([Math.cos(angle), Math.sin(angle), -Math.sin(angle), Math.cos(angle), 0, 0])
           } else {
             console.warn('warning', 'rotate skipped; invalid num of params');
@@ -398,7 +444,7 @@ class SvgParser implements ISVGParser {
           // skewX
         } else if (xformKind == 'skewX') {
           if (params.length == 1) {
-            var angle = params[0] * this.DEG_TO_RAD
+            let angle = params[0] * this.SVGAttributeMapping.DEG_TO_RAD
             xforms.push([1, 0, Math.tan(angle), 1, 0, 0])
           } else {
             console.warn('warning', 'skewX skipped; invalid num of params');
@@ -406,7 +452,7 @@ class SvgParser implements ISVGParser {
           // skewY
         } else if (xformKind == 'skewY') {
           if (params.length == 1) {
-            var angle = params[0] * this.DEG_TO_RAD
+            let angle = params[0] * this.SVGAttributeMapping.DEG_TO_RAD
             xforms.push([1, Math.tan(angle), 0, 1, 0, 0])
           } else {
             console.warn('warning', 'skewY skipped; invalid num of params');
@@ -415,8 +461,8 @@ class SvgParser implements ISVGParser {
       }
 
       //calculate combined transformation matrix
-      var xform_combined = [1, 0, 0, 1, 0, 0]
-      for (var i = 0; i < xforms.length; i++) {
+      let xform_combined = [1, 0, 0, 1, 0, 0]
+      for (let i = 0; i < xforms.length; i++) {
         xform_combined = parser.matrixMult(xform_combined, xforms[i])
       }
 
@@ -479,6 +525,9 @@ class SvgParser implements ISVGParser {
 
     'stroke-opacity': function (parser: ISVGParser, node: SvgNode, val: string) {
       node.strokeOpacity = Math.min(1, Math.max(0, parseFloat(val)))
+    },
+    'font-size': function (parser: ISVGParser, node: SvgNode, val: string) {
+      node.fontSize = parser.parseUnit(val) || 1
     },
 
     // Presentations Attributes
@@ -698,13 +747,13 @@ class SvgParser implements ISVGParser {
     image: function (parser: ISVGParser, tag: SVGElement, node: SvgNode) {
       // not supported
       // has transform and style attributes
-      var ns = 'http://www.w3.org/1999/xlink';
-      var href = tag.getAttributeNS(ns, 'href');
+      let ns = 'http://www.w3.org/1999/xlink';
+      let href = tag.getAttributeNS(ns, 'href');
       node.href = href;
     },
 
-    defs: function (parser: ISVGParser, tag: SVGElement, node: SvgNode) {
-      node.unsupported = true;
+    defs: (parser: ISVGParser, tag: SVGElement, node: SvgNode) => {
+      node.defs = true;
       // not supported
       // http://www.w3.org/TR/SVG11/struct.html#Head
       // has transform and style attributes
@@ -716,8 +765,14 @@ class SvgParser implements ISVGParser {
       // has transform and style attributes
     },
 
-    use: function (parser: ISVGParser, tag: SVGElement, node: SvgNode) {
-      node.unsupported = true;
+    use: (parser: ISVGParser, tag: SVGElement, node: SvgNode) => {
+      let ns = 'http://www.w3.org/1999/xlink';
+      let href = tag.getAttributeNS(ns, 'href');
+      node.href = href;
+      let v  = this.globalNodes[node.href]
+
+      //node.unsupported = true;
+      console.log(node,v)
       // not supported
       // has transform and style attributes
     },
@@ -756,42 +811,63 @@ class SvgParser implements ISVGParser {
       //   }
       // }
     },
-    tspan: function (parser: ISVGParser, tag: SVGTSpanElement, node: SvgNode) {
-      if (parser.font) {
-
-        if (tag.textContent !== null) {
-          //opentype.parse()
-          //opentype.parseBuffer()
-          let path = parser.font.getPath(tag.textContent, 0, 0, 1, { kerning: true })
-          let dPath = path.toPathData(undefined)
-          //console.log(tag.textContent, dPath)
-          if (dPath.length > 0) {
-            parser.addPath(dPath, node);
-          }
-          /*
-          for (var x = 0; x < tag.textContent.length; x++) {
-            let char = tag.textContent.charAt(x)
-            let glyph = parser.font.charToGlyph(char);
-            let path = glyph.getPath(0, 0, 10);
-            let decimalPlaces = 3;
-            let d = path.toPathData(decimalPlaces);
-            console.log('path', d);
-            //console.log('path svg', path.toSVG(decimalPlaces));
-            if (d.length > 0) {
-              parser.addPath(d, node);
-            }
-          }
-          */
-        }
-      }
-      node.text = tag.textContent
-      // not supported
+    text: (parser: ISVGParser, tag: SVGTextElement, node: SvgNode)=>{
+      this._textContent(parser,tag,node)
+      // working on support
+      // http://www.w3.org/TR/SVG11/struct.html#Head
+      // has transform and style attributes
+      
+    },
+    textPath: (parser: ISVGParser, tag: SVGTextPathElement, node: SvgNode)=>{
+      this._textContent(parser,tag,node)
+      // working on support
+      // http://www.w3.org/TR/SVG11/struct.html#Head
+      // has transform and style attributes
+      
+    },
+    tspan: (parser: ISVGParser, tag: SVGTSpanElement, node: SvgNode) => {
+      this._textContent(parser,tag,node)
+      // working on support
       // http://www.w3.org/TR/SVG11/struct.html#Head
       // has transform and style attributes
     }
 
   }
 
+  _textContent(parser: ISVGParser, tag: SVGTextContentElement, node: SvgNode){
+    if (parser.font) {
+      
+              if (tag.textContent !== null) {
+                //opentype.parse()
+                //opentype.parseBuffer()
+                //TODO tag.getAttribute('x') might return a string if each x value per glyph
+                let x = parser.parseUnit(tag.getAttribute('x')) || 0
+                let y = parser.parseUnit(tag.getAttribute('y')) || 0
+                let path = parser.font.getPath(tag.textContent, x, y, node.fontSize, { kerning: true })
+                //let path = parser.font.getPath(tag.textContent, 0, 0, 1, { kerning: true })
+                let dPath = path.toPathData(undefined)
+                //console.log(tag.textContent, dPath)
+                if (dPath.length > 0) {
+                  parser.addPath(dPath, node);
+                }
+                /*
+                for (var x = 0; x < tag.textContent.length; x++) {
+                  let char = tag.textContent.charAt(x)
+                  let glyph = parser.font.charToGlyph(char);
+                  let path = glyph.getPath(0, 0, 10);
+                  let decimalPlaces = 3;
+                  let d = path.toPathData(decimalPlaces);
+                  console.log('path', d);
+                  //console.log('path svg', path.toSVG(decimalPlaces));
+                  if (d.length > 0) {
+                    parser.addPath(d, node);
+                  }
+                }
+                */
+              }
+            }
+            node.text = tag.textContent
+  }
   // recognized svg elements
   ///////////////////////////
 
@@ -801,7 +877,7 @@ class SvgParser implements ISVGParser {
   // handle path data
   // this is where all the geometry gets converted for the boundarys output
 
-  addPath(dObject: string | any[], node: SvgNode) {
+  addPath(dObject: string | PathDValue[], node: SvgNode) {
     // http://www.w3.org/TR/SVG11/paths.html#PathData
 
     var tolerance2 = this.tolerance_squared
@@ -811,18 +887,22 @@ class SvgParser implements ISVGParser {
       tolerance2 /= Math.pow(totalMaxScale, 2);
       // console.info('notice', "tolerance2: " + tolerance2.toString());
     }
-    let d: any[]
-    if (typeof dObject == 'string') {
+    
+    let d: PathDValue[] = []
+    //let d: DPath
+    if (typeof dObject === 'string') {
       // parse path string
-      d = (dObject as string).match(/([A-Za-z]|-?[0-9]+\.?[0-9]*(?:e-?[0-9]*)?)/g);
-      for (var i = 0; i < d.length; i++) {
-        var num = parseFloat(d[i]);
-        if (!isNaN(num)) {
-          d[i] = num;
+      let mArr = dObject.match(/([A-Za-z]|-?[0-9]+\.?[0-9]*(?:e-?[0-9]*)?)/g);
+      for (let val of mArr) {
+        let num = parseFloat(val);
+        if (isNaN(num)) {
+          d.push(val)
+        } else {
+          d.push(num)          
         }
       }
     } else {
-      d = dObject as any[]
+      d = dObject
     }
     //console.info('notice', "d: " + d.toString());
 
@@ -830,7 +910,7 @@ class SvgParser implements ISVGParser {
       return (d.length > 0) && (typeof (d[0]) === 'number');
     }
 
-    function getNext() {
+    function getNext(): any {
       if (d.length > 0) {
         return d.shift();  // pop first item
       } else {
@@ -890,11 +970,10 @@ class SvgParser implements ISVGParser {
           if (subpath.length > 0) {
             //we can not reference first subpath subpath.push(subpath[0]) without cloning values
             //due to transformations, which will be applied multiple times
-            subpath.push([subpath[0][0],subpath[0][1]]);
+            subpath.push([subpath[0][0], subpath[0][1]]);
             node.path.push(subpath);
             x = subpath[subpath.length - 1][0];
             y = subpath[subpath.length - 1][1];
-            console.log('close path svg Z or z',node,subpath);
             subpath = [];
           }
           //I think there is an error here
@@ -1242,7 +1321,7 @@ class SvgParser implements ISVGParser {
     if (sweep && delta < 0) { delta += Math.PI * 2; }
     if (!sweep && delta > 0) { delta -= Math.PI * 2; }
 
-    function getVertex(pct) : Point {
+    function getVertex(pct): Point {
       var theta = psi + delta * pct;
       var ct = Math.cos(theta);
       var st = Math.sin(theta);
@@ -1251,7 +1330,7 @@ class SvgParser implements ISVGParser {
 
     // let the recursive fun begin
     //
-    function recursiveArc(parser, t1, t2, c1:Point, c5:Point, level, tolerance2) {
+    function recursiveArc(parser, t1, t2, c1: Point, c5: Point, level, tolerance2) {
       if (level > 18) {
         // protect from deep recursion cases
         // max 2**18 = 262144 segments

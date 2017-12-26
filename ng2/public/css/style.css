@@ -3,6 +3,14 @@
   font-family: 'Glyphicons Halflings';
   content:"\e072";
 }
+/*
+a.importer {
+    color:green
+}
+*/
+body.import a.importer {
+    color:red
+}
 
 .dro-display {
     background-color: #949782;

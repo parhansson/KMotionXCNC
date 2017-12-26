@@ -22,6 +22,9 @@ export class Gcode2ThreeTransformer extends GCodeTransformer<THREE.Geometry, THR
   //   linewidth: 1,
   //   vertexColors: THREE.FaceColors
   // });
+
+
+
   private interpolateShapeData: ThreeShapeData = {
 
     material: new THREE.LineBasicMaterial({
@@ -41,8 +44,10 @@ export class Gcode2ThreeTransformer extends GCodeTransformer<THREE.Geometry, THR
 
   }
 
+  constructor(disableWorker?: boolean) {
+    super(disableWorker)
+  }
 
-  constructor(disableWorker?: boolean) { super(disableWorker) }
   protected createOutput() {
     const output = new THREE.Group()
     output.name = 'GCODE';
@@ -59,9 +64,9 @@ export class Gcode2ThreeTransformer extends GCodeTransformer<THREE.Geometry, THR
     return lineGeometry;
   }
 
-  protected endShape(){
-    if(this.output.children.length > 0){
-      this.output.children[this.output.children.length -1].userData.endLine =  this.state.lineNo
+  protected endShape() {
+    if (this.output.children.length > 0) {
+      this.output.children[this.output.children.length - 1].userData.endLine = this.state.lineNo
     }
   }
 

@@ -1,7 +1,7 @@
 import { Payload } from './payload'
 
 export class FileResource {
-  private paths: string[] = []
+  public paths: string[] = []
 
   constructor(dir?: string, public file?: string) {
     if (dir) {

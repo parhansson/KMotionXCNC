@@ -111,7 +111,7 @@ export class KmxStatusParser {
 
     return status;
   }
-
+  /* tslint:disable:no-bitwise */
   toBitArr(value: number, size: number) {
     let bitArr: boolean[] = [];
     for (let i = 0; i < size; i++) {

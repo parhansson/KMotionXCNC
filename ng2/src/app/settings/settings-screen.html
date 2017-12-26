@@ -59,7 +59,6 @@
 
       <h3 class="settings-header">Extended M-codes</h3>
       <div class="">
-        {{action | json}}
         <kmx-mcode-value *ngFor="let action of machine.extendedActions" [action]="action"></kmx-mcode-value>
       </div>
     </tab>
