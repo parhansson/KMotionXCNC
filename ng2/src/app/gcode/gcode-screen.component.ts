@@ -124,8 +124,7 @@ export class GCodeScreenComponent {
 
   private renderBackground(x, y, z) {
 
-    console.log('debounce?', x, y, z)
-    var texture = new THREE.TextureLoader().load('/settings/textures/bghoneym.jpg');
+    const texture = new THREE.TextureLoader().load('/settings/textures/bghoneym.png');
 
 
     // assuming you want the texture to repeat in both directions:

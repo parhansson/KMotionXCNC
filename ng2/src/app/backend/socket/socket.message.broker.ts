@@ -52,12 +52,13 @@ export class SocketMessageBroker implements SocketMessageHandler {
   }
 
   onmessage(event: MessageEvent) {
-    if (event.data.command == 'connect') {
-      let url = event.data.url;
-      this.socket.connect(url);
-    } else if (event.data.command == 'acknowledge') {
-      this.acknowledge(event.data.id, event.data.ret);
-    } else if (event.data.command == 'disconnect') {
+    const data = event.data
+    if (data.command == 'connect') {
+      const url = data.url
+      this.socket.connect(url)
+    } else if (data.command == 'acknowledge') {
+      this.acknowledge(data.id, data.ret)
+    } else if (data.command == 'disconnect') {
       //no need to acually disconnect at the moment
       this.socket.destroy();
       this.post(new TextMessage('done'));
@@ -66,12 +67,12 @@ export class SocketMessageBroker implements SocketMessageHandler {
   }
 
   private onBinaryMessage(data: ArrayBuffer) {
-    let status = this.kmxStatusStream.readBuffer(data);
+    const status = this.kmxStatusStream.readBuffer(data);
     this.post(status);
   }
 
   private acknowledge(id, ret) {
-    this.socket.sendMessage(JSON.stringify({ type: 'CB_ACK', id: id, returnValue: ret }));
+    this.socket.sendMessage(JSON.stringify({ type: 'CB_ACK', id, returnValue: ret }));
   }
 
   private post(payload: TextMessage | LogMessage | KmxStatus | ControlMessage) {

@@ -30,8 +30,10 @@ export class KmxStatus implements Status {
 
   copyFrom(from: KmxStatus) {
     for (let key in from) {
-      //copy all the fields
-      this[key] = from[key];
+      if (from.hasOwnProperty(key)) {
+        //copy all the fields
+        this[key] = from[key]
+      }
     }
   }
 }

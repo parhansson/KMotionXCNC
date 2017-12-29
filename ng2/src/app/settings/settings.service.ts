@@ -2,7 +2,7 @@ import { Injectable, Inject } from '@angular/core';
 import { BackendService } from '../backend/backend.service';
 import { IFileBackend, FileServiceToken } from '../resources'
 import { KMXUtil } from '../util/kmxutil';
-import { Subject, BehaviorSubject } from 'rxjs/Rx'
+import { Subject, ReplaySubject } from 'rxjs/Rx'
 
 export class Machine {
   private static mcodes = ['M0', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9', 'S'];
@@ -52,15 +52,13 @@ export class Machine {
     return axes;
   }
 
-  public static actionsArr(existingActions, codes) {
+  public static actionsArr(existingActions: Action[], codes: string[]) {
 
     var actions = existingActions || []
-
-    for (var i = 0; i < codes.length; i++) {
-      var codeName = codes[i];
+    for(let codeName of codes) {
       var found = false;
-      for (var j = 0; j < actions.length; j++) {
-        if (actions[j].name === codeName) {
+      for(let action of actions) {
+        if (action.name === codeName) {
           found = true;
           break;
         }
@@ -111,11 +109,11 @@ export class Axis {
 export class Action {
   action: number
   name: string
-  dParam0: number
-  dParam2: number
-  dParam3: number
-  dParam1: number
-  file: string
+  dParam0?: number
+  dParam2?: number
+  dParam3?: number
+  dParam1?: number
+  file?: string
 }
 export class TPlanner {
   breakangle: number
@@ -132,8 +130,8 @@ export class SettingsService {
   constructor(
     private kmxBackend: BackendService,
     @Inject(FileServiceToken) private fileBackend: IFileBackend) {
-    this.machine = new Machine();
-    this.subject = new BehaviorSubject<Machine>(this.machine)
+    this.machine = new Machine();    
+    this.subject = new ReplaySubject<Machine>(1)
     this.load('./settings/machines/laser.cnf');
   }
   public save(): void {
@@ -151,7 +149,10 @@ export class SettingsService {
         this.machine.update(payload.json())
         this.subject.next(this.machine)
       },
-      err => console.error(err),
+      err => {
+        console.error(err)
+        this.subject.next(this.machine)
+      },
       () => console.log('File loaded: ' + file)
     )
   }

@@ -44,6 +44,13 @@ module.exports = webpackMerge(commonConfig, {
         changeOrigin: true,
         secure: false
       }      
-    ]
+    ],
+    //bug in filesystem events on osx
+    //hence watchoptions added 
+    watchOptions: {
+      aggregateTimeout: 300,
+      poll: 500,
+      ignored: /node_modules/
+    }
   }
 });

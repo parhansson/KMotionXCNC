@@ -15,10 +15,6 @@ import {
 } from '../resources'
 import { TransformingFileStore } from '../model/transforming-file-store.service'
 
-export interface OnFileEventHandler {
-  (file: FileResource): void
-}
-
 @Component({
   selector: 'import-wizard',
   templateUrl: './import-wizard.component.html',

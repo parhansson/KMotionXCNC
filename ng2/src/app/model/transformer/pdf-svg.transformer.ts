@@ -21,38 +21,38 @@ export class Pdf2SvgTransformer extends ModelTransformer<ArrayBuffer, SVGElement
     // Fetch the PDF document from the URL using promises
     //
     let transformerSettings = this.transformerSettings
-    let transformer = this;
+    let transformer = this
     PDFJS.getDocument(source as any).then(function (pdf) {
-      let numPages = pdf.numPages;
+      let numPages = pdf.numPages
       // Using promise to fetch the page
 
       // For testing only.
       let MAX_NUM_PAGES = 50;
-      let ii = Math.min(MAX_NUM_PAGES, numPages);
+      let ii = Math.min(MAX_NUM_PAGES, numPages)
       let svgPages = [];
-      let promise: Promise<any> = Promise.resolve();
+      let promise: Promise<any> = Promise.resolve()
       for (var i = 1; i <= ii; i++) {
         let anchor = null;//createAnchor(i);
-        if (transformerSettings.pdf.page != i) continue;
+        if (transformerSettings.pdf.page != i) continue
         // Using promise to fetch and render the next page
         promise = promise.then(function (pageNum, anchor) {
           return pdf.getPage(pageNum).then(page => {
-            let viewport = page.getViewport(scale);
+            let viewport = page.getViewport(scale)
 
             // var container = createContainer(pageNum,viewport.width,viewport.height);
             //  anchor.appendChild(container);
 
             return page.getOperatorList().then(opList => {
-              let svgGfx = <PDFJSExtra.SVGGraphics>new PDFJS.SVGGraphics(page.commonObjs, page.objs);
+              let svgGfx: PDFJSExtra.SVGGraphics = new PDFJS.SVGGraphics(page.commonObjs, page.objs)
               return svgGfx.getSVG(opList, viewport).then(svg => {
-                transformer.logSvg(svg);
+                transformer.logSvg(svg)
                 targetObserver.next(svg)
                 //svgObserver.complete()
-                pdf.destroy(); //Destroy worker
+                pdf.destroy() //Destroy worker
               });
             });
           });
-        }.bind(null, i, anchor));
+        }.bind(null, i, anchor))
       }
     });
   }

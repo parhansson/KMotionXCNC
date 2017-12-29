@@ -116,9 +116,9 @@ export class ConnectorComponent {
     //But it is not the index but the pin number wich is index + 1 we are counting as even or not
     this.kflop.update(this.connector, this.intStatus)
     if (even === true) {
-      return this.connector.pins.filter((item, index) => { return index % 2 != 0 })
+      return this.connector.pins.filter((item, index) => index % 2 != 0 )
     } else if (even === false) {
-      return this.connector.pins.filter((item, index) => { return index % 2 == 0 })
+      return this.connector.pins.filter((item, index) => index % 2 == 0 )
     } else {
       return this.connector.pins
     }

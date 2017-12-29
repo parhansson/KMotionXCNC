@@ -102,10 +102,10 @@ export class CustomReuseStrategy3 implements RouteReuseStrategy {
      * @param route This is stored for later comparison to requested routes, see `this.shouldAttach`
      * @param handle Later to be retrieved by this.retrieve, and offered up to whatever controller is using this class
      */
-    store(route: ActivatedRouteSnapshot, handle: DetachedRouteHandle): void {
+    store(route: ActivatedRouteSnapshot, routeHandle: DetachedRouteHandle): void {
         let storedRoute: RouteStorageObject = {
             snapshot: route,
-            handle: handle
+            handle: routeHandle
         };
 
         console.log( 'store:', storedRoute, 'into: ', this.storedRoutes );

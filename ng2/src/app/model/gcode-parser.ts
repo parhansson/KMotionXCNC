@@ -58,30 +58,30 @@ class ParseValue {
 export class GCodeParser {
   // Search for codes without space between them
   public static skipCodes = {
-    'N': 'Line number'
+    N: 'Line number'
   };
   public static controlWords = {
-    'G': 'G codes, Interpolate, rapid traverse etc',
-    'M': 'M code',
-    'F': 'Set Feed rate in/min or mm/min',
-    'S': 'Spindle Speed',
-    'D': 'Tool',
-    'O': 'Subroutine Label'
+    G: 'G codes, Interpolate, rapid traverse etc',
+    M: 'M code',
+    F: 'Set Feed rate in/min or mm/min',
+    S: 'Spindle Speed',
+    D: 'Tool',
+    O: 'Subroutine Label'
   };
   public static paramWords = {
-    'X': 'X axis',
-    'Y': 'Y axis',
-    'Z': 'Z axis',
-    'A': 'A axis',
-    'B': 'B axis',
-    'C': 'C axis',
-    //'E': 'E axis present in 3d printer gcode files',
-    'I': 'I parameter on G2,G3',
-    'J': 'J parameter on G2,G3',
-    'K': 'K parameter on G2,G3',
-    'R': 'R parameter on G2,G3',
-    'L': 'G10 parameter',
-    'P': 'G10 parameter'
+    X: 'X axis',
+    Y: 'Y axis',
+    Z: 'Z axis',
+    A: 'A axis',
+    B: 'B axis',
+    C: 'C axis',
+    //E: 'E axis present in 3d printer gcode files',
+    I: 'I parameter on G2,G3',
+    J: 'J parameter on G2,G3',
+    K: 'K parameter on G2,G3',
+    R: 'R parameter on G2,G3',
+    L: 'G10 parameter',
+    P: 'G10 parameter'
   }
 
   private static valueChars = '+-0123456789.';
@@ -107,6 +107,7 @@ export class GCodeParser {
     let commentDepth = 0;
     for (var x = 0; x < len; x++) {
       let c = text.charAt(x)
+      /* tslint:disable:no-conditional-assignment */
       if (commentDepth == 0 && (commentDepth += (GCodeParser.blockCommentDepth[c] || 0)) > 0) {
         part.next(block, ParseValue.Comment)
       } else if (c === GCodeParser.blockCommentEnd) {

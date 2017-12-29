@@ -65,14 +65,15 @@ export class OrientationCube {
         geometry.faceVertexUvs[0][i++] = [neg[0], neg[1], neg[3]];
         geometry.faceVertexUvs[0][i++] = [neg[1], neg[2], neg[3]];
       }
-      let mesh = new THREE.Mesh(geometry, material);
-      console.log(mesh.toJSON());
+      const mesh = new THREE.Mesh(geometry, material);
+      //console.log(mesh.toJSON());
       scene.add(mesh);
 
     });
 
     // add axes
     let radius = 80;
+    //TODO AxisHelper is deprecated renamed to AxesHelper wait for new typings
     scene.add(new THREE.AxisHelper(radius));
 
     /* 

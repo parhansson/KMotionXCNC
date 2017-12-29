@@ -168,14 +168,14 @@ export class JigsawWizardComponent {
         })
         return edgecircles
       });
-      return peicecircles.reduce((prev, curr) => { return prev.concat(curr) });
+      return peicecircles.reduce((prev, curr) => prev.concat(curr))
       //return circles;
     })
-    return piecesCircles.reduce((prev, curr) => { return prev.concat(curr) });
+    return piecesCircles.reduce((prev, curr) => prev.concat(curr))
   };
   buildPiecePaths(pieces) {
     return pieces.map((piece) => {
-      return this.svg.path(this.piecePathData(piece));
+      return this.svg.path(this.piecePathData(piece))
     });
   };
   // SVG helpers
@@ -204,8 +204,8 @@ export class JigsawWizardComponent {
 
       </style>`,
     closeTag: '</svg>',
-    path: (pathData) => { return '<path vector-effect="non-scaling-stroke" d="' + pathData + '"/>' },
-    circle: (point) => { return '<circle class="EndPoint" cx="' + point[0] + '" cy="' + point[1] + '" r="10" />' }
+    path: (pathData) => `<path vector-effect="non-scaling-stroke" d="${pathData}"/>` ,
+    circle: (point) => `<circle class="EndPoint" cx="${point[0]}" cy="${point[1]}" r="10" />` 
   };
 
   private generate() {

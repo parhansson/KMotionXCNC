@@ -13,10 +13,6 @@ import {
   FileStore
 } from '../resources'
 
-export interface OnFileEventHandler {
-  (file: FileResource): void
-}
-
 @Component({
   selector: 'code-editor',
   templateUrl: './ace-editor.component.html'

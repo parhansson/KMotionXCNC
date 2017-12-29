@@ -74,8 +74,8 @@ export class Igm2GcodeTransformer extends ModelTransformer<IGM, GCodeSource>{
     gcode.push('G90'); //Absolute Coordinates
 
     const unitGCode = {
-      'mm': 'G21',
-      'in': 'G20'
+      mm: 'G21',
+      in: 'G20'
     }
     //G20 Inch units
     //G21 mm units

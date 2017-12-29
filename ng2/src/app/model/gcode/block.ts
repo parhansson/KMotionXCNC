@@ -3,7 +3,7 @@ import { Word } from './word'
 
 export class Block {
   line: number
-  parts: BlockPart<string | Word[]>[] = []
+  parts: Array<BlockPart<string | Word[]>> = []
 
   constructor(public text: string) { }
 

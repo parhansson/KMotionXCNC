@@ -64,13 +64,13 @@ export class SocketService {
   }
 
   private acknowledge(id, ret) {
-    this.socketWorker.postMessage({ command: 'acknowledge', id: id, ret: ret });
+    this.socketWorker.postMessage({ command: 'acknowledge', id, ret });
   }
 
   private onTextMessage(textMessage: TextMessage) {
     if (textMessage.message === 'WorkerReady') {
       let url = 'ws://' + window.location.host + '/ws';
-      this.socketWorker.postMessage({ command: 'connect', url: url });
+      this.socketWorker.postMessage({ command: 'connect', url });
     }
   }
 
@@ -95,7 +95,7 @@ export class SocketService {
 
   private onControlMessage(obj: ControlMessage) {
     let payload = obj.payload
-    let ret = undefined;
+    let ret
     switch (payload.type) {
       case 'STATUS': // 0: Non blocking callback. Called from the interpreter in different thread
         {

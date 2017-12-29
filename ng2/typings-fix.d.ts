@@ -1,7 +1,5 @@
 
 
-//declare var module: { id: string, exports: any };
-
 declare class DxfParser{
   constructor(stream?:any)
   parseSync(fileText:string)
@@ -38,5 +36,5 @@ interface PDFPageProxy {
   SVGGraphics(
     objects: PDFObjects,
     objects1: PDFObjects,
-    forceDataSchema?: boolean): void
+    forceDataSchema?: boolean): void //PDFJSExtra.SVGGraphics
  }

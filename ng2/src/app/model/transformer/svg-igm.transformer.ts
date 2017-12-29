@@ -126,6 +126,7 @@ export class Svg2IgmTransformer extends ModelTransformer<SVGElement, IGM>{
 
   private makeModel(node: SvgNode, igm: IGM) {
     if(node.defs) return
+    if(node.unsupported) return
     this.makeShape(node, igm);
     for (let child of node.children) {
       this.makeModel(child, igm);
@@ -133,8 +134,8 @@ export class Svg2IgmTransformer extends ModelTransformer<SVGElement, IGM>{
   }
   private makeShape(node: SvgNode, igm: IGM) {
     let unitsPerInch = {
-      'mm': 25.4,
-      'in': 1
+      mm: 25.4,
+      in: 1
     }
     const settings = this.settings;
     let dpiScale
@@ -167,53 +168,51 @@ export class Svg2IgmTransformer extends ModelTransformer<SVGElement, IGM>{
     }
   }
 }
-interface ElementFilter {
-  (element: SVGElement): boolean
-}
 
+type ElementFilter = (element: SVGElement) => boolean
 /**
-  SVG parser for the Lasersaur.
-  Converts SVG DOM to a flat collection of paths.
-
-  Copyright (c) 2011 Nortd Labs
-  Open Source by the terms of the Gnu Public License (GPL3) or higher.
-
-  Code inspired by cake.js, canvg.js, svg2obj.py, and Squirtle.
-  Thank you for open sourcing your work!
-
-  Usage:
-  var boundarys = SVGReader.parse(svgstring, config)
-
-  Features:
-    * <svg> width and height, viewBox clipping.
-    * paths, rectangles, ellipses, circles, lines, polylines and polygons
-    * nested transforms
-    * transform lists (transform="rotate(30) translate(2,2) scale(4)")
-    * non-pixel units (cm, mm, in, pt, pc)
-    * 'style' attribute and presentation attributes
-    * curves, arcs, cirles, ellipses tesellated according to tolerance
-
-  Intentinally not Supported:
-    * markers
-    * masking
-    * em, ex, % units
-    * text (needs to be converted to paths)
-    * raster images
-    * style sheets
-
-  ToDo:
-    * check for out of bounds geometry
-    * Only basic text rendering is currently supported
-    * Load different fonts
-    * complete defs an use
-*/
+ * SVG parser for the Lasersaur.
+ * Converts SVG DOM to a flat collection of paths.
+ *
+ * Copyright (c) 2011 Nortd Labs
+ * Open Source by the terms of the Gnu Public License (GPL3) or higher.
+ *
+ * Code inspired by cake.js, canvg.js, svg2obj.py, and Squirtle.
+ * Thank you for open sourcing your work!
+ *
+ * Usage:
+ *  var boundarys = SVGReader.parse(svgstring, config)
+ *
+ * Features:
+ *   <svg> width and height, viewBox clipping.
+ *   paths, rectangles, ellipses, circles, lines, polylines and polygons
+ *   nested transforms
+ *   transform lists (transform="rotate(30) translate(2,2) scale(4)")
+ *   non-pixel units (cm, mm, in, pt, pc)
+ *   'style' attribute and presentation attributes
+ *   curves, arcs, cirles, ellipses tesellated according to tolerance
+ *
+ * Intentinally not Supported:
+ *   markers
+ *   masking
+ *   em, ex, % units
+ *   text (needs to be converted to paths)
+ *   raster images
+ *   style sheets
+ *
+ * ToDo:
+ *   check for out of bounds geometry
+ *   Only basic text rendering is currently supported
+ *   Load different fonts
+ *   complete defs an use
+ */
 
 interface ISVGParser {
   font: opentype.Font
   addPath(d: string | PathDValue[], node: SvgNode)
   parseUnit(val: string)
   matrixMult(mA: number[], mB: number[])
-  strip(val: string);
+  strip(val: string): string
 }
 abstract class SVGElementWalker<T> {
 
@@ -243,17 +242,18 @@ abstract class SVGElementWalker<T> {
 interface SvgNodeMap { [id: string]: SvgNode; }
 
 class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
-
-  globalNodes: SvgNodeMap = { };
+  private DEG_TO_RAD = Math.PI / 180
+  private RAD_TO_DEG = 180 / Math.PI
+  private globalNodes: SvgNodeMap = { };
   // output path flattened (world coords)
   // hash of path by color
   // each path is a list of subpaths
   // each subpath is a list of verteces
-  style = {}
+  private style = {}
   // style at current parsing position
-  tolerance = 0.1
+  private tolerance = 0.1
   // max tollerance when tesselating curvy shapes
-  tolerance_squared: number
+  private tolerance_squared: number
 
   constructor(elementFilter: ElementFilter, public font: opentype.Font) {
     super(elementFilter)
@@ -306,8 +306,9 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
 
           // 2.) parse own attributes and overwrite
           if (element.attributes) {
-            for (let j = 0; j < element.attributes.length; j++) {
-              let attr = element.attributes[j]
+            const attrlen = element.attributes.length
+            for (let j = 0; j < attrlen; j++) {
+              const attr = element.attributes[j]
               if (attr.nodeName && attr.nodeValue && this.SVGAttributeMapping[attr.nodeName]) {
                 //console.log(attr.nodeName, attr.nodeValue)
                 this.SVGAttributeMapping[attr.nodeName](this, currentNode, attr.nodeValue, element)
@@ -379,27 +380,26 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
   /////////////////////////////
   // recognized svg attributes
 
-  SVGAttributeMapping = {
-    DEG_TO_RAD: Math.PI / 180,
-    RAD_TO_DEG: 180 / Math.PI,
 
-    id: (parser: ISVGParser, node: SvgNode, val: string, element?:SVGElement) => {
+  SVGAttributeMapping = {
+
+    'id': (parser: ISVGParser, node: SvgNode, val: string, element?:SVGElement) => {
       node.id = val
       this.globalNodes['#'+val] = node;
     },
 
-    transform: (parser: ISVGParser, node: SvgNode, val: string) => {
+    'transform': (parser: ISVGParser, node: SvgNode, val: string) => {
       // http://www.w3.org/TR/SVG11/coords.html#EstablishingANewUserSpace
-      let xforms: number[][] = []
-      let segs = val.match(/[a-z]+\s*\([^)]*\)/ig)
-      for (var i = 0; i < segs.length; i++) {
-        let kv = segs[i].split('(');
-        let xformKind = parser.strip(kv[0]);
-        let paramsTemp = parser.strip(kv[1]).slice(0, -1);
-        let params = paramsTemp.split(/[\s,]+/).map(parseFloat)
+      const xforms: number[][] = []
+      const segs = val.match(/[a-z]+\s*\([^)]*\)/ig)
+      for (const seg of segs) {
+        const kv = seg.split('(');
+        const xformKind = parser.strip(kv[0]);
+        const paramsTemp = parser.strip(kv[1]).slice(0, -1);
+        const params = paramsTemp.split(/[\s,]+/).map(parseFloat)
         // double check params
-        for (let j = 0; j < params.length; j++) {
-          if (isNaN(params[j])) {
+        for(const param of params) {
+          if (isNaN(param)) {
             console.warn('warning', 'transform skipped; contains non-numbers');
             continue  // skip this transform
           }
@@ -417,12 +417,12 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
           // rotate
         } else if (xformKind == 'rotate') {
           if (params.length == 3) {
-            var angle = params[0] * this.SVGAttributeMapping.DEG_TO_RAD
+            var angle = params[0] * this.DEG_TO_RAD
             xforms.push([1, 0, 0, 1, params[1], params[2]])
             xforms.push([Math.cos(angle), Math.sin(angle), -Math.sin(angle), Math.cos(angle), 0, 0])
             xforms.push([1, 0, 0, 1, -params[1], -params[2]])
           } else if (params.length == 1) {
-            var angle = params[0] * this.SVGAttributeMapping.DEG_TO_RAD
+            var angle = params[0] * this.DEG_TO_RAD
             xforms.push([Math.cos(angle), Math.sin(angle), -Math.sin(angle), Math.cos(angle), 0, 0])
           } else {
             console.warn('warning', 'rotate skipped; invalid num of params');
@@ -444,7 +444,7 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
           // skewX
         } else if (xformKind == 'skewX') {
           if (params.length == 1) {
-            let angle = params[0] * this.SVGAttributeMapping.DEG_TO_RAD
+            let angle = params[0] * this.DEG_TO_RAD
             xforms.push([1, 0, Math.tan(angle), 1, 0, 0])
           } else {
             console.warn('warning', 'skewX skipped; invalid num of params');
@@ -452,7 +452,7 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
           // skewY
         } else if (xformKind == 'skewY') {
           if (params.length == 1) {
-            let angle = params[0] * this.SVGAttributeMapping.DEG_TO_RAD
+            let angle = params[0] * this.DEG_TO_RAD
             xforms.push([1, Math.tan(angle), 0, 1, 0, 0])
           } else {
             console.warn('warning', 'skewY skipped; invalid num of params');
@@ -462,15 +462,15 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
 
       //calculate combined transformation matrix
       let xform_combined = [1, 0, 0, 1, 0, 0]
-      for (let i = 0; i < xforms.length; i++) {
-        xform_combined = parser.matrixMult(xform_combined, xforms[i])
+      for (let xform of xforms) {
+        xform_combined = parser.matrixMult(xform_combined, xform)
       }
 
       // assign
       node.xform = xform_combined
     },
 
-    style: function (parser: ISVGParser, node: SvgNode, val: string) {
+    'style': (parser: ISVGParser, node: SvgNode, val: string) => {
       // style attribute
       // http://www.w3.org/TR/SVG11/styling.html#StyleAttribute
       // example: <rect x="200" y="100" width="600" height="300"
@@ -478,8 +478,8 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
 
       // relay to parse style attributes the same as Presentation Attributes
       var segs = val.split(';')
-      for (var i = 0; i < segs.length; i++) {
-        var kv = segs[i].split(':')
+      for (let seg of segs) {
+        var kv = seg.split(':')
         var k = parser.strip(kv[0])
         if (this[k]) {
           var v = parser.strip(kv[1])
@@ -494,46 +494,46 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
     // example: <rect x="200" y="100" width="600" height="300"
     //          fill="red" stroke="blue" stroke-width="3"/>
 
-    opacity: function (parser: ISVGParser, node: SvgNode, val: string) {
+    'opacity': (parser: ISVGParser, node: SvgNode, val: string) => {
       node.opacity = parseFloat(val)
     },
 
-    display: function (parser: ISVGParser, node: SvgNode, val: string) {
+    'display': (parser: ISVGParser, node: SvgNode, val: string) => {
       node.display = val
     },
 
-    visibility: function (parser: ISVGParser, node: SvgNode, val: string) {
+    'visibility': (parser: ISVGParser, node: SvgNode, val: string) => {
       node.visibility = val
     },
 
-    fill: function (parser: ISVGParser, node: SvgNode, val: string) {
-      node.fill = this.__parseColor(parser, val, node.color)
+    'fill': (parser: ISVGParser, node: SvgNode, val: string) => {
+      node.fill = this.SVGAttributeMapping.__parseColor(parser, val, node.color)
     },
 
-    stroke: function (parser: ISVGParser, node: SvgNode, val: string) {
-      node.stroke = this.__parseColor(parser, val, node.color)
+    'stroke': (parser: ISVGParser, node: SvgNode, val: string) => {
+      node.stroke = this.SVGAttributeMapping.__parseColor(parser, val, node.color)
     },
 
-    color: function (parser: ISVGParser, node: SvgNode, val: string) {
+    'color': (parser: ISVGParser, node: SvgNode, val: string) => {
       if (val == 'inherit') return
-      node.color = this.__parseColor(parser, val, node.color)
+      node.color = this.SVGAttributeMapping.__parseColor(parser, val, node.color)
     },
 
-    'fill-opacity': function (parser: ISVGParser, node: SvgNode, val: string) {
+    'fill-opacity': (parser: ISVGParser, node: SvgNode, val: string) => {
       node.fillOpacity = Math.min(1, Math.max(0, parseFloat(val)))
     },
 
-    'stroke-opacity': function (parser: ISVGParser, node: SvgNode, val: string) {
+    'stroke-opacity': (parser: ISVGParser, node: SvgNode, val: string) => {
       node.strokeOpacity = Math.min(1, Math.max(0, parseFloat(val)))
     },
-    'font-size': function (parser: ISVGParser, node: SvgNode, val: string) {
+    'font-size': (parser: ISVGParser, node: SvgNode, val: string) => {
       node.fontSize = parser.parseUnit(val) || 1
     },
 
     // Presentations Attributes
     ///////////////////////////
 
-    __parseColor: function (parser: ISVGParser, val, currentColor) {
+    '__parseColor': (parser: ISVGParser, val, currentColor) => {
 
       if (val.charAt(0) == '#') {
         if (val.length == 4)
@@ -549,7 +549,7 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
           if (c.charAt(c.length - 1) == '%')
             a[i] = Math.round(parseFloat(c.slice(0, -1)) * 2.55)
           else
-            a[i] = parseInt(c)
+            a[i] = parseInt(c,10)
         }
         return a
 
@@ -560,7 +560,7 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
           if (c.charAt(c.length - 1) == '%')
             a[i] = Math.round(parseFloat(c.slice(0, -1)) * 2.55)
           else
-            a[i] = parseInt(c)
+            a[i] = parseInt(c,10)
         }
         var c = parser.strip(a[3])
         if (c.charAt(c.length - 1) == '%')
@@ -597,7 +597,7 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
 
   SVGTagMapping = {
 
-    svg: function (parser: ISVGParser, tag: SVGElement, node: SvgNode) {
+    svg: (parser: ISVGParser, tag: SVGElement, node: SvgNode) => {
       // has style attributes
       node.fill = 'black'
       node.stroke = 'none'
@@ -615,37 +615,37 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
     },
 
 
-    g: function (parser: ISVGParser, tag: SVGElement, node: SvgNode) {
+    g: (parser: ISVGParser, tag: SVGElement, node: SvgNode) => {
       // http://www.w3.org/TR/SVG11/struct.html#Groups
       // has transform and style attributes
     },
 
 
-    polygon: function (parser: ISVGParser, tag: SVGElement, node: SvgNode) {
+    polygon: (parser: ISVGParser, tag: SVGElement, node: SvgNode) => {
       // http://www.w3.org/TR/SVG11/shapes.html#PolygonElement
       // has transform and style attributes
-      var d = this.__getPolyPath(parser, tag)
+      var d = this.SVGTagMapping.__getPolyPath(parser, tag)
       d.push('z')
       parser.addPath(d, node)
     },
 
 
-    polyline: function (parser: ISVGParser, tag: SVGElement, node: SvgNode) {
+    polyline: (parser: ISVGParser, tag: SVGElement, node: SvgNode) => {
       // http://www.w3.org/TR/SVG11/shapes.html#PolylineElement
       // has transform and style attributes
-      var d = this.__getPolyPath(parser, tag)
+      var d = this.SVGTagMapping.__getPolyPath(parser, tag)
       parser.addPath(d, node)
     },
 
-    __getPolyPath: function (parser: ISVGParser, tag: SVGElement) {
+    __getPolyPath: (parser: ISVGParser, tag: SVGElement) => {
       // has transform and style attributes
       var subpath = []
       var vertnums = parser.strip(tag.getAttribute('points').toString()).split(/[\s,]+/).map(parseFloat)
       if (vertnums.length % 2 == 0) {
-        var d = ['M']
+        let d: any[] = ['M']
         d.push(vertnums[0])
         d.push(vertnums[1])
-        for (var i = 2; i < vertnums.length; i += 2) {
+        for (let i = 2; i < vertnums.length; i += 2) {
           d.push(vertnums[i])
           d.push(vertnums[i + 1])
         }
@@ -655,7 +655,7 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
       }
     },
 
-    rect: function (parser: ISVGParser, tag: SVGElement, node: SvgNode) {
+    rect: (parser: ISVGParser, tag: SVGElement, node: SvgNode) => {
       // http://www.w3.org/TR/SVG11/shapes.html#RectElement
       // has transform and style attributes
       var w = parser.parseUnit(tag.getAttribute('width')) || 0
@@ -687,7 +687,7 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
     },
 
 
-    line: function (parser: ISVGParser, tag: SVGElement, node: SvgNode) {
+    line: (parser: ISVGParser, tag: SVGElement, node: SvgNode) => {
       // http://www.w3.org/TR/SVG11/shapes.html#LineElement
       // has transform and style attributes
       var x1 = parser.parseUnit(tag.getAttribute('x1')) || 0
@@ -699,7 +699,7 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
     },
 
 
-    circle: function (parser: ISVGParser, tag: SVGElement, node: SvgNode) {
+    circle: (parser: ISVGParser, tag: SVGElement, node: SvgNode) => {
       // http://www.w3.org/TR/SVG11/shapes.html#CircleElement
       // has transform and style attributes
       var r = parser.parseUnit(tag.getAttribute('r'))
@@ -718,7 +718,7 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
     },
 
 
-    ellipse: function (parser: ISVGParser, tag: SVGElement, node: SvgNode) {
+    ellipse: (parser: ISVGParser, tag: SVGElement, node: SvgNode) => {
       // has transform and style attributes
       var rx = parser.parseUnit(tag.getAttribute('rx'))
       var ry = parser.parseUnit(tag.getAttribute('ry'))
@@ -737,14 +737,14 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
     },
 
 
-    path: function (parser: ISVGParser, tag: SVGElement, node: SvgNode) {
+    path: (parser: ISVGParser, tag: SVGElement, node: SvgNode) => {
       // http://www.w3.org/TR/SVG11/paths.html
       // has transform and style attributes
       var d = tag.getAttribute('d')
       parser.addPath(d, node)
     },
 
-    image: function (parser: ISVGParser, tag: SVGElement, node: SvgNode) {
+    image: (parser: ISVGParser, tag: SVGElement, node: SvgNode) => {
       // not supported
       // has transform and style attributes
       let ns = 'http://www.w3.org/1999/xlink';
@@ -759,7 +759,7 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
       // has transform and style attributes
     },
 
-    clipPath: function (parser: ISVGParser, tag: SVGElement, node: SvgNode) {
+    clipPath: (parser: ISVGParser, tag: SVGElement, node: SvgNode) => {
       node.unsupported = true;
       // not supported
       // has transform and style attributes
@@ -777,7 +777,7 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
       // has transform and style attributes
     },
 
-    style: function (parser: ISVGParser, tag: SVGElement, node: SvgNode) {
+    style: (parser: ISVGParser, tag: SVGElement, node: SvgNode) => {
       //node.unsupported = true;
 
       let doc = document.implementation.createHTMLDocument(''),
