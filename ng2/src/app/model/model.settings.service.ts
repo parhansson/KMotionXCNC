@@ -36,7 +36,8 @@ export class ModelSettings {
     { name: '6mm acryl', ppi: 'M100 P2200 Q100 ', speed: 'F90', passes: 1 },
     { name: '4mm plywood', ppi: 'M100 P300 Q100 ', speed: 'F250', passes: 1 },
     { name: '10mm furu P900 ner till P600', ppi: 'M100 P900 Q100', speed: 'F50', passes: 1 },
-    { name: '3mm plywood johans dyra', ppi: 'M100 P700 Q100', speed: 'F150', passes: 3 }
+    { name: '3mm plywood johans dyra', ppi: 'M100 P700 Q100', speed: 'F150', passes: 3 },
+    { name: 'papper 220-240g', ppi: 'M100 P400 Q100', speed: 'F1000', passes: 1 }
 
   ]
 

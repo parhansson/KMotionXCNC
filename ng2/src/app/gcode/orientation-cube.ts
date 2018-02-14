@@ -73,8 +73,7 @@ export class OrientationCube {
 
     // add axes
     let radius = 80;
-    //TODO AxisHelper is deprecated renamed to AxesHelper wait for new typings
-    scene.add(new THREE.AxisHelper(radius));
+    scene.add(new THREE.AxesHelper(radius));
 
     /* 
     let segments = 32; 

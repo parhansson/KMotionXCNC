@@ -5,8 +5,6 @@ declare class DxfParser{
   parseSync(fileText:string)
 }
 
-declare module 'three-trackballcontrols' { }
-
 // Merge PDFJS typings
 declare namespace PDFJSExtra {
   export interface PDFPageOperatorList {
