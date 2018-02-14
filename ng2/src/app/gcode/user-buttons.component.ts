@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
-import { SettingsService, Machine, Action } from '../settings/settings.service';
-import { BackendService } from '../backend/backend.service';
+import { Component } from '@angular/core'
+import { SettingsService, Machine, Action } from '../settings/settings.service'
+import { BackendService } from '../backend/backend.service'
 
 @Component({
   selector: 'user-defined-buttons',
@@ -19,12 +19,12 @@ export class UserButtonsComponent {
   constructor(settingsService: SettingsService, private backendService: BackendService) {
     settingsService.subject.subscribe(machine => 
       this.userActions = machine.userActions
-    );
+    )
   }
 
   onUserButton(index: number, action: Action) {
-    console.log(index, action);
-    this.backendService.onInvokeAction(index + 11);
+    console.log(index, action)
+    this.backendService.onInvokeAction(index + 11)
   }
 
 }

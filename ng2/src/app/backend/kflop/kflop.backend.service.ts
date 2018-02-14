@@ -1,6 +1,6 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, Observer, Subject, AsyncSubject } from 'rxjs/Rx';
+import { Injectable } from '@angular/core'
+import { HttpClient } from '@angular/common/http'
+import { Observable, Observer, Subject, AsyncSubject } from 'rxjs/Rx'
 import { FileResource, Payload, IFileBackend, DirList } from '../../resources'
 import { BackendService } from '../backend.service'
 
@@ -10,32 +10,32 @@ export class KFlopBackendService extends BackendService implements IFileBackend 
   constructor(private http: HttpClient) { super() }
 
   public listDir(path: string): Observable<DirList> {
-    return this.onEvent('listDir', path);
+    return this.onEvent('listDir', path)
   }
 
   saveFile(name: string, content: ArrayBuffer | ArrayBufferView | Blob | string) {
-    let url: string = '/upload'
-    let progressObserver: Observer<number>;
+    const url: string = '/upload'
+    let progressObserver: Observer<number>
     //progress: number = 0;
-    let progress$ = new Observable<number>(observer => { progressObserver = observer })
-    let formData: FormData = new FormData()
+    const progress$ = new Observable<number>(observer => { progressObserver = observer })
+    const formData: FormData = new FormData()
 
     if (File.constructor === Function) {
-      let files: File[] = []
+      const files: File[] = []
       files.push(new File([content], name))
       for (let i = 0; i < files.length; i++) {
-        formData.append('file' + i, files[i], files[i].name);
+        formData.append('file' + i, files[i], files[i].name)
       }
     } else {
       //Some browsers (Safari) does not support File constructor.
-      var blob = new Blob([content], { type: 'plain/text', endings: 'transparent' });
-      formData.append('file', blob, name);
+      const blob = new Blob([content], { type: 'plain/text', endings: 'transparent' })
+      formData.append('file', blob, name)
 
     }
 
     //return new Promise((resolve, reject) => {
 
-    let xhr: XMLHttpRequest = new XMLHttpRequest();
+    const xhr: XMLHttpRequest = new XMLHttpRequest()
     xhr.onreadystatechange = () => {
       if (xhr.readyState === 4) {
         if (xhr.status === 200) {
@@ -43,20 +43,20 @@ export class KFlopBackendService extends BackendService implements IFileBackend 
           progressObserver.complete()
         } else {
           //reject(xhr.response);
-          progressObserver.error(xhr.response);
+          progressObserver.error(xhr.response)
         }
       }
-    };
+    }
 
     //FileUploadService.setUploadUpdateInterval(500);
 
     xhr.upload.onprogress = (event) => {
-      let progress = Math.round(event.loaded / event.total * 100);
-      progressObserver.next(progress);
-    };
+      const progress = Math.round(event.loaded / event.total * 100)
+      progressObserver.next(progress)
+    }
 
-    xhr.open('POST', url, true);
-    xhr.send(formData);
+    xhr.open('POST', url, true)
+    xhr.send(formData)
     // });
     progress$.subscribe(data => console.log(data + '%'))
     return progress$
@@ -64,8 +64,8 @@ export class KFlopBackendService extends BackendService implements IFileBackend 
 
   loadFile(path: string): Observable<Payload> {
 
-    let url = '/api/kmx/openFile';
-    let data = { params: path };
+    const url = '/api/kmx/openFile'
+    const data = { params: path }
 
     return this.http.post(url, JSON.stringify(data),
       {
@@ -79,12 +79,12 @@ export class KFlopBackendService extends BackendService implements IFileBackend 
   }
 
   protected onEvent<R>(eventName: string, parameters?: any): Observable<R> {
-    const url = '/api/kmx/' + eventName;
+    const url = '/api/kmx/' + eventName
     let payload: string
     if (parameters === undefined) {
-      payload = JSON.stringify({});
+      payload = JSON.stringify({})
     } else {
-      payload = JSON.stringify({ params: parameters });
+      payload = JSON.stringify({ params: parameters })
     }
     // TODO make cold hot to prevent reposting
     const coldObservable = this.http.post(url, payload)
@@ -92,8 +92,8 @@ export class KFlopBackendService extends BackendService implements IFileBackend 
       data => { },
       err => console.error('There was an error on event: ' + eventName, err),
       () => console.log(eventName + ' Complete')
-    );
-    return coldObservable as Observable<R>;
+    )
+    return coldObservable as Observable<R>
   }
 
 }

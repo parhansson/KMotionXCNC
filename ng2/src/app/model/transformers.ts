@@ -57,9 +57,9 @@ export class StaticTransformer {
       this.dxf2IgmTransformer.execute(payload, this.igmSubject)
     } else {
       if (contentType === 'application/pdf') {
-        this.pdf2svgTransformer.execute(payload as ArrayBuffer, this.svgSubject);
+        this.pdf2svgTransformer.execute(payload as ArrayBuffer, this.svgSubject)
       } else if (contentType === 'image/svg+xml') {
-        let svgElement = this.asSVGElement(payload)
+        const svgElement = this.asSVGElement(payload)
         this.svgSubject.next(svgElement)
 
         /*
@@ -75,7 +75,7 @@ export class StaticTransformer {
         if (testDoGcodeIGM) {
           this.gcode2IgmTransformer.execute(gcode, this.igmSubject)
         } else {
-          this.gcodeSubject.next(gcode);
+          this.gcodeSubject.next(gcode)
         }
       }
     }
@@ -93,15 +93,15 @@ export class StaticTransformer {
       } else if (source instanceof ArrayBuffer) {
         svgstring = KMXUtil.ab2str(source)
       } else {
-        console.error('Unsupported source', source);
+        console.error('Unsupported source', source)
       }
 
       if ((window as any).DOMParser) {
         // clean off any preceding whitespace not sure if this is really needed
         //svgstring = svgstring.replace(/^[\n\r \t]/gm, '');
-        doc = new DOMParser().parseFromString(svgstring, 'image/svg+xml').documentElement as any as SVGElement;
+        doc = new DOMParser().parseFromString(svgstring, 'image/svg+xml').documentElement as any as SVGElement
       } else {
-        console.error('DOMParser not supported. Update your browser');
+        console.error('DOMParser not supported. Update your browser')
       }
     }
     if (doc.localName !== 'svg') {
@@ -112,9 +112,9 @@ export class StaticTransformer {
   }
   asGCodeSource(input: string | string[] | ArrayBuffer) {
     if (input instanceof ArrayBuffer) {
-      return new GCodeSource(KMXUtil.ab2str(input));
+      return new GCodeSource(KMXUtil.ab2str(input))
     } else {
-      return new GCodeSource(input);
+      return new GCodeSource(input)
     }
   }
 

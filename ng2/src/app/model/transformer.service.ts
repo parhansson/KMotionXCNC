@@ -1,51 +1,51 @@
 
 
-import { Injectable } from '@angular/core';
-import { Observer, Observable, Subject, AsyncSubject } from 'rxjs/Rx';
-import { KMXUtil } from '../util/kmxutil';
-import { ModelTransformer } from './transformer/model.transformer';
+import { Injectable } from '@angular/core'
+import { Observer, Observable, Subject, AsyncSubject } from 'rxjs/Rx'
+import { KMXUtil } from '../util/kmxutil'
+import { ModelTransformer } from './transformer/model.transformer'
 
 
 @Injectable()
 export class TransformerService {
-  transformers: ModelTransformer<any, any>[] = [];
+  transformers: Array<ModelTransformer<any, any>> = []
 
   constructor() {
 
   }
   register(transformer: ModelTransformer<any, any>) {
-    this.transformers.push(transformer);
+    this.transformers.push(transformer)
   }
 
   matchType(mimeType: string) {
-    for (var i = 0; i < this.transformers.length; i++) {
-      if (this.transformers[i].inputMime.indexOf(mimeType) > -1) {
-        return this.transformers[i];
+    for (const transformer of  this.transformers) {
+      if (transformer.inputMime.indexOf(mimeType) > -1) {
+        return transformer
       }
     }
-    return null;
+    return null
   }
   matchName(name) {
-    for (var i = 0; i < this.transformers.length; i++) {
-      if (this.transformers[i].name === name) {
-        return this.transformers[i];
+    for (const transformer of  this.transformers) {
+      if (transformer.name === name) {
+        return transformer
       }
     }
-    return null;
+    return null
   }
   transformNamed(transformerName, source) {
 
-    let subject = new Subject<any>()
-    var transformer = this.matchName(transformerName);
+    const subject = new Subject<any>()
+    const transformer = this.matchName(transformerName)
     if (transformer !== null) {
-      return transformer.execute(source, subject);
+      return transformer.execute(source, subject)
     }
     subject.error('Named transformer "' + transformerName + '" not found')
     subject.complete()
   }
   transcode(mime: string, source: any): Subject<any> {
-    let subject = new AsyncSubject<any>()
-    var transformer = this.matchType(mime);
+    const subject = new AsyncSubject<any>()
+    const transformer = this.matchType(mime)
     if (transformer !== null) {
       transformer.execute(source, subject).subscribe(result => this.transcode(transformer.outputMime, result))
       /*
@@ -62,12 +62,12 @@ export class TransformerService {
 
     if (typeof source === 'string') {
       //asume gcode text do not transform
-      subject.next(source);
+      subject.next(source)
     } else if (source instanceof ArrayBuffer) {
       //gcode file do not transform
-      subject.next(KMXUtil.ab2str(source));
+      subject.next(KMXUtil.ab2str(source))
     } else {
-      subject.error("Unsupported source: " + (typeof source));
+      subject.error('Unsupported source: ' + (typeof source))
     }
     subject.complete()
 

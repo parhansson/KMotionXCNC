@@ -1,9 +1,9 @@
-import { Component, Inject, Injectable } from '@angular/core';
+import { Component, Inject, Injectable } from '@angular/core'
 import { LogComponent } from './log.component'
 import { LogSubject } from './log-subject'
 
 interface LogIdToLogSubjectMap {
-  [id: string]: LogSubject<LogMessage>;
+  [id: string]: LogSubject<LogMessage>
 }
 export class LogMessage {
   constructor(public message: string, public styleClass?: string) {
@@ -20,22 +20,22 @@ export class LogService {
   }
 
   public getLogSubject(logId: string) {
-    let subject = this.logs[logId];
+    let subject = this.logs[logId]
     if (subject === undefined) {
-      subject = this.logs[logId] = new LogSubject<LogMessage>();
+      subject = this.logs[logId] = new LogSubject<LogMessage>()
     }
-    return subject;
+    return subject
   }
 
   public clearLog(logId: string) {
-    this.logs[logId].prune();
+    this.logs[logId].prune()
   }
 
   public logExist(logId: string) {
-    return this.logs[logId] !== undefined;
+    return this.logs[logId] !== undefined
   }
 
   public log(consoleId: string, message: string, styleClass?:string) {
-    this.getLogSubject(consoleId).next(new LogMessage(message, styleClass));
+    this.getLogSubject(consoleId).next(new LogMessage(message, styleClass))
   }
 }

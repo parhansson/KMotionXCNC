@@ -10,14 +10,14 @@ export class OrientationCube {
 
   constructor(private syncCamera: THREE.Camera, private domElement: HTMLElement) {
 
-    this.renderer = new THREE.WebGLRenderer({ antialias: false, clearColor: 0x000000, alpha: true });
-    this.scene = new THREE.Scene();
+    this.renderer = new THREE.WebGLRenderer({ antialias: false, clearColor: 0x000000, alpha: true })
+    this.scene = new THREE.Scene()
     // camera
-    this.camera = new THREE.PerspectiveCamera(50, this.CANVAS_WIDTH / this.CANVAS_HEIGHT, 1, 1000);
-    this.camera.up = syncCamera.up; // important!
+    this.camera = new THREE.PerspectiveCamera(50, this.CANVAS_WIDTH / this.CANVAS_HEIGHT, 1, 1000)
+    this.camera.up = syncCamera.up // important!
 
     // renderer
-    this.renderer.setSize(this.CANVAS_WIDTH, this.CANVAS_HEIGHT);
+    this.renderer.setSize(this.CANVAS_WIDTH, this.CANVAS_HEIGHT)
     this.renderer.domElement.style.cssText =
       'width: 150px;height: 150px;' +
       //'background-color: transparent;'+ 
@@ -26,54 +26,54 @@ export class OrientationCube {
       'position: absolute;' +
       'right: 0px;' +
       'top: -20px;' +
-      'z-index: 100;';
+      'z-index: 100;'
     //'border: 1px solid black; /* or none; */';
-    domElement.appendChild(this.renderer.domElement);
-    this.createCube(this.scene);
+    domElement.appendChild(this.renderer.domElement)
+    this.createCube(this.scene)
   }
   
   render(newPosition: THREE.Vector3) {
-    this.camera.position.copy(this.syncCamera.position);
-    this.camera.position.sub(newPosition);
-    this.camera.position.setLength(this.CAM_DISTANCE);
-    this.camera.lookAt(this.scene.position);
+    this.camera.position.copy(this.syncCamera.position)
+    this.camera.position.sub(newPosition)
+    this.camera.position.setLength(this.CAM_DISTANCE)
+    this.camera.lookAt(this.scene.position)
     //console.log(this.camera.position)
-    this.renderer.render(this.scene, this.camera);
+    this.renderer.render(this.scene, this.camera)
   }
 
   createCube(scene: THREE.Scene) { // create an array with six textures for a cool cube
     new THREE.TextureLoader().load('/settings/textures/textures.png', (texture: THREE.Texture) => {
       //let material = new THREE.MeshPhongMaterial( { map: THREE.ImageUtils.loadTexture('images/box-atlas.png') } );
-      let material = new THREE.MeshBasicMaterial({
+      const material = new THREE.MeshBasicMaterial({
         map: texture
-      });
+      })
 
-      let size = 50;
-      let geometry = new THREE.CubeGeometry(size, size, size, 1, 1, 1);
-      geometry.faceVertexUvs[0] = [];
-      let textPercent = 0.125;
-      let LU = -textPercent;
-      let RU = 0;
-      let i = 0;
+      const size = 50
+      const geometry = new THREE.CubeGeometry(size, size, size, 1, 1, 1)
+      geometry.faceVertexUvs[0] = []
+      const textPercent = 0.125
+      let LU = -textPercent
+      let RU = 0
+      let i = 0
       for (let t = 0; t < 6; t++) {
-        LU += textPercent; RU += textPercent;
-        let pos = [new THREE.Vector2(LU, 1), new THREE.Vector2(LU, 0), new THREE.Vector2(RU, 0), new THREE.Vector2(RU, 1)];
-        LU += textPercent; RU += textPercent;
-        let neg = [new THREE.Vector2(LU, 1), new THREE.Vector2(LU, 0), new THREE.Vector2(RU, 0), new THREE.Vector2(RU, 1)];
-        geometry.faceVertexUvs[0][i++] = [pos[0], pos[1], pos[3]];
-        geometry.faceVertexUvs[0][i++] = [pos[1], pos[2], pos[3]];
-        geometry.faceVertexUvs[0][i++] = [neg[0], neg[1], neg[3]];
-        geometry.faceVertexUvs[0][i++] = [neg[1], neg[2], neg[3]];
+        LU += textPercent; RU += textPercent
+        const pos = [new THREE.Vector2(LU, 1), new THREE.Vector2(LU, 0), new THREE.Vector2(RU, 0), new THREE.Vector2(RU, 1)]
+        LU += textPercent; RU += textPercent
+        const neg = [new THREE.Vector2(LU, 1), new THREE.Vector2(LU, 0), new THREE.Vector2(RU, 0), new THREE.Vector2(RU, 1)]
+        geometry.faceVertexUvs[0][i++] = [pos[0], pos[1], pos[3]]
+        geometry.faceVertexUvs[0][i++] = [pos[1], pos[2], pos[3]]
+        geometry.faceVertexUvs[0][i++] = [neg[0], neg[1], neg[3]]
+        geometry.faceVertexUvs[0][i++] = [neg[1], neg[2], neg[3]]
       }
-      const mesh = new THREE.Mesh(geometry, material);
+      const mesh = new THREE.Mesh(geometry, material)
       //console.log(mesh.toJSON());
-      scene.add(mesh);
+      scene.add(mesh)
 
-    });
+    })
 
     // add axes
-    let radius = 80;
-    scene.add(new THREE.AxesHelper(radius));
+    const radius = 80
+    scene.add(new THREE.AxesHelper(radius))
 
     /* 
     let segments = 32; 

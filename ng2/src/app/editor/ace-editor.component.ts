@@ -1,5 +1,5 @@
-import { Component, Inject, Input, ViewChild } from '@angular/core';
-import { AceDirective } from './ace.directive';
+import { Component, Inject, Input, ViewChild } from '@angular/core'
+import { AceDirective } from './ace.directive'
 import { KMXUtil } from '../util/kmxutil'
 import {
   DropZoneDirective,
@@ -20,25 +20,25 @@ import {
 })
 export class AceEditorComponent {
   @ViewChild(AceDirective)
-  private aceEditor: AceDirective;
+  private aceEditor: AceDirective
 
   @ViewChild(FileDialogComponent)
-  private resourceComponent: FileDialogComponent;
+  private resourceComponent: FileDialogComponent
 
-  @Input() mode: string;
-  @Input() theme: string;
-  resource: FileResource;
-  dirty: boolean;
+  @Input() mode: string
+  @Input() theme: string
+  resource: FileResource
+  dirty: boolean
 
   constructor( @Inject(FileStoreToken) private fileStore: FileStore) {
-    this.resource = new FileResource('');
+    this.resource = new FileResource('')
 
     this.fileStore.textSubject.subscribe(text => {
-      this.textContent = text;
-      this.dirty = false;
+      this.textContent = text
+      this.dirty = false
     },
       err => console.error(err)
-    );
+    )
   }
 
   get textContent() {
@@ -52,12 +52,12 @@ export class AceEditorComponent {
   onContentChange(change: any /*AceAjax.EditorChangeEvent*/) {
     //console.log('onContentChange', change);
     //TODO Gcode need to be aware of this in order update 3d view
-    this.dirty = true;
+    this.dirty = true
   }
 
   onSave() {
     this.fileStore.store(this.resource.canonical, this.textContent)
-    this.dirty = false;
+    this.dirty = false
   }
 
   onSaveAs() {
@@ -66,15 +66,15 @@ export class AceEditorComponent {
 
   onFile(file: FileResource | Payload) {
     if (file instanceof FileResource) {
-      this.resource = file;
+      this.resource = file
     } else {
       //Use imported name
-      this.resource.canonical = file.name;
+      this.resource.canonical = file.name
     }
     //Selected in file dialog or drop imported file
     //load() should be responsible for returning file resource.
     //then imported files can be saved and get a real name
-    this.fileStore.load(file);
+    this.fileStore.load(file)
 
   }
 

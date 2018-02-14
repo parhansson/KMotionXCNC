@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input } from '@angular/core'
 import { Action } from './settings.service'
 
 @Component({
@@ -7,8 +7,8 @@ import { Action } from './settings.service'
 })
 export class MCodeValueComponent {
 
-    @Input() userButton = false;
-    @Input() action: Action;
+    @Input() userButton = false
+    @Input() action: Action
 
     actionOptions = [
         //{action:-1,name:'Reserved', visible:[false,false,false,false,false,false],paramNames:['','','','','','']},
@@ -22,7 +22,7 @@ export class MCodeValueComponent {
         { action: 7, name: 'Run a Windows program wait til finished', visible: [false, false, false, false, false, true], paramNames: ['', '', '', '', '', 'File'] },
         { action: 8, name: 'Callback to the User Application', visible: [false, false, false, false, false, false], paramNames: ['', '', '', '', '', ''] },
         { action: 9, name: 'Wait/Hold until a bit is high or low', visible: [true, true, false, false, false, false], paramNames: ['Wait bit', 'till', '', '', '', ''] }
-    ];
+    ]
 
     constructor() {
 

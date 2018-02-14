@@ -1,5 +1,5 @@
-import { Component, Inject, Input, Output } from '@angular/core';
-import { ModelSettingsService, ModelSettings } from '../model/model.settings.service';
+import { Component, Inject, Input, Output } from '@angular/core'
+import { ModelSettingsService, ModelSettings } from '../model/model.settings.service'
 @Component({
   selector: 'material-settings',
   templateUrl: './material-settings.component.html'

@@ -28,15 +28,15 @@ export class FileResource {
     return this.dir + '/' + this.file
   }
   set canonical(file) {
-    let parts = file.split('/');
+    const parts = file.split('/')
     this.file = parts.splice(parts.length - 1)[0]
     this.paths = parts
   }
 
   up(count: number) {
-    this.paths = this.paths.splice(0, this.paths.length - count);
+    this.paths = this.paths.splice(0, this.paths.length - count)
   }
   goto(index: number) {
-    this.paths = this.paths.splice(0, index);
+    this.paths = this.paths.splice(0, index)
   }
 }

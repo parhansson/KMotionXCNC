@@ -1,4 +1,4 @@
-import { Directive, Component, Input, Output, EventEmitter, ElementRef, Inject } from '@angular/core';
+import { Directive, Component, Input, Output, EventEmitter, ElementRef, Inject } from '@angular/core'
 import { FileResource } from './file-resource'
 import { IFileBackend, FileServiceToken, FileEntry } from './file-backend'
 import { DropZoneDirective } from './drop-zone.directive'
@@ -61,12 +61,12 @@ export class FileDialogComponent {
   }
 
   show() {
-    this.showModal = true;
+    this.showModal = true
     this.modalDisplay = 'block'
     this.listDir()
   }
   hide() {
-    this.showModal = false;
+    this.showModal = false
     this.modalDisplay = 'none'
   }
 
@@ -84,7 +84,7 @@ export class FileDialogComponent {
     this.hide()
   }
   openFile() {
-    this.setFileResource(this.resource);
+    this.setFileResource(this.resource)
   }
 
   public listDir() {

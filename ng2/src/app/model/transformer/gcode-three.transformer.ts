@@ -50,18 +50,18 @@ export class Gcode2ThreeTransformer extends GCodeTransformer<THREE.Geometry, THR
 
   protected createOutput() {
     const output = new THREE.Group()
-    output.name = 'GCODE';
+    output.name = 'GCODE'
     return output
   }
 
   protected startShape() {
     const data = this.getShapeData()
-    const lineGeometry = new THREE.Geometry();
-    const shape = new THREE.Line(lineGeometry, data.material);
+    const lineGeometry = new THREE.Geometry()
+    const shape = new THREE.Line(lineGeometry, data.material)
     shape.userData = { startLine: this.state.lineNo }
-    this.output.add(shape);
+    this.output.add(shape)
     //console.log("new line");
-    return lineGeometry;
+    return lineGeometry
   }
 
   protected endShape() {
@@ -84,15 +84,15 @@ export class Gcode2ThreeTransformer extends GCodeTransformer<THREE.Geometry, THR
   }
 
   protected addLinearPoint(newPosition: GCodeVector, geometry: THREE.Geometry) {
-    geometry.vertices.push(new THREE.Vector3(newPosition.x, newPosition.y, newPosition.z));
+    geometry.vertices.push(new THREE.Vector3(newPosition.x, newPosition.y, newPosition.z))
     //let color = getShapeData()
     //geometry.colors.push(color);
-    return newPosition;
+    return newPosition
   }
   protected addCurve(curve: GCodeCurve3, geometry: THREE.Geometry) {
-    var vectors = curve.getPoints(50);
-    for (let point of vectors) {
-      geometry.vertices.push(new THREE.Vector3(point.x, point.y, point.z));
+    const vectors = curve.getPoints(50)
+    for (const point of vectors) {
+      geometry.vertices.push(new THREE.Vector3(point.x, point.y, point.z))
     }
     //let color = getShapeData()
     // new THREE.Vector3().fromAttribute
@@ -107,14 +107,14 @@ export class Gcode2ThreeTransformer extends GCodeTransformer<THREE.Geometry, THR
 
     newPosition.e = args.E !== undefined ? args.E : position.e,
       //TODO doesn't work as expected due to changing feedrate in the middle of line.
-      newPosition.extruding = (newPosition.e - position.e) > 0;
+      newPosition.extruding = (newPosition.e - position.e) > 0
     if (newPosition.extruding) {
-      var color = new THREE.Color(newPosition.extruding ? 0xBBFFFF : 0xFF00FF);
-      geometry.vertices.push(new THREE.Vector3(position.x, position.y, position.z));
-      geometry.vertices.push(new THREE.Vector3(newPosition.x, newPosition.y, newPosition.z));
-      geometry.colors.push(color);
-      geometry.colors.push(color);
+      const color = new THREE.Color(newPosition.extruding ? 0xBBFFFF : 0xFF00FF)
+      geometry.vertices.push(new THREE.Vector3(position.x, position.y, position.z))
+      geometry.vertices.push(new THREE.Vector3(newPosition.x, newPosition.y, newPosition.z))
+      geometry.colors.push(color)
+      geometry.colors.push(color)
     }
-    return newPosition;
+    return newPosition
   }
 }

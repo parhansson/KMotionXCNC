@@ -1,8 +1,8 @@
-import { Component, ViewChild, SkipSelf, Inject } from '@angular/core';
+import { Component, ViewChild, SkipSelf, Inject } from '@angular/core'
 import { FileResource, Payload, FileServiceToken, IFileBackend, FileStoreToken, FileStore } from '../resources'
 import { AceEditorComponent} from '../editor'
 import { TransformingFileStore } from '../model/transforming-file-store.service'
-import { SocketService } from '../backend/socket.service';
+import { SocketService } from '../backend/socket.service'
 import { BackendService } from '../backend/backend.service'
 
 @Component({
@@ -16,7 +16,7 @@ import { BackendService } from '../backend/backend.service'
 })
 export class GCodeEditorComponent {
   @ViewChild(AceEditorComponent)
-  editorComponent: AceEditorComponent;
+  editorComponent: AceEditorComponent
 
   constructor( 
     @Inject(FileStoreToken) private fileStore: TransformingFileStore,
@@ -25,18 +25,18 @@ export class GCodeEditorComponent {
 
   }
   ngAfterViewInit() {
-    this.editorComponent.onFile(new FileResource('./gcode'));
+    this.editorComponent.onFile(new FileResource('./gcode'))
     //this.editorComponent.onContentChange()
     this.socketService.gcodeFileSubject.subscribe(gcodeFile => {
-      this.editorComponent.resource = gcodeFile;
+      this.editorComponent.resource = gcodeFile
       if (gcodeFile.file) {
-        let subscription = this.fileBackend.loadFile(gcodeFile.canonical).subscribe(
+        const subscription = this.fileBackend.loadFile(gcodeFile.canonical).subscribe(
           payload => {
             this.fileStore.payloadSubject.next(payload)
           },
           null,
           () => subscription.unsubscribe()
-        );
+        )
       }
 
     })

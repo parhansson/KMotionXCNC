@@ -1,8 +1,8 @@
-import { Subject } from 'rxjs/Subject';
-import { Subscriber } from 'rxjs/Subscriber';
-import { Subscription } from 'rxjs/Subscription';
-import { ObjectUnsubscribedError } from 'rxjs/util/ObjectUnsubscribedError';
-import { SubjectSubscription } from 'rxjs/SubjectSubscription';
+import { Subject } from 'rxjs/Subject'
+import { Subscriber } from 'rxjs/Subscriber'
+import { Subscription } from 'rxjs/Subscription'
+import { ObjectUnsubscribedError } from 'rxjs/util/ObjectUnsubscribedError'
+import { SubjectSubscription } from 'rxjs/SubjectSubscription'
 import { LimitBuffer } from '../util'
 /**
  * @class LogSubject<T>
@@ -19,45 +19,45 @@ export class LogSubject<T> extends Subject<T> {
   }
 
   setBufferSize(bufferSize: number) {
-    this._buffer.setBufferSize(bufferSize);
+    this._buffer.setBufferSize(bufferSize)
   }
 
   prune(): void {
-    this._buffer.prune();
+    this._buffer.prune()
   }
 
   next(value: T): void {
-    this._buffer.add(value);
-    super.next(value);
+    this._buffer.add(value)
+    super.next(value)
   }
 
   protected _subscribe(subscriber: Subscriber<T>): Subscription {
-    const _events = this._buffer.getEvents();
-    let subscription: Subscription;
+    const _events = this._buffer.getEvents()
+    let subscription: Subscription
 
     if (this.closed) {
-      throw new ObjectUnsubscribedError();
+      throw new ObjectUnsubscribedError()
     } else if (this.hasError) {
-      subscription = Subscription.EMPTY;
+      subscription = Subscription.EMPTY
     } else if (this.isStopped) {
-      subscription = Subscription.EMPTY;
+      subscription = Subscription.EMPTY
     } else {
-      this.observers.push(subscriber);
-      subscription = new SubjectSubscription(this, subscriber);
+      this.observers.push(subscriber)
+      subscription = new SubjectSubscription(this, subscriber)
     }
 
-    const len = _events.length;
+    const len = _events.length
     for (let i = 0; i < len && !subscriber.closed; i++) {
-      subscriber.next(_events[i]);
+      subscriber.next(_events[i])
     }
 
     if (this.hasError) {
-      subscriber.error(this.thrownError);
+      subscriber.error(this.thrownError)
     } else if (this.isStopped) {
-      subscriber.complete();
+      subscriber.complete()
     }
 
-    return subscription;
+    return subscription
   }
 }
 

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable } from '@angular/core'
 export class Material {
   name: string
   ppi: string
@@ -20,7 +20,7 @@ export class SVGModelSettings {
   removeSingularites: boolean = true
   initCode: string = ''
   feedRate: number = 250
-  passes: number = 1;
+  passes: number = 1
   materialWidth: number = 10
   renderText: boolean = false
 }
@@ -45,7 +45,7 @@ export class ModelSettings {
 
 @Injectable()
 export class ModelSettingsService {
-  settings: ModelSettings = new ModelSettings();
+  settings: ModelSettings = new ModelSettings()
 
   constructor() {
     this.settings.svg.initCode = 'M100 P200 Q100'

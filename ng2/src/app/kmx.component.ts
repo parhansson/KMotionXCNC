@@ -1,5 +1,5 @@
-import { Component, Inject } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Component, Inject } from '@angular/core'
+import { ActivatedRoute, Router } from '@angular/router'
 
 import { SocketService } from './backend/socket.service'
 import { KmxStatus } from './hal/kflop'
@@ -28,8 +28,8 @@ export class KmxComponent {
         this.backend.onSimulate()
     }
     processDrop(event:DragEvent){
-        event.preventDefault();
-        event.stopImmediatePropagation();
+        event.preventDefault()
+        event.stopImmediatePropagation()
     }
     processDragExit(){
         //this.router.navigateByUrl('/gcode', {relativeTo:this.route});

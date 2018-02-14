@@ -1,7 +1,7 @@
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { AceDirective } from './ace.directive';
-import { AceEditorComponent } from './ace-editor.component';
+import { NgModule } from '@angular/core'
+import { CommonModule } from '@angular/common'
+import { AceDirective } from './ace.directive'
+import { AceEditorComponent } from './ace-editor.component'
 import { ResourceModule } from '../resources/resource.module'
 @NgModule({
   imports: [

@@ -5,7 +5,7 @@ export { FileResource } from './file-resource'
 export { Payload } from './payload'
 export { FileDialogComponent } from './file-dialog.component'
 export { FilePathComponent } from './file-path.component'
-export { FileStoreToken, FileStore } from './file-store';
+export { FileStoreToken, FileStore } from './file-store'
 export { DefaultFileStore } from './default-file-store.service'
 
 

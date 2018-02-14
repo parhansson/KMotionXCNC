@@ -1,13 +1,13 @@
 // Angular
-import '@angular/platform-browser';
-import '@angular/platform-browser-dynamic';
-import '@angular/core';
-import '@angular/common';
-import '@angular/forms';
-import '@angular/common/http';
-import '@angular/router';
+import '@angular/platform-browser'
+import '@angular/platform-browser-dynamic'
+import '@angular/core'
+import '@angular/common'
+import '@angular/forms'
+import '@angular/common/http'
+import '@angular/router'
 // RxJS
-import 'rxjs';
+import 'rxjs'
 // Other vendors for example jQuery, Lodash or Bootstrap
 // You can import js, ts, css, sass, ...
 
@@ -25,9 +25,9 @@ import '../public/css/style.css'
 //THREE is modular but not the TrackballControls example
 // imports-loader provides THREE to the TrackballControls example
 // exports-loader gets THREE.TrackballControls
-import * as THREE from 'three';
+import * as THREE from 'three'
 //import THREE from 'three';
-import 'imports-loader?THREE=three!three/examples/js/controls/TrackballControls';
+import 'imports-loader?THREE=three!three/examples/js/controls/TrackballControls'
 
 import 'script-loader!dxf-parser/dist/dxf-parser.js'
 

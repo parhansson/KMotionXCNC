@@ -6,14 +6,14 @@ class Wrapper {
     constructor() { }
 
     postMessage(message, ports, transfer) {
-        postMessage(message, ports, transfer);
+        postMessage(message, ports, transfer)
     }
 }
 
-let smb = new SocketMessageBroker(new Wrapper());
+const smb = new SocketMessageBroker(new Wrapper())
 
 onmessage = function (ev) {
-    smb.onmessage(ev);
+    smb.onmessage(ev)
 }
 
 export default SocketWorker

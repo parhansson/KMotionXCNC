@@ -1,4 +1,4 @@
-import { Directive, Component, Input, Output, EventEmitter, ElementRef } from '@angular/core';
+import { Directive, Component, Input, Output, EventEmitter, ElementRef } from '@angular/core'
 import { FileResource } from './file-resource'
 import { Payload } from './payload'
 @Directive({
@@ -23,47 +23,47 @@ export class DropZoneDirective {
   }
 
   processDrop(event: DragEvent) {
-    var file: File
+    let file: File
     if (event != null) {
-      event.preventDefault();
+      event.preventDefault()
     }
     this.highlight(null)
-    file = (event.dataTransfer as DataTransfer).files.item(0);
+    file = (event.dataTransfer as DataTransfer).files.item(0)
     if (this.checkSize(file.size) && this.isTypeValid(file.type)) {
       //TODO break this out to utility class and make it optional to actually load or emit  file as payload in FileResource 
       //let p: FilePropertyBag
-      let reader = new FileReader();
+      const reader = new FileReader()
       reader.addEventListener('load', (evt) => {
-        let payload = new Payload((evt as any).target.result, file.type);
-        payload.name = file.name;
-        this.dropped.emit(payload);
+        const payload = new Payload((evt as any).target.result, file.type)
+        payload.name = file.name
+        this.dropped.emit(payload)
       })
       reader.readAsArrayBuffer(file)
 
     }
-    return false;
+    return false
   }
 
   processDragExit(event: DragEvent) {
     if (event != null) {
-      event.preventDefault();
+      event.preventDefault()
     }
     this.highlight(null)
-    event.dataTransfer.effectAllowed = 'none';
+    event.dataTransfer.effectAllowed = 'none'
     return false
   }
 
   processDragOverOrEnter(event: DragEvent) {
     if (event != null) {
-      event.preventDefault();
+      event.preventDefault()
     }
     this.highlight('lightgray')
-    event.dataTransfer.effectAllowed = 'copy';
-    return false;
+    event.dataTransfer.effectAllowed = 'copy'
+    return false
   }
 
   private highlight(color: string) {
-    this.element.style.backgroundColor = color;
+    this.element.style.backgroundColor = color
   }
 
   private checkSize(size) {
@@ -76,7 +76,7 @@ export class DropZoneDirective {
       return false;
     }
     */
-    return true;
+    return true
   }
 
   private isTypeValid(type) {
@@ -88,7 +88,7 @@ export class DropZoneDirective {
       return false;
     }
     */
-    return true;
+    return true
   }
 
 

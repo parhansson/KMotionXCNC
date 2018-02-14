@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
-import { BackendService } from '../backend/backend.service';
-import { SocketService } from '../backend/socket.service';
+import { Component } from '@angular/core'
+import { BackendService } from '../backend/backend.service'
+import { SocketService } from '../backend/socket.service'
 import { KmxStatus } from '../hal/kflop'
 
 @Component({
@@ -29,16 +29,16 @@ export class ControlButtonsComponent {
 
   constructor(private backendService: BackendService,
     private socketService: SocketService) {
-    this.kmxStatus = socketService.data;
+    this.kmxStatus = socketService.data
 
   }
 
   onFeedhold() {
-    this.backendService.onFeedhold();
+    this.backendService.onFeedhold()
   }
 
   onHalt() {
-    this.backendService.onHalt();
+    this.backendService.onHalt()
   }
 
   onCycleStart() {
@@ -46,14 +46,14 @@ export class ControlButtonsComponent {
   }
 
   onReset() {
-    this.backendService.onReset();
+    this.backendService.onReset()
   }
 
   onStep() {
-    this.backendService.onStep();
+    this.backendService.onStep()
   }
   onEmergencyStop() {
-    this.backendService.onEmergencyStop();
+    this.backendService.onEmergencyStop()
   }
 
 }

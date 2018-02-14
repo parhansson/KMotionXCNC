@@ -1,4 +1,4 @@
-import { Component, Injectable, Pipe, PipeTransform, Input, Attribute } from '@angular/core';
+import { Component, Injectable, Pipe, PipeTransform, Input, Attribute } from '@angular/core'
 import { SocketService } from '../backend/socket.service'
 import { KFlop, KmxStatus } from '../hal/kflop'
 import { Connector, IOPin } from '../hal'

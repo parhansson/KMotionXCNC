@@ -1,4 +1,4 @@
-import { Component, Inject, ViewChild } from '@angular/core';
+import { Component, Inject, ViewChild } from '@angular/core'
 import { AceEditorComponent } from '../editor'
 import { FileResource, FileStoreToken, FileStore, DefaultFileStore } from '../resources'
 
@@ -18,12 +18,12 @@ import { FileResource, FileStoreToken, FileStore, DefaultFileStore } from '../re
 })
 export class CCodeEditorComponent {
   @ViewChild(AceEditorComponent)
-  editorComponent: AceEditorComponent;
+  editorComponent: AceEditorComponent
 
   constructor() { }
 
   ngAfterViewInit() {
-    this.editorComponent.onFile(new FileResource('./settings/c-programs'));
+    this.editorComponent.onFile(new FileResource('./settings/c-programs'))
   }
   onCompile() {
     console.warn('Compile not implemented')

@@ -1,4 +1,4 @@
-import { Component, Inject, Input, Output, ViewChild, ElementRef } from '@angular/core';
+import { Component, Inject, Input, Output, ViewChild, ElementRef } from '@angular/core'
 import { StaticTransformer } from '../model/transformers'
 import { SvgEditor } from './svg-editor'
 
@@ -12,7 +12,7 @@ export class SvgPreviewComponent {
   private svgEditor: SvgEditor
 
   constructor(private staticTransformer: StaticTransformer) {
-    this.svgEditor = new SvgEditor();
+    this.svgEditor = new SvgEditor()
   }
 
   render(svg: string | SVGElement) {
@@ -22,7 +22,7 @@ export class SvgPreviewComponent {
     //window.open(window.URL.createObjectURL(blob));
     let doc: SVGElement
     if (typeof svg  === 'string') {
-       doc = new DOMParser().parseFromString(svg, 'image/svg+xml').documentElement as any as SVGElement;
+       doc = new DOMParser().parseFromString(svg, 'image/svg+xml').documentElement as any as SVGElement
     } else {
       doc = svg
     }

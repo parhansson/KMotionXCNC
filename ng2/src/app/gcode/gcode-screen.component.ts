@@ -40,16 +40,16 @@ import * as THREE from 'three'
 })
 export class GCodeScreenComponent {
   @ViewChild(ThreeViewComponent)
-  threeComp: ThreeViewComponent;
+  threeComp: ThreeViewComponent
   @ViewChild(GCodeEditorComponent)
-  editorComponent: GCodeEditorComponent;
+  editorComponent: GCodeEditorComponent
   kmxStatus: KmxStatus
 
   constructor(private backendService: BackendService,
     private socketService: SocketService,
     private settingsService: SettingsService,
     private staticTransformer: StaticTransformer) {
-    this.kmxStatus = socketService.data;
+    this.kmxStatus = socketService.data
 
   }
   ngAfterViewInit() {
@@ -57,74 +57,74 @@ export class GCodeScreenComponent {
     this.settingsService.subject.subscribe((machine) => this.renderMachineObject(machine))
   }
 
-  private machineBounds: THREE.Object3D = null;
-  private machineBackground: THREE.Object3D = null;
-  private machineGrid: THREE.Object3D = null;
+  private machineBounds: THREE.Object3D = null
+  private machineBackground: THREE.Object3D = null
+  private machineGrid: THREE.Object3D = null
 
   renderMachineObject(machine: Machine) {
 
     if (this.machineGrid != null) {
-      this.threeComp.removeAuxObject(this.machineGrid);
+      this.threeComp.removeAuxObject(this.machineGrid)
     }
     if (this.machineBounds != null) {
-      this.threeComp.removeAuxObject(this.machineBounds);
+      this.threeComp.removeAuxObject(this.machineBounds)
     }
     if (this.machineBackground != null) {
-      this.threeComp.removeAuxObject(this.machineBackground);
+      this.threeComp.removeAuxObject(this.machineBackground)
     }
-    let x = machine.dimX;
-    let y = machine.dimY;
-    let z = machine.dimZ;
-    this.machineBounds = this.createMachineBounds(x, y, z);
-    this.machineBackground = this.renderBackground(x, y, z);
-    this.machineGrid = this.renderGrid(x, y, z);
-    this.threeComp.addAuxObject(this.machineBounds);
-    this.threeComp.addAuxObject(this.machineBackground);
-    this.threeComp.addAuxObject(this.machineGrid);
+    const x = machine.dimX
+    const y = machine.dimY
+    const z = machine.dimZ
+    this.machineBounds = this.createMachineBounds(x, y, z)
+    this.machineBackground = this.renderBackground(x, y, z)
+    this.machineGrid = this.renderGrid(x, y, z)
+    this.threeComp.addAuxObject(this.machineBounds)
+    this.threeComp.addAuxObject(this.machineBackground)
+    this.threeComp.addAuxObject(this.machineGrid)
     
     this.threeComp.requestTick()
 
   }
   private createMachineBounds(x, y, z) {
 
-    let boxGeom = new THREE.BoxGeometry(x, y, z);
-    boxGeom.translate(x / 2, y / 2, z / 2);
-    let material = new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 1, opacity: 0.5 });
-    let edges = new THREE.LineSegments(
+    const boxGeom = new THREE.BoxGeometry(x, y, z)
+    boxGeom.translate(x / 2, y / 2, z / 2)
+    const material = new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 1, opacity: 0.5 })
+    const edges = new THREE.LineSegments(
       new THREE.EdgesGeometry(boxGeom as any, undefined),
-      material);
-    return edges;
+      material)
+    return edges
   }
   
   private renderGrid(x, y, z):THREE.Object3D{
     const sizeX = x
     const sizeY = y
-    const step = 10;
+    const step = 10
 
-    var geometry = new THREE.Geometry();
-    var material = new THREE.LineBasicMaterial( { color: 0x999999, opacity: 0.7, linewidth:1 } );
+    const geometry = new THREE.Geometry()
+    const material = new THREE.LineBasicMaterial( { color: 0x999999, opacity: 0.7, linewidth:1 } )
 
-    for ( var i = -sizeY; i <= sizeY; i += step ) {
+    for ( let i = -sizeY; i <= sizeY; i += step ) {
 
-        geometry.vertices.push( new THREE.Vector3( - sizeX, i,0 ) );
-        geometry.vertices.push( new THREE.Vector3(   sizeX, i,0 ) );
-
-    }
-    for ( var i = -sizeX; i <= sizeX; i += step ) {
-
-        geometry.vertices.push( new THREE.Vector3( i, -sizeY,0 ) );
-        geometry.vertices.push( new THREE.Vector3( i,   sizeY , 0) );
+        geometry.vertices.push( new THREE.Vector3( - sizeX, i,0 ) )
+        geometry.vertices.push( new THREE.Vector3(   sizeX, i,0 ) )
 
     }
+    for ( let i = -sizeX; i <= sizeX; i += step ) {
 
-    geometry.translate(x / 2, y / 2, 0);
-    var line = new THREE.LineSegments( geometry, material);
+        geometry.vertices.push( new THREE.Vector3( i, -sizeY,0 ) )
+        geometry.vertices.push( new THREE.Vector3( i,   sizeY , 0) )
+
+    }
+
+    geometry.translate(x / 2, y / 2, 0)
+    const line = new THREE.LineSegments( geometry, material)
     return line
   }
 
   private renderBackground(x, y, z) {
 
-    const texture = new THREE.TextureLoader().load('/settings/textures/bghoneym.png');
+    const texture = new THREE.TextureLoader().load('/settings/textures/bghoneym.png')
 
 
     // assuming you want the texture to repeat in both directions:
@@ -135,16 +135,16 @@ export class GCodeScreenComponent {
     //   which is probably why your example wasn't working
     //texture.repeat.set( 4, 4 ); 
 
-    let material = new THREE.MeshBasicMaterial({
+    const material = new THREE.MeshBasicMaterial({
       map: texture,
       side: THREE.DoubleSide,
       transparent: true,
       opacity: 0.3
-    });
-    let geometry = new THREE.PlaneGeometry(x, y);
-    geometry.translate(x / 2, y / 2, 0);
-    let mesh = new THREE.Mesh(geometry, material);
-    return mesh;
+    })
+    const geometry = new THREE.PlaneGeometry(x, y)
+    geometry.translate(x / 2, y / 2, 0)
+    const mesh = new THREE.Mesh(geometry, material)
+    return mesh
 
   }
 

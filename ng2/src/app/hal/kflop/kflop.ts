@@ -3,24 +3,24 @@ import { KmxStatus } from './kmx-status'
 
 export class KFlop {
 
-  private static _instance: KFlop = new KFlop();
+  private static _instance: KFlop = new KFlop()
 
-  private _score: number = 0;
+  private _score: number = 0
 
   public static getInstance(): KFlop {
-    return KFlop._instance;
+    return KFlop._instance
   }
 
   jp7 = new Connector('JP7 - GPIO', [])
   jp4 = new Connector('JP4 - Aux #0', [])
   jp6 = new Connector('JP6 - Aux #1', [])
-  jp5 = new Connector('JP5 - GPIO #1', []);
+  jp5 = new Connector('JP5 - GPIO #1', [])
 
   constructor() {
     if (KFlop._instance) {
-      throw new Error('Error: Instantiation failed: Use KFlop.getInstance() instead of new.');
+      throw new Error('Error: Instantiation failed: Use KFlop.getInstance() instead of new.')
     }
-    KFlop._instance = this;
+    KFlop._instance = this
     this.jp7.pins.push(new IOPin('VDD33', '+3.3 Volts Output'))
     this.jp7.pins.push(new IOPin('VDD33', '+3.3 Volts Output'))
     this.jp7.pins.push(new IOPin('VDD12', '+12 Volts Output'))
@@ -108,7 +108,7 @@ export class KFlop {
 
   update(connector: Connector, kmxStatus: KmxStatus) {
     if (connector != null) {
-      for (let pin of connector.pins) {
+      for (const pin of connector.pins) {
         if (pin.number !== undefined) {
           pin.state = kmxStatus.bitsState[pin.number]
           pin.output = kmxStatus.bitsDirection[pin.number]

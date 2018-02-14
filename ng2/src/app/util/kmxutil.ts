@@ -3,62 +3,63 @@ export class KMXUtil {
 
 
   static ab2str(buf: ArrayBuffer) {
-    var arr = new Uint8Array(buf)
-    var str = '';
-    for (var i = 0, l = arr.length; i < l; i++)
-      str += String.fromCharCode(arr[i]);
-    return str;
+    const arr = new Uint8Array(buf)
+    let str = ''
+    for (let i = 0, l = arr.length; i < l; i++) {
+      str += String.fromCharCode(arr[i])
+    }
+    return str
     //Call stack too deep on certain browsers 
     //return String.fromCharCode.apply(null, new Uint8Array(buf)); //Uint16Array
     //Solution to this can be found in PDF.js
   }
 
   static str2ab(str: string) {
-    var buf = new ArrayBuffer(str.length * 2); // 2 bytes for each char
-    var bufView = new Uint16Array(buf);
-    for (var i = 0, strLen = str.length; i < strLen; i++) {
-      bufView[i] = str.charCodeAt(i);
+    const buf = new ArrayBuffer(str.length * 2) // 2 bytes for each char
+    const bufView = new Uint16Array(buf)
+    for (let i = 0, strLen = str.length; i < strLen; i++) {
+      bufView[i] = str.charCodeAt(i)
     }
-    return buf;
+    return buf
   }
 
   static injectScript(source, loadedCondition) {
     return new Promise(function (resolve, reject) {
       if (loadedCondition === true) {
         //TODO check if script tag is present instead of external loaded condition 
-        resolve('Script already loaded:' + source);
+        resolve('Script already loaded:' + source)
       } else {
-        var script = document.createElement('script');
-        script.type = 'text/javascript';
-        script.async = true;
+        const script = document.createElement('script')
+        script.type = 'text/javascript'
+        script.async = true
         script.onload = function () {
           // remote script has loaded
-          resolve('Script loaded:' + source);
-        };
-        script.onerror = function () { reject(Error('Load script failed: ' + source)); }
-        script.src = source;
-        document.getElementsByTagName('head')[0].appendChild(script);
+          resolve('Script loaded:' + source)
+        }
+        script.onerror = function () { reject(Error('Load script failed: ' + source)) }
+        script.src = source
+        document.getElementsByTagName('head')[0].appendChild(script)
       }
 
 
-    });
+    })
   }
 
   static getSingletonWorker(workerScript, messageHandler) {
     return new Promise<Worker>(function (resolve, reject) {
-      var worker = KMXUtil.workers[workerScript];
+      let worker = KMXUtil.workers[workerScript]
       if (worker === undefined) {
         try {
-          worker = new Worker(workerScript);;
+          worker = new Worker(workerScript)
         } catch (error) {
-          reject(Error(error));
+          reject(Error(error))
         }
-        KMXUtil.workers[workerScript] = worker;
+        KMXUtil.workers[workerScript] = worker
       }
       //This needs to be set every time. Need to figure out why 
-      worker.onmessage = messageHandler;
-      resolve(worker);
-    }.bind(this));
+      worker.onmessage = messageHandler
+      resolve(worker)
+    }.bind(this))
 
   }
 
@@ -68,22 +69,22 @@ export class KMXUtil {
   // N milliseconds. If `immediate` is passed, trigger the function on the
   // leading edge, instead of the trailing.
   static debounce(func, wait, immediate) {
-    var timeout;
+    let timeout
     return function () {
-      var context = this, args = arguments;
-      var later = function () {
-        timeout = null;
+      const context = this, args = arguments
+      const later = function () {
+        timeout = null
         if (!immediate){
-          func.apply(context, args);
+          func.apply(context, args)
         }
-      };
-      var callNow = immediate && !timeout;
-      clearTimeout(timeout);
-      timeout = setTimeout(later, wait);
+      }
+      const callNow = immediate && !timeout
+      clearTimeout(timeout)
+      timeout = setTimeout(later, wait)
       if (callNow) {
         func.apply(context, args)
       }
-    };
+    }
   }
   static svgToString(svg: SVGElement): string {
     // need to add namespace declarations for this to be a valid xml document

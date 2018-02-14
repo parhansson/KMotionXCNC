@@ -3,7 +3,7 @@
  * Parses a string of gcode instructions, and invokes codeHandlers for each type of
  * command or values.
  */
-import { Subject } from 'rxjs/Rx';
+import { Subject } from 'rxjs/Rx'
 import {
   Word,
   BlockPart,
@@ -32,9 +32,9 @@ class ParseValue {
       case (ParseValue.Comment):
         return new Comment(this.val)
       case (ParseValue.ParamWord):
-        return new ParamWord(this.letter, parseFloat(this.val));
+        return new ParamWord(this.letter, parseFloat(this.val))
       case (ParseValue.ControlWord):
-        return new ControlWord(this.letter, parseFloat(this.val));
+        return new ControlWord(this.letter, parseFloat(this.val))
     }
   }
   next(block: Block, nextType: number, nextLetter?: string) {
@@ -59,7 +59,7 @@ export class GCodeParser {
   // Search for codes without space between them
   public static skipCodes = {
     N: 'Line number'
-  };
+  }
   public static controlWords = {
     G: 'G codes, Interpolate, rapid traverse etc',
     M: 'M code',
@@ -67,7 +67,7 @@ export class GCodeParser {
     S: 'Spindle Speed',
     D: 'Tool',
     O: 'Subroutine Label'
-  };
+  }
   public static paramWords = {
     X: 'X axis',
     Y: 'Y axis',
@@ -84,15 +84,15 @@ export class GCodeParser {
     P: 'G10 parameter'
   }
 
-  private static valueChars = '+-0123456789.';
+  private static valueChars = '+-0123456789.'
   private static blockCommentDepth = {
     '(': 1,
     ';': Infinity
-  };
+  }
 
-  private static blockCommentEnd = ')';
+  private static blockCommentEnd = ')'
 
-  public subject: Subject<Block>;
+  public subject: Subject<Block>
 
 
   constructor() {
@@ -100,13 +100,13 @@ export class GCodeParser {
   }
 
   parseLine(rawText: string) {
-    let block = new Block(rawText);
-    let text = rawText.toUpperCase();
-    let len = text.length
-    let part = new ParseValue()
-    let commentDepth = 0;
-    for (var x = 0; x < len; x++) {
-      let c = text.charAt(x)
+    const block = new Block(rawText)
+    const text = rawText.toUpperCase()
+    const len = text.length
+    const part = new ParseValue()
+    let commentDepth = 0
+    for (let x = 0; x < len; x++) {
+      const c = text.charAt(x)
       /* tslint:disable:no-conditional-assignment */
       if (commentDepth == 0 && (commentDepth += (GCodeParser.blockCommentDepth[c] || 0)) > 0) {
         part.next(block, ParseValue.Comment)
@@ -136,16 +136,16 @@ export class GCodeParser {
   }
 
   parseLines(gcodeLines: string[]) {
-    console.time('parsing');
-    let i = 0;
-    for (let line of gcodeLines) {
-      let block = this.parseLine(line)
+    console.time('parsing')
+    let i = 0
+    for (const line of gcodeLines) {
+      const block = this.parseLine(line)
       block.line = i++
-      this.subject.next(block);
+      this.subject.next(block)
 
     }
-    this.subject.complete();
-    console.timeEnd('parsing');
+    this.subject.complete()
+    console.timeEnd('parsing')
 
   }
 

@@ -1,8 +1,8 @@
 
-import { Observer } from 'rxjs/Rx';
-import { IGM, IgmObject } from '../igm';
-import { GCodeVector } from '../vector';
-import { ModelTransformer } from './model.transformer';
+import { Observer } from 'rxjs/Rx'
+import { IGM, IgmObject } from '../igm'
+import { GCodeVector } from '../vector'
+import { ModelTransformer } from './model.transformer'
 import { SVGModelSettings } from '../model.settings.service'
 import * as opentype from 'opentype.js'
 /*
@@ -13,13 +13,13 @@ if (typeof(String.prototype.strip) === "undefined") {
 }
 */
 function createAnchor(name, url) {
-  var anchor = document.createElement('a');
-  anchor.setAttribute('title', name);
-  anchor.setAttribute('href', url);
-  var newContent = document.createTextNode(name);
-  anchor.appendChild(newContent);
-  document.body.appendChild(anchor);
-  return anchor;
+  const anchor = document.createElement('a')
+  anchor.setAttribute('title', name)
+  anchor.setAttribute('href', url)
+  const newContent = document.createTextNode(name)
+  anchor.appendChild(newContent)
+  document.body.appendChild(anchor)
+  return anchor
 }
 
 type Point = [number, number]
@@ -48,31 +48,31 @@ class SvgNode {
   children: SvgNode[]
 
   constructor() {
-    this.path = [];
+    this.path = []
     this.children = []
   }
   clone() {
-    let node = new SvgNode();
-    node.path = [];
-    node.xform = [1, 0, 0, 1, 0, 0];
-    node.opacity = this.opacity;
-    node.display = this.display;
-    node.visibility = this.visibility;
-    node.fill = this.fill;
-    node.stroke = this.stroke;
-    node.color = this.color;
-    node.fillOpacity = this.fillOpacity;
-    node.strokeOpacity = this.strokeOpacity;
+    const node = new SvgNode()
+    node.path = []
+    node.xform = [1, 0, 0, 1, 0, 0]
+    node.opacity = this.opacity
+    node.display = this.display
+    node.visibility = this.visibility
+    node.fill = this.fill
+    node.stroke = this.stroke
+    node.color = this.color
+    node.fillOpacity = this.fillOpacity
+    node.strokeOpacity = this.strokeOpacity
     node.fontSize = this.fontSize
-    node.defs = this.defs;
-    node.unsupported = this.unsupported;
+    node.defs = this.defs
+    node.unsupported = this.unsupported
     node.text = null //cannot inherit text
-    return node;
+    return node
 
   }
   inherit() {
-    let node = this.clone()
-    this.children.push(node);
+    const node = this.clone()
+    this.children.push(node)
     return node
   }
 }
@@ -87,88 +87,88 @@ export class Svg2IgmTransformer extends ModelTransformer<SVGElement, IGM>{
     //opentype.load(node.fontBlob, function(err, font) {  
     opentype.load('/settings/RawengulkPcs.otf', (err, font) => {
       if (err) {
-        alert('Could not load font: ' + err);
+        alert('Could not load font: ' + err)
       } else {
         this.font = font
       }
-    });
+    })
 
   }
 
   execute(svgRootElement: SVGElement, targetObserver: Observer<IGM>) {
 
-    let igm = new IGM();
+    const igm = new IGM()
 
 
     // let the fun begin
-    let cssFilterAllowed = ['svg', 'g', 'defs', 'style', 'use'];
-    let cssFilter = (element: SVGElement) => {
+    const cssFilterAllowed = ['svg', 'g', 'defs', 'style', 'use']
+    const cssFilter = (element: SVGElement) => {
       return cssFilterAllowed.indexOf(element.localName) > -1
     }
-    let igmText = new IGM()
+    const igmText = new IGM()
 
     //this.font = null //disable text rendering
     //new SvgParser(cssFilter, this.font).accept(svgRootElement, node/*, igmText*/)
     //console.log(igmText)
 
-    let contentFilterDissalowed = [
+    const contentFilterDissalowed = [
       'style', 
       //'defs'
-    ];
-    let contentFilter = (element: SVGElement) => {
-      return contentFilterDissalowed.indexOf(element.localName) < 0;
-    };
-    let parser = new SvgParser(contentFilter, this.font)
-    let node2 = parser.parse(svgRootElement)    
-    this.makeModel(node2, igm);
+    ]
+    const contentFilter = (element: SVGElement) => {
+      return contentFilterDissalowed.indexOf(element.localName) < 0
+    }
+    const parser = new SvgParser(contentFilter, this.font)
+    const node2 = parser.parse(svgRootElement)    
+    this.makeModel(node2, igm)
     targetObserver.next(igm)
   }
 
   private makeModel(node: SvgNode, igm: IGM) {
-    if(node.defs) return
-    if(node.unsupported) return
+    if(node.defs) { return }
+    if(node.unsupported) { return }
     //if stroke is undefined we do not generate shape
     //TODO this should be handled in igm.addToLayerObject as invisible layer
     if(node.stroke || node.text){
       console.log('stroke', node.stroke)
-      this.makeShape(node, igm);
+      this.makeShape(node, igm)
     }
-    for (let child of node.children) {
-      this.makeModel(child, igm);
+    for (const child of node.children) {
+      this.makeModel(child, igm)
     }
   }
   private makeShape(node: SvgNode, igm: IGM) {
-    let unitsPerInch = {
+    const unitsPerInch = {
       mm: 25.4,
       in: 1
     }
-    const settings = this.settings;
+    const settings = this.settings
     let dpiScale
     if (settings.dpi) {
       if (unitsPerInch[settings.unit]) {
-        dpiScale = unitsPerInch[settings.unit] / settings.dpi;
+        dpiScale = unitsPerInch[settings.unit] / settings.dpi
       } else {
         dpiScale = 1
         console.log('Invalid unit ' + settings.unit)
       }
     }
 
-    for (let subpath of node.path) {
-      let shape = new IgmObject();
+    for (const subpath of node.path) {
+      const shape = new IgmObject()
       shape.type = 'Linear interpolation'
       shape.cmd = 'G1'
-      shape.node = node; //Not currently in use
-      for (let point of subpath) {
-        shape.vectors.push(new GCodeVector(point[0], point[1], 0));
+      shape.node = node //Not currently in use
+      for (const point of subpath) {
+        shape.vectors.push(new GCodeVector(point[0], point[1], 0))
         //TODO clip on clipPath here. this will be extremely difficult
       }
-      shape.scale(dpiScale);
+      shape.scale(dpiScale)
 
       if (node.unsupported === true) {
-        igm.unsupported.push(subpath);
+        igm.unsupported.push(subpath)
       } else {
         //this.boundarys.allcolors.push(subpath);
-        igm.addToLayerObject(node.stroke, shape);
+        igm.addToLayerObject(node.stroke, shape)
       }
     }
   }
@@ -228,7 +228,7 @@ abstract class SVGElementWalker<T> {
   accept(parentElement: SVGElement,parentData:T) {
     //domNode.childNodes will not return text node
     for (let i = 0; i < parentElement.children.length; i++) {
-     let element = parentElement.children.item(i) as SVGElement
+     const element = parentElement.children.item(i) as SVGElement
 
     //  for (let i = 0; i < parentElement.childNodes.length; i++) {
     //    let element = parentElement.childNodes.item(i) as SVGElement
@@ -236,7 +236,7 @@ abstract class SVGElementWalker<T> {
         continue
       }
       //if (element.childNodes) {
-        let resultData = this.onElement(element,parentData)
+        const resultData = this.onElement(element,parentData)
         // recursive call
         this.accept(element,resultData)
       //}
@@ -244,12 +244,12 @@ abstract class SVGElementWalker<T> {
   }
   protected abstract onElement(element: SVGElement, parentData:T):T
 }
-interface SvgNodeMap { [id: string]: SvgNode; }
+interface SvgNodeMap { [id: string]: SvgNode }
 
 class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
   private DEG_TO_RAD = Math.PI / 180
   private RAD_TO_DEG = 180 / Math.PI
-  private globalNodes: SvgNodeMap = { };
+  private globalNodes: SvgNodeMap = { }
   // output path flattened (world coords)
   // hash of path by color
   // each path is a list of subpaths
@@ -262,10 +262,10 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
 
   constructor(elementFilter: ElementFilter, public font: opentype.Font) {
     super(elementFilter)
-    this.tolerance_squared = Math.pow(this.tolerance, 2);
+    this.tolerance_squared = Math.pow(this.tolerance, 2)
   }
   parse(rootElement: SVGElement){
-    let result = new SvgNode();
+    const result = new SvgNode()
     //result.stroke = [255, 0, 0];
     result.xformToWorld = [1, 0, 0, 1, 0, 0]
     this.accept(rootElement,result)
@@ -291,7 +291,7 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
       }
           // 1.) setup a new node
           // and inherit from parent
-          let currentNode = parentNode.inherit()
+          const currentNode = parentNode.inherit()
 
           // var ns = 'http://www.w3.org/1999/xlink';
           // let href = element.getAttributeNS(ns, 'href')
@@ -338,7 +338,7 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
           // TODO this does not work due to asynchronous operation
 
           if (currentNode.fontBlob) {
-            console.log('fontblob', currentNode.fontBlob);
+            console.log('fontblob', currentNode.fontBlob)
             //   var tempParser = this;
             ///settings/RawengulkPcs.otf
             //   opentype.load(node.fontBlob, function(err, font) {
@@ -362,10 +362,10 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
           }
           // 5.) compile boundarys
           // before adding all path data convert to world coordinates
-          for (let subpath of currentNode.path) {
-            for (let point of subpath) {
+          for (const subpath of currentNode.path) {
+            for (const point of subpath) {
               //TODO clip on clipPath here. this will be extremely difficult
-              let transformed = this.matrixApply(currentNode.xformToWorld, point);
+              const transformed = this.matrixApply(currentNode.xformToWorld, point)
               point[0] = transformed[0] //new Vec2(tmp[0], tmp[1]);
               point[1] = transformed[1]
             }
@@ -375,7 +375,7 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
             //createAnchor('bulle',node.href);
             //console.log(node.href.length, node.href);
           }
-          return currentNode;
+          return currentNode
         //}
         //return parentNode;
    }
@@ -390,7 +390,7 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
 
     'id': (parser: ISVGParser, node: SvgNode, val: string, element?:SVGElement) => {
       node.id = val
-      this.globalNodes['#'+val] = node;
+      this.globalNodes['#'+val] = node
     },
 
     'transform': (parser: ISVGParser, node: SvgNode, val: string) => {
@@ -398,14 +398,14 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
       const xforms: number[][] = []
       const segs = val.match(/[a-z]+\s*\([^)]*\)/ig)
       for (const seg of segs) {
-        const kv = seg.split('(');
-        const xformKind = parser.strip(kv[0]);
-        const paramsTemp = parser.strip(kv[1]).slice(0, -1);
+        const kv = seg.split('(')
+        const xformKind = parser.strip(kv[0])
+        const paramsTemp = parser.strip(kv[1]).slice(0, -1)
         const params = paramsTemp.split(/[\s,]+/).map(parseFloat)
         // double check params
         for(const param of params) {
           if (isNaN(param)) {
-            console.warn('warning', 'transform skipped; contains non-numbers');
+            console.warn('warning', 'transform skipped; contains non-numbers')
             continue  // skip this transform
           }
         }
@@ -417,20 +417,20 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
           } else if (params.length == 2) {
             xforms.push([1, 0, 0, 1, params[0], params[1]])
           } else {
-            console.warn('warning', 'translate skipped; invalid num of params');
+            console.warn('warning', 'translate skipped; invalid num of params')
           }
           // rotate
         } else if (xformKind == 'rotate') {
           if (params.length == 3) {
-            var angle = params[0] * this.DEG_TO_RAD
+            const angle = params[0] * this.DEG_TO_RAD
             xforms.push([1, 0, 0, 1, params[1], params[2]])
             xforms.push([Math.cos(angle), Math.sin(angle), -Math.sin(angle), Math.cos(angle), 0, 0])
             xforms.push([1, 0, 0, 1, -params[1], -params[2]])
           } else if (params.length == 1) {
-            var angle = params[0] * this.DEG_TO_RAD
+            const angle = params[0] * this.DEG_TO_RAD
             xforms.push([Math.cos(angle), Math.sin(angle), -Math.sin(angle), Math.cos(angle), 0, 0])
           } else {
-            console.warn('warning', 'rotate skipped; invalid num of params');
+            console.warn('warning', 'rotate skipped; invalid num of params')
           }
           //scale
         } else if (xformKind == 'scale') {
@@ -439,7 +439,7 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
           } else if (params.length == 2) {
             xforms.push([params[0], 0, 0, params[1], 0, 0])
           } else {
-            console.warn('warning', 'scale skipped; invalid num of params');
+            console.warn('warning', 'scale skipped; invalid num of params')
           }
           // matrix
         } else if (xformKind == 'matrix') {
@@ -449,25 +449,25 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
           // skewX
         } else if (xformKind == 'skewX') {
           if (params.length == 1) {
-            let angle = params[0] * this.DEG_TO_RAD
+            const angle = params[0] * this.DEG_TO_RAD
             xforms.push([1, 0, Math.tan(angle), 1, 0, 0])
           } else {
-            console.warn('warning', 'skewX skipped; invalid num of params');
+            console.warn('warning', 'skewX skipped; invalid num of params')
           }
           // skewY
         } else if (xformKind == 'skewY') {
           if (params.length == 1) {
-            let angle = params[0] * this.DEG_TO_RAD
+            const angle = params[0] * this.DEG_TO_RAD
             xforms.push([1, Math.tan(angle), 0, 1, 0, 0])
           } else {
-            console.warn('warning', 'skewY skipped; invalid num of params');
+            console.warn('warning', 'skewY skipped; invalid num of params')
           }
         }
       }
 
       //calculate combined transformation matrix
       let xform_combined = [1, 0, 0, 1, 0, 0]
-      for (let xform of xforms) {
+      for (const xform of xforms) {
         xform_combined = parser.matrixMult(xform_combined, xform)
       }
 
@@ -482,12 +482,12 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
       //          style="fill: red; stroke: blue; stroke-width: 3"/>
 
       // relay to parse style attributes the same as Presentation Attributes
-      var segs = val.split(';')
-      for (let seg of segs) {
-        var kv = seg.split(':')
-        var k = parser.strip(kv[0])
+      const segs = val.split(';')
+      for (const seg of segs) {
+        const kv = seg.split(':')
+        const k = parser.strip(kv[0])
         if (this[k]) {
-          var v = parser.strip(kv[1])
+          const v = parser.strip(kv[1])
           this[k](parser, node, v)
         }
       }
@@ -520,7 +520,7 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
     },
 
     'color': (parser: ISVGParser, node: SvgNode, val: string) => {
-      if (val == 'inherit') return
+      if (val == 'inherit') { return }
       node.color = this.SVGAttributeMapping.__parseColor(parser, val, node.color)
     },
 
@@ -541,41 +541,48 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
     '__parseColor': (parser: ISVGParser, val, currentColor) => {
 
       if (val.charAt(0) == '#') {
-        if (val.length == 4)
+        if (val.length == 4) {
           val = val.replace(/([^#])/g, '$1$1')
-        var a = val.slice(1).match(/../g).map(
+        }
+        const a = val.slice(1).match(/../g).map(
           function (i) { return parseInt(i, 16) })
         return a
 
       } else if (val.search(/^rgb\(/) != -1) {
-        var a = val.slice(4, -1).split(',')
-        for (var i = 0; i < a.length; i++) {
-          var c = parser.strip(a[i])
-          if (c.charAt(c.length - 1) == '%')
+        const a = val.slice(4, -1).split(',')
+        for (let i = 0; i < a.length; i++) {
+          const c = parser.strip(a[i])
+          if (c.charAt(c.length - 1) == '%') {
             a[i] = Math.round(parseFloat(c.slice(0, -1)) * 2.55)
-          else
+          }
+          else {
             a[i] = parseInt(c,10)
+          }
         }
         return a
 
       } else if (val.search(/^rgba\(/) != -1) {
-        var a = val.slice(5, -1).split(',')
-        for (var i = 0; i < 3; i++) {
-          var c = parser.strip(a[i])
-          if (c.charAt(c.length - 1) == '%')
+        const a = val.slice(5, -1).split(',')
+        for (let i = 0; i < 3; i++) {
+          const c = parser.strip(a[i])
+          if (c.charAt(c.length - 1) == '%') {
             a[i] = Math.round(parseFloat(c.slice(0, -1)) * 2.55)
-          else
+          }
+          else {
             a[i] = parseInt(c,10)
+          }
         }
-        var c = parser.strip(a[3])
-        if (c.charAt(c.length - 1) == '%')
+        const c = parser.strip(a[3])
+        if (c.charAt(c.length - 1) == '%') {
           a[3] = Math.round(parseFloat(c.slice(0, -1)) * 0.01)
-        else
+        }
+        else {
           a[3] = Math.max(0, Math.min(1, parseFloat(c)))
+        }
         return a
 
       } else if (val.search(/^url\(/) != -1) {
-        console.error('error', 'defs are not supported at the moment');
+        console.error('error', 'defs are not supported at the moment')
       } else if (val == 'currentColor') {
         return currentColor
       } else if (val == 'none') {
@@ -629,7 +636,7 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
     polygon: (parser: ISVGParser, tag: SVGElement, node: SvgNode) => {
       // http://www.w3.org/TR/SVG11/shapes.html#PolygonElement
       // has transform and style attributes
-      var d = this.SVGTagMapping.__getPolyPath(parser, tag)
+      const d = this.SVGTagMapping.__getPolyPath(parser, tag)
       d.push('z')
       parser.addPath(d, node)
     },
@@ -638,16 +645,16 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
     polyline: (parser: ISVGParser, tag: SVGElement, node: SvgNode) => {
       // http://www.w3.org/TR/SVG11/shapes.html#PolylineElement
       // has transform and style attributes
-      var d = this.SVGTagMapping.__getPolyPath(parser, tag)
+      const d = this.SVGTagMapping.__getPolyPath(parser, tag)
       parser.addPath(d, node)
     },
 
     __getPolyPath: (parser: ISVGParser, tag: SVGElement) => {
       // has transform and style attributes
-      var subpath = []
-      var vertnums = parser.strip(tag.getAttribute('points').toString()).split(/[\s,]+/).map(parseFloat)
+      const subpath = []
+      const vertnums = parser.strip(tag.getAttribute('points').toString()).split(/[\s,]+/).map(parseFloat)
       if (vertnums.length % 2 == 0) {
-        let d: any[] = ['M']
+        const d: any[] = ['M']
         d.push(vertnums[0])
         d.push(vertnums[1])
         for (let i = 2; i < vertnums.length; i += 2) {
@@ -656,28 +663,28 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
         }
         return d
       } else {
-        console.error('error', 'in __getPolyPath: odd number of verteces');
+        console.error('error', 'in __getPolyPath: odd number of verteces')
       }
     },
 
     rect: (parser: ISVGParser, tag: SVGElement, node: SvgNode) => {
       // http://www.w3.org/TR/SVG11/shapes.html#RectElement
       // has transform and style attributes
-      var w = parser.parseUnit(tag.getAttribute('width')) || 0
-      var h = parser.parseUnit(tag.getAttribute('height')) || 0
-      var x = parser.parseUnit(tag.getAttribute('x')) || 0
-      var y = parser.parseUnit(tag.getAttribute('y')) || 0
-      var rx = parser.parseUnit(tag.getAttribute('rx'))
-      var ry = parser.parseUnit(tag.getAttribute('ry'))
+      const w = parser.parseUnit(tag.getAttribute('width')) || 0
+      const h = parser.parseUnit(tag.getAttribute('height')) || 0
+      const x = parser.parseUnit(tag.getAttribute('x')) || 0
+      const y = parser.parseUnit(tag.getAttribute('y')) || 0
+      let rx = parser.parseUnit(tag.getAttribute('rx'))
+      let ry = parser.parseUnit(tag.getAttribute('ry'))
 
       if (rx == null || ry == null) {  // no rounded corners
-        var d = ['M', x, y, 'h', w, 'v', h, 'h', -w, 'z'];
+        const d = ['M', x, y, 'h', w, 'v', h, 'h', -w, 'z']
         parser.addPath(d, node)
       } else {                       // rounded corners
-        if ('ry' == null) { ry = rx; }
-        if (rx < 0.0) { rx *= -1; }
-        if (ry < 0.0) { ry *= -1; }
-        d = ['M', x + rx, y,
+        if ('ry' == null) { ry = rx }
+        if (rx < 0.0) { rx *= -1 }
+        if (ry < 0.0) { ry *= -1 }
+        const d = ['M', x + rx, y,
           'h', w - 2 * rx,
           'c', rx, 0.0, rx, ry, rx, ry,
           'v', h - ry,
@@ -686,7 +693,7 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
           'c', -rx, '0.0', -rx, -ry, -rx, -ry,
           'v', -h + ry,
           'c', '0.0', '0.0', '0.0', -ry, rx, -ry,
-          'z'];
+          'z']
         parser.addPath(d, node)
       }
     },
@@ -695,11 +702,11 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
     line: (parser: ISVGParser, tag: SVGElement, node: SvgNode) => {
       // http://www.w3.org/TR/SVG11/shapes.html#LineElement
       // has transform and style attributes
-      var x1 = parser.parseUnit(tag.getAttribute('x1')) || 0
-      var y1 = parser.parseUnit(tag.getAttribute('y1')) || 0
-      var x2 = parser.parseUnit(tag.getAttribute('x2')) || 0
-      var y2 = parser.parseUnit(tag.getAttribute('y2')) || 0
-      var d = ['M', x1, y1, 'L', x2, y2]
+      const x1 = parser.parseUnit(tag.getAttribute('x1')) || 0
+      const y1 = parser.parseUnit(tag.getAttribute('y1')) || 0
+      const x2 = parser.parseUnit(tag.getAttribute('x2')) || 0
+      const y2 = parser.parseUnit(tag.getAttribute('y2')) || 0
+      const d = ['M', x1, y1, 'L', x2, y2]
       parser.addPath(d, node)
     },
 
@@ -707,37 +714,37 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
     circle: (parser: ISVGParser, tag: SVGElement, node: SvgNode) => {
       // http://www.w3.org/TR/SVG11/shapes.html#CircleElement
       // has transform and style attributes
-      var r = parser.parseUnit(tag.getAttribute('r'))
-      var cx = parser.parseUnit(tag.getAttribute('cx')) || 0
-      var cy = parser.parseUnit(tag.getAttribute('cy')) || 0
+      const r = parser.parseUnit(tag.getAttribute('r'))
+      const cx = parser.parseUnit(tag.getAttribute('cx')) || 0
+      const cy = parser.parseUnit(tag.getAttribute('cy')) || 0
 
       if (r > 0.0) {
-        var d = ['M', cx - r, cy,
+        const d = ['M', cx - r, cy,
           'A', r, r, 0, 0, 0, cx, cy + r,
           'A', r, r, 0, 0, 0, cx + r, cy,
           'A', r, r, 0, 0, 0, cx, cy - r,
           'A', r, r, 0, 0, 0, cx - r, cy,
-          'Z'];
-        parser.addPath(d, node);
+          'Z']
+        parser.addPath(d, node)
       }
     },
 
 
     ellipse: (parser: ISVGParser, tag: SVGElement, node: SvgNode) => {
       // has transform and style attributes
-      var rx = parser.parseUnit(tag.getAttribute('rx'))
-      var ry = parser.parseUnit(tag.getAttribute('ry'))
-      var cx = parser.parseUnit(tag.getAttribute('cx')) || 0
-      var cy = parser.parseUnit(tag.getAttribute('cy')) || 0
+      const rx = parser.parseUnit(tag.getAttribute('rx'))
+      const ry = parser.parseUnit(tag.getAttribute('ry'))
+      const cx = parser.parseUnit(tag.getAttribute('cx')) || 0
+      const cy = parser.parseUnit(tag.getAttribute('cy')) || 0
 
       if (rx > 0.0 && ry > 0.0) {
-        var d = ['M', cx - rx, cy,
+        const d = ['M', cx - rx, cy,
           'A', rx, ry, 0, 0, 0, cx, cy + ry,
           'A', rx, ry, 0, 0, 0, cx + rx, cy,
           'A', rx, ry, 0, 0, 0, cx, cy - ry,
           'A', rx, ry, 0, 0, 0, cx - rx, cy,
-          'Z'];
-        parser.addPath(d, node);
+          'Z']
+        parser.addPath(d, node)
       }
     },
 
@@ -745,36 +752,36 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
     path: (parser: ISVGParser, tag: SVGElement, node: SvgNode) => {
       // http://www.w3.org/TR/SVG11/paths.html
       // has transform and style attributes
-      var d = tag.getAttribute('d')
+      const d = tag.getAttribute('d')
       parser.addPath(d, node)
     },
 
     image: (parser: ISVGParser, tag: SVGElement, node: SvgNode) => {
       // not supported
       // has transform and style attributes
-      let ns = 'http://www.w3.org/1999/xlink';
-      let href = tag.getAttributeNS(ns, 'href');
-      node.href = href;
+      const ns = 'http://www.w3.org/1999/xlink'
+      const href = tag.getAttributeNS(ns, 'href')
+      node.href = href
     },
 
     defs: (parser: ISVGParser, tag: SVGElement, node: SvgNode) => {
-      node.defs = true;
+      node.defs = true
       // not supported
       // http://www.w3.org/TR/SVG11/struct.html#Head
       // has transform and style attributes
     },
 
     clipPath: (parser: ISVGParser, tag: SVGElement, node: SvgNode) => {
-      node.unsupported = true;
+      node.unsupported = true
       // not supported
       // has transform and style attributes
     },
 
     use: (parser: ISVGParser, tag: SVGElement, node: SvgNode) => {
-      let ns = 'http://www.w3.org/1999/xlink';
-      let href = tag.getAttributeNS(ns, 'href');
-      node.href = href;
-      let v  = this.globalNodes[node.href]
+      const ns = 'http://www.w3.org/1999/xlink'
+      const href = tag.getAttributeNS(ns, 'href')
+      node.href = href
+      const v  = this.globalNodes[node.href]
 
       //node.unsupported = true;
       console.log(node,v)
@@ -785,19 +792,19 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
     style: (parser: ISVGParser, tag: SVGElement, node: SvgNode) => {
       //node.unsupported = true;
 
-      let doc = document.implementation.createHTMLDocument(''),
-        styleElement = document.createElement('style');
+      const doc = document.implementation.createHTMLDocument(''),
+        styleElement = document.createElement('style')
 
-      styleElement.textContent = tag.textContent;
+      styleElement.textContent = tag.textContent
       // the style will only be parsed once it is added to a document
-      doc.body.appendChild(styleElement);
+      doc.body.appendChild(styleElement)
 
       //@font-face
       //console.log('rules', styleElement.sheet.cssRules);
-      let style = tag.textContent;
-      let s = style.indexOf('url(') + 4;
-      let e = style.indexOf(')', s);
-      node.fontBlob = tag.textContent.substring(s, e);
+      const style = tag.textContent
+      const s = style.indexOf('url(') + 4
+      const e = style.indexOf(')', s)
+      node.fontBlob = tag.textContent.substring(s, e)
 
       //blob:
       // not supported: embedded style sheets
@@ -846,14 +853,14 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
                 //opentype.parse()
                 //opentype.parseBuffer()
                 //TODO tag.getAttribute('x') might return a string if each x value per glyph
-                let x = parser.parseUnit(tag.getAttribute('x')) || 0
-                let y = parser.parseUnit(tag.getAttribute('y')) || 0
-                let path = parser.font.getPath(tag.textContent, x, y, node.fontSize, { kerning: true })
+                const x = parser.parseUnit(tag.getAttribute('x')) || 0
+                const y = parser.parseUnit(tag.getAttribute('y')) || 0
+                const path = parser.font.getPath(tag.textContent, x, y, node.fontSize, { kerning: true })
                 //let path = parser.font.getPath(tag.textContent, 0, 0, 1, { kerning: true })
-                let dPath = path.toPathData(undefined)
+                const dPath = path.toPathData(undefined)
                 //console.log(tag.textContent, dPath)
                 if (dPath.length > 0) {
-                  parser.addPath(dPath, node);
+                  parser.addPath(dPath, node)
                 }
                 /*
                 for (var x = 0; x < tag.textContent.length; x++) {
@@ -885,11 +892,11 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
   addPath(dObject: string | PathDValue[], node: SvgNode) {
     // http://www.w3.org/TR/SVG11/paths.html#PathData
 
-    var tolerance2 = this.tolerance_squared
-    var totalMaxScale = this.matrixGetScale(node.xformToWorld);
+    let tolerance2 = this.tolerance_squared
+    const totalMaxScale = this.matrixGetScale(node.xformToWorld)
     if (totalMaxScale != 0) {
       // adjust for possible transforms
-      tolerance2 /= Math.pow(totalMaxScale, 2);
+      tolerance2 /= Math.pow(totalMaxScale, 2)
       // console.info('notice', "tolerance2: " + tolerance2.toString());
     }
     
@@ -897,9 +904,9 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
     //let d: DPath
     if (typeof dObject === 'string') {
       // parse path string
-      let mArr = dObject.match(/([A-Za-z]|-?[0-9]+\.?[0-9]*(?:e-?[0-9]*)?)/g);
-      for (let val of mArr) {
-        let num = parseFloat(val);
+      const mArr = dObject.match(/([A-Za-z]|-?[0-9]+\.?[0-9]*(?:e-?[0-9]*)?)/g)
+      for (const val of mArr) {
+        const num = parseFloat(val)
         if (isNaN(num)) {
           d.push(val)
         } else {
@@ -912,302 +919,302 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
     //console.info('notice', "d: " + d.toString());
 
     function nextIsNum() {
-      return (d.length > 0) && (typeof (d[0]) === 'number');
+      return (d.length > 0) && (typeof (d[0]) === 'number')
     }
 
     function getNext(): any {
       if (d.length > 0) {
-        return d.shift();  // pop first item
+        return d.shift()  // pop first item
       } else {
-        console.error('error', 'in addPath: not enough parameters');
-        return null;
+        console.error('error', 'in addPath: not enough parameters')
+        return null
       }
     }
 
-    var x = 0;
-    var y = 0;
-    var cmdPrev = '';
-    var xPrevCp;
-    var yPrevCp;
-    var subpath: Subpath = [];
+    let x = 0
+    let y = 0
+    let cmdPrev = ''
+    let xPrevCp
+    let yPrevCp
+    let subpath: Subpath = []
 
     while (d.length > 0) {
-      var cmd = getNext();
+      const cmd = getNext()
       switch (cmd) {
         case 'M':  // moveto absolute
           // start new subpath
           if (subpath.length > 0) {
-            node.path.push(subpath);
-            subpath = [];
+            node.path.push(subpath)
+            subpath = []
           }
-          var implicitVerts = 0
+          let implicitVerts1 = 0
           while (nextIsNum()) {
-            x = getNext();
-            y = getNext();
-            subpath.push([x, y]);
-            implicitVerts += 1;
+            x = getNext()
+            y = getNext()
+            subpath.push([x, y])
+            implicitVerts1 += 1
           }
           break
         case 'm':  //moveto relative
           // start new subpath
           if (subpath.length > 0) {
-            node.path.push(subpath);
-            subpath = [];
+            node.path.push(subpath)
+            subpath = []
           }
           if (cmdPrev == '') {
             // first treated absolute
-            x = getNext();
-            y = getNext();
-            subpath.push([x, y]);
+            x = getNext()
+            y = getNext()
+            subpath.push([x, y])
           }
-          var implicitVerts = 0
+          let implicitVerts2 = 0
           while (nextIsNum()) {
             // subsequent treated realtive
-            x += getNext();
-            y += getNext();
-            subpath.push([x, y]);
-            implicitVerts += 1;
+            x += getNext()
+            y += getNext()
+            subpath.push([x, y])
+            implicitVerts2 += 1
           }
-          break;
+          break
         case 'Z':  // closepath
         case 'z':  // closepath
           // loop and finalize subpath
           if (subpath.length > 0) {
             //we can not reference first subpath subpath.push(subpath[0]) without cloning values
             //due to transformations, which will be applied multiple times
-            subpath.push([subpath[0][0], subpath[0][1]]);
-            node.path.push(subpath);
-            x = subpath[subpath.length - 1][0];
-            y = subpath[subpath.length - 1][1];
-            subpath = [];
+            subpath.push([subpath[0][0], subpath[0][1]])
+            node.path.push(subpath)
+            x = subpath[subpath.length - 1][0]
+            y = subpath[subpath.length - 1][1]
+            subpath = []
           }
           //I think there is an error here
           break
         case 'L':  // lineto absolute
           while (nextIsNum()) {
-            x = getNext();
-            y = getNext();
-            subpath.push([x, y]);
+            x = getNext()
+            y = getNext()
+            subpath.push([x, y])
           }
           break
         case 'l':  // lineto relative
           while (nextIsNum()) {
-            x += getNext();
-            y += getNext();
-            subpath.push([x, y]);
+            x += getNext()
+            y += getNext()
+            subpath.push([x, y])
           }
           break
         case 'H':  // lineto horizontal absolute
           while (nextIsNum()) {
-            x = getNext();
-            subpath.push([x, y]);
+            x = getNext()
+            subpath.push([x, y])
           }
           break
         case 'h':  // lineto horizontal relative
           while (nextIsNum()) {
-            x += getNext();
-            subpath.push([x, y]);
+            x += getNext()
+            subpath.push([x, y])
           }
-          break;
+          break
         case 'V':  // lineto vertical absolute
           while (nextIsNum()) {
             y = getNext()
             subpath.push([x, y])
           }
-          break;
+          break
         case 'v':  // lineto vertical realtive
           while (nextIsNum()) {
-            y += getNext();
-            subpath.push([x, y]);
+            y += getNext()
+            subpath.push([x, y])
           }
-          break;
+          break
         case 'C':  // curveto cubic absolute
           while (nextIsNum()) {
-            var x2 = getNext();
-            var y2 = getNext();
-            var x3 = getNext();
-            var y3 = getNext();
-            var x4 = getNext();
-            var y4 = getNext();
-            subpath.push([x, y]);
-            this.addCubicBezier(subpath, x, y, x2, y2, x3, y3, x4, y4, 0, tolerance2);
-            subpath.push([x4, y4]);
-            x = x4;
-            y = y4;
-            xPrevCp = x3;
-            yPrevCp = y3;
+            const x2 = getNext()
+            const y2 = getNext()
+            const x3 = getNext()
+            const y3 = getNext()
+            const x4 = getNext()
+            const y4 = getNext()
+            subpath.push([x, y])
+            this.addCubicBezier(subpath, x, y, x2, y2, x3, y3, x4, y4, 0, tolerance2)
+            subpath.push([x4, y4])
+            x = x4
+            y = y4
+            xPrevCp = x3
+            yPrevCp = y3
           }
           break
         case 'c':  // curveto cubic relative
           while (nextIsNum()) {
-            var x2 = x + getNext();
-            var y2 = y + getNext();
-            var x3 = x + getNext();
-            var y3 = y + getNext();
-            var x4 = x + getNext();
-            var y4 = y + getNext();
-            subpath.push([x, y]);
-            this.addCubicBezier(subpath, x, y, x2, y2, x3, y3, x4, y4, 0, tolerance2);
-            subpath.push([x4, y4]);
-            x = x4;
-            y = y4;
-            xPrevCp = x3;
-            yPrevCp = y3;
+            const x2 = x + getNext()
+            const y2 = y + getNext()
+            const x3 = x + getNext()
+            const y3 = y + getNext()
+            const x4 = x + getNext()
+            const y4 = y + getNext()
+            subpath.push([x, y])
+            this.addCubicBezier(subpath, x, y, x2, y2, x3, y3, x4, y4, 0, tolerance2)
+            subpath.push([x4, y4])
+            x = x4
+            y = y4
+            xPrevCp = x3
+            yPrevCp = y3
           }
           break
         case 'S':  // curveto cubic absolute shorthand
           while (nextIsNum()) {
-            var x2;
-            var y2;
+            let x2
+            let y2
             if (cmdPrev.match(/[CcSs]/)) {
-              x2 = x - (xPrevCp - x);
-              y2 = y - (yPrevCp - y);
+              x2 = x - (xPrevCp - x)
+              y2 = y - (yPrevCp - y)
             } else {
-              x2 = x;
-              y2 = y;
+              x2 = x
+              y2 = y
             }
-            var x3 = getNext();
-            var y3 = getNext();
-            var x4 = getNext();
-            var y4 = getNext();
-            subpath.push([x, y]);
-            this.addCubicBezier(subpath, x, y, x2, y2, x3, y3, x4, y4, 0, tolerance2);
-            subpath.push([x4, y4]);
-            x = x4;
-            y = y4;
-            xPrevCp = x3;
-            yPrevCp = y3;
+            const x3 = getNext()
+            const y3 = getNext()
+            const x4 = getNext()
+            const y4 = getNext()
+            subpath.push([x, y])
+            this.addCubicBezier(subpath, x, y, x2, y2, x3, y3, x4, y4, 0, tolerance2)
+            subpath.push([x4, y4])
+            x = x4
+            y = y4
+            xPrevCp = x3
+            yPrevCp = y3
           }
           break
         case 's':  // curveto cubic relative shorthand
           while (nextIsNum()) {
-            var x2;
-            var y2;
+            let x2
+            let y2
             if (cmdPrev.match(/[CcSs]/)) {
-              x2 = x - (xPrevCp - x);
-              y2 = y - (yPrevCp - y);
+              x2 = x - (xPrevCp - x)
+              y2 = y - (yPrevCp - y)
             } else {
-              x2 = x;
-              y2 = y;
+              x2 = x
+              y2 = y
             }
-            var x3 = x + getNext();
-            var y3 = y + getNext();
-            var x4 = x + getNext();
-            var y4 = y + getNext();
-            subpath.push([x, y]);
-            this.addCubicBezier(subpath, x, y, x2, y2, x3, y3, x4, y4, 0, tolerance2);
-            subpath.push([x4, y4]);
-            x = x4;
-            y = y4;
-            xPrevCp = x3;
-            yPrevCp = y3;
+            const x3 = x + getNext()
+            const y3 = y + getNext()
+            const x4 = x + getNext()
+            const y4 = y + getNext()
+            subpath.push([x, y])
+            this.addCubicBezier(subpath, x, y, x2, y2, x3, y3, x4, y4, 0, tolerance2)
+            subpath.push([x4, y4])
+            x = x4
+            y = y4
+            xPrevCp = x3
+            yPrevCp = y3
           }
           break
         case 'Q':  // curveto quadratic absolute
           while (nextIsNum()) {
-            var x2 = getNext();
-            var y2 = getNext();
-            var x3 = getNext();
-            var y3 = getNext();
-            subpath.push([x, y]);
-            this.addQuadraticBezier(subpath, x, y, x2, y2, x3, y3, 0, tolerance2);
-            subpath.push([x3, y3]);
-            x = x3;
-            y = y3;
+            const x2 = getNext()
+            const y2 = getNext()
+            const x3 = getNext()
+            const y3 = getNext()
+            subpath.push([x, y])
+            this.addQuadraticBezier(subpath, x, y, x2, y2, x3, y3, 0, tolerance2)
+            subpath.push([x3, y3])
+            x = x3
+            y = y3
           }
           break
         case 'q':  // curveto quadratic relative
           while (nextIsNum()) {
-            var x2 = x + getNext();
-            var y2 = y + getNext();
-            var x3 = x + getNext();
-            var y3 = y + getNext();
-            subpath.push([x, y]);
-            this.addQuadraticBezier(subpath, x, y, x2, y2, x3, y3, 0, tolerance2);
-            subpath.push([x3, y3]);
-            x = x3;
-            y = y3;
+            const x2 = x + getNext()
+            const y2 = y + getNext()
+            const x3 = x + getNext()
+            const y3 = y + getNext()
+            subpath.push([x, y])
+            this.addQuadraticBezier(subpath, x, y, x2, y2, x3, y3, 0, tolerance2)
+            subpath.push([x3, y3])
+            x = x3
+            y = y3
           }
           break
         case 'T':  // curveto quadratic absolute shorthand
           while (nextIsNum()) {
-            var x2;
-            var y2;
+            let x2
+            let y2
             if (cmdPrev.match(/[QqTt]/)) {
-              x2 = x - (xPrevCp - x);
-              y2 = y - (yPrevCp - y);
+              x2 = x - (xPrevCp - x)
+              y2 = y - (yPrevCp - y)
             } else {
-              x2 = x;
-              y2 = y;
+              x2 = x
+              y2 = y
             }
-            var x3 = getNext();
-            var y3 = getNext();
-            subpath.push([x, y]);
-            this.addQuadraticBezier(subpath, x, y, x2, y2, x3, y3, 0, tolerance2);
-            subpath.push([x3, y3]);
-            x = x3;
-            y = y3;
-            xPrevCp = x2;
-            yPrevCp = y2;
+            const x3 = getNext()
+            const y3 = getNext()
+            subpath.push([x, y])
+            this.addQuadraticBezier(subpath, x, y, x2, y2, x3, y3, 0, tolerance2)
+            subpath.push([x3, y3])
+            x = x3
+            y = y3
+            xPrevCp = x2
+            yPrevCp = y2
           }
           break
         case 't':  // curveto quadratic relative shorthand
           while (nextIsNum()) {
-            var x2;
-            var y2;
+            let x2
+            let y2
             if (cmdPrev.match(/[QqTt]/)) {
-              x2 = x - (xPrevCp - x);
-              y2 = y - (yPrevCp - y);
+              x2 = x - (xPrevCp - x)
+              y2 = y - (yPrevCp - y)
             } else {
-              x2 = x;
-              y2 = y;
+              x2 = x
+              y2 = y
             }
-            var x3 = x + getNext();
-            var y3 = y + getNext();
-            subpath.push([x, y]);
-            this.addQuadraticBezier(subpath, x, y, x2, y2, x3, y3, 0, tolerance2);
-            subpath.push([x3, y3]);
-            x = x3;
-            y = y3;
-            xPrevCp = x2;
-            yPrevCp = y2;
+            const x3 = x + getNext()
+            const y3 = y + getNext()
+            subpath.push([x, y])
+            this.addQuadraticBezier(subpath, x, y, x2, y2, x3, y3, 0, tolerance2)
+            subpath.push([x3, y3])
+            x = x3
+            y = y3
+            xPrevCp = x2
+            yPrevCp = y2
           }
           break
         case 'A':  // eliptical arc absolute
           while (nextIsNum()) {
-            var rx = getNext();
-            var ry = getNext();
-            var xrot = getNext();
-            var large = getNext();
-            var sweep = getNext();
-            var x2 = getNext();
-            var y2 = getNext();
-            this.addArc(subpath, x, y, rx, ry, xrot, large, sweep, x2, y2, tolerance2);
+            const rx = getNext()
+            const ry = getNext()
+            const xrot = getNext()
+            const large = getNext()
+            const sweep = getNext()
+            const x2 = getNext()
+            const y2 = getNext()
+            this.addArc(subpath, x, y, rx, ry, xrot, large, sweep, x2, y2, tolerance2)
             x = x2
             y = y2
           }
           break
         case 'a':  // elliptical arc relative
           while (nextIsNum()) {
-            var rx = getNext();
-            var ry = getNext();
-            var xrot = getNext();
-            var large = getNext();
-            var sweep = getNext();
-            var x2 = x + getNext();
-            var y2 = y + getNext();
-            this.addArc(subpath, x, y, rx, ry, xrot, large, sweep, x2, y2, tolerance2);
+            const rx = getNext()
+            const ry = getNext()
+            const xrot = getNext()
+            const large = getNext()
+            const sweep = getNext()
+            const x2 = x + getNext()
+            const y2 = y + getNext()
+            this.addArc(subpath, x, y, rx, ry, xrot, large, sweep, x2, y2, tolerance2)
             x = x2
             y = y2
           }
           break
       }
-      cmdPrev = cmd;
+      cmdPrev = cmd
     }
     // finalize subpath
     if (subpath.length > 0) {
-      node.path.push(subpath);
-      subpath = [];
+      node.path.push(subpath)
+      subpath = []
     }
   }
 
@@ -1228,25 +1235,25 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
     }
 
     // Calculate all the mid-points of the line segments
-    var x12 = (x1 + x2) / 2.0
-    var y12 = (y1 + y2) / 2.0
-    var x23 = (x2 + x3) / 2.0
-    var y23 = (y2 + y3) / 2.0
-    var x34 = (x3 + x4) / 2.0
-    var y34 = (y3 + y4) / 2.0
-    var x123 = (x12 + x23) / 2.0
-    var y123 = (y12 + y23) / 2.0
-    var x234 = (x23 + x34) / 2.0
-    var y234 = (y23 + y34) / 2.0
-    var x1234 = (x123 + x234) / 2.0
-    var y1234 = (y123 + y234) / 2.0
+    const x12 = (x1 + x2) / 2.0
+    const y12 = (y1 + y2) / 2.0
+    const x23 = (x2 + x3) / 2.0
+    const y23 = (y2 + y3) / 2.0
+    const x34 = (x3 + x4) / 2.0
+    const y34 = (y3 + y4) / 2.0
+    const x123 = (x12 + x23) / 2.0
+    const y123 = (y12 + y23) / 2.0
+    const x234 = (x23 + x34) / 2.0
+    const y234 = (y23 + y34) / 2.0
+    const x1234 = (x123 + x234) / 2.0
+    const y1234 = (y123 + y234) / 2.0
 
     // Try to approximate the full cubic curve by a single straight line
-    var dx = x4 - x1
-    var dy = y4 - y1
+    const dx = x4 - x1
+    const dy = y4 - y1
 
-    var d2 = Math.abs(((x2 - x4) * dy - (y2 - y4) * dx))
-    var d3 = Math.abs(((x3 - x4) * dy - (y3 - y4) * dx))
+    const d2 = Math.abs(((x2 - x4) * dy - (y2 - y4) * dx))
+    const d3 = Math.abs(((x3 - x4) * dy - (y3 - y4) * dx))
 
     if (Math.pow(d2 + d3, 2) < 5.0 * tolerance2 * (dx * dx + dy * dy)) {
       // added factor of 5.0 to match circle resolution
@@ -1255,8 +1262,8 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
     }
 
     // Continue subdivision
-    this.addCubicBezier(subpath, x1, y1, x12, y12, x123, y123, x1234, y1234, level + 1, tolerance2);
-    this.addCubicBezier(subpath, x1234, y1234, x234, y234, x34, y34, x4, y4, level + 1, tolerance2);
+    this.addCubicBezier(subpath, x1, y1, x12, y12, x123, y123, x1234, y1234, level + 1, tolerance2)
+    this.addCubicBezier(subpath, x1234, y1234, x234, y234, x34, y34, x4, y4, level + 1, tolerance2)
   }
 
 
@@ -1268,16 +1275,16 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
     }
 
     // Calculate all the mid-points of the line segments
-    var x12 = (x1 + x2) / 2.0
-    var y12 = (y1 + y2) / 2.0
-    var x23 = (x2 + x3) / 2.0
-    var y23 = (y2 + y3) / 2.0
-    var x123 = (x12 + x23) / 2.0
-    var y123 = (y12 + y23) / 2.0
+    const x12 = (x1 + x2) / 2.0
+    const y12 = (y1 + y2) / 2.0
+    const x23 = (x2 + x3) / 2.0
+    const y23 = (y2 + y3) / 2.0
+    const x123 = (x12 + x23) / 2.0
+    const y123 = (y12 + y23) / 2.0
 
-    var dx = x3 - x1
-    var dy = y3 - y1
-    var d = Math.abs(((x2 - x3) * dy - (y2 - y3) * dx))
+    const dx = x3 - x1
+    const dy = y3 - y1
+    const d = Math.abs(((x2 - x3) * dy - (y2 - y3) * dx))
 
     if (d * d <= 5.0 * tolerance2 * (dx * dx + dy * dy)) {
       // added factor of 5.0 to match circle resolution
@@ -1296,41 +1303,41 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
     // plus some recursive sugar for incrementally refining the
     // arc resolution until the requested tolerance is met.
     // http://www.w3.org/TR/SVG/implnote.html#ArcImplementationNotes
-    var cp = Math.cos(phi);
-    var sp = Math.sin(phi);
-    var dx = 0.5 * (x1 - x2);
-    var dy = 0.5 * (y1 - y2);
-    var x_ = cp * dx + sp * dy;
-    var y_ = -sp * dx + cp * dy;
-    var r2 = (Math.pow(rx * ry, 2) - Math.pow(rx * y_, 2) - Math.pow(ry * x_, 2)) /
-      (Math.pow(rx * y_, 2) + Math.pow(ry * x_, 2));
-    if (r2 < 0) { r2 = 0; }
-    var r = Math.sqrt(r2);
-    if (large_arc == sweep) { r = -r; }
-    var cx_ = r * rx * y_ / ry;
-    var cy_ = -r * ry * x_ / rx;
-    var cx = cp * cx_ - sp * cy_ + 0.5 * (x1 + x2);
-    var cy = sp * cx_ + cp * cy_ + 0.5 * (y1 + y2);
+    const cp = Math.cos(phi)
+    const sp = Math.sin(phi)
+    const dx = 0.5 * (x1 - x2)
+    const dy = 0.5 * (y1 - y2)
+    const x_ = cp * dx + sp * dy
+    const y_ = -sp * dx + cp * dy
+    let r2 = (Math.pow(rx * ry, 2) - Math.pow(rx * y_, 2) - Math.pow(ry * x_, 2)) /
+      (Math.pow(rx * y_, 2) + Math.pow(ry * x_, 2))
+    if (r2 < 0) { r2 = 0 }
+    let r = Math.sqrt(r2)
+    if (large_arc == sweep) { r = -r }
+    const cx_ = r * rx * y_ / ry
+    const cy_ = -r * ry * x_ / rx
+    const cx = cp * cx_ - sp * cy_ + 0.5 * (x1 + x2)
+    const cy = sp * cx_ + cp * cy_ + 0.5 * (y1 + y2)
 
     function angle(u, v) {
-      var a = Math.acos((u[0] * v[0] + u[1] * v[1]) /
+      const a = Math.acos((u[0] * v[0] + u[1] * v[1]) /
         Math.sqrt((Math.pow(u[0], 2) + Math.pow(u[1], 2)) *
-          (Math.pow(v[0], 2) + Math.pow(v[1], 2))));
-      var sgn = -1;
-      if (u[0] * v[1] > u[1] * v[0]) { sgn = 1; }
-      return sgn * a;
+          (Math.pow(v[0], 2) + Math.pow(v[1], 2))))
+      let sgn = -1
+      if (u[0] * v[1] > u[1] * v[0]) { sgn = 1 }
+      return sgn * a
     }
 
-    var psi = angle([1, 0], [(x_ - cx_) / rx, (y_ - cy_) / ry]);
-    var delta = angle([(x_ - cx_) / rx, (y_ - cy_) / ry], [(-x_ - cx_) / rx, (-y_ - cy_) / ry]);
-    if (sweep && delta < 0) { delta += Math.PI * 2; }
-    if (!sweep && delta > 0) { delta -= Math.PI * 2; }
+    const psi = angle([1, 0], [(x_ - cx_) / rx, (y_ - cy_) / ry])
+    let delta = angle([(x_ - cx_) / rx, (y_ - cy_) / ry], [(-x_ - cx_) / rx, (-y_ - cy_) / ry])
+    if (sweep && delta < 0) { delta += Math.PI * 2 }
+    if (!sweep && delta > 0) { delta -= Math.PI * 2 }
 
     function getVertex(pct): Point {
-      var theta = psi + delta * pct;
-      var ct = Math.cos(theta);
-      var st = Math.sin(theta);
-      return [cp * rx * ct - sp * ry * st + cx, sp * rx * ct + cp * ry * st + cy];
+      const theta = psi + delta * pct
+      const ct = Math.cos(theta)
+      const st = Math.sin(theta)
+      return [cp * rx * ct - sp * ry * st + cx, sp * rx * ct + cp * ry * st + cy]
     }
 
     // let the recursive fun begin
@@ -1341,27 +1348,27 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
         // max 2**18 = 262144 segments
         return
       }
-      var tRange = t2 - t1
-      var tHalf = t1 + 0.5 * tRange;
-      var c2 = getVertex(t1 + 0.25 * tRange);
-      var c3 = getVertex(tHalf);
-      var c4 = getVertex(t1 + 0.75 * tRange);
+      const tRange = t2 - t1
+      const tHalf = t1 + 0.5 * tRange
+      const c2 = getVertex(t1 + 0.25 * tRange)
+      const c3 = getVertex(tHalf)
+      const c4 = getVertex(t1 + 0.75 * tRange)
       if (parser.vertexDistanceSquared(c2, parser.vertexMiddle(c1, c3)) > tolerance2) {
-        recursiveArc(parser, t1, tHalf, c1, c3, level + 1, tolerance2);
+        recursiveArc(parser, t1, tHalf, c1, c3, level + 1, tolerance2)
       }
-      subpath.push(c3);
+      subpath.push(c3)
       if (parser.vertexDistanceSquared(c4, parser.vertexMiddle(c3, c5)) > tolerance2) {
-        recursiveArc(parser, tHalf, t2, c3, c5, level + 1, tolerance2);
+        recursiveArc(parser, tHalf, t2, c3, c5, level + 1, tolerance2)
       }
     }
 
-    var t1Init = 0.0;
-    var t2Init = 1.0;
-    var c1Init = getVertex(t1Init);
-    var c5Init = getVertex(t2Init);
-    subpath.push(c1Init);
-    recursiveArc(this, t1Init, t2Init, c1Init, c5Init, 0, tolerance2);
-    subpath.push(c5Init);
+    const t1Init = 0.0
+    const t2Init = 1.0
+    const c1Init = getVertex(t1Init)
+    const c5Init = getVertex(t2Init)
+    subpath.push(c1Init)
+    recursiveArc(this, t1Init, t2Init, c1Init, c5Init, 0, tolerance2)
+    subpath.push(c5Init)
   }
 
 
@@ -1377,7 +1384,7 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
       return null
     } else {
       // assume 90dpi
-      var multiplier = 1.0
+      let multiplier = 1.0
       if (val.search(/cm$/i) != -1) {
         multiplier = 35.433070869
       } else if (val.search(/mm$/i) != -1) {
@@ -1406,32 +1413,32 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
 
   matrixApply(mat: number[], vec: number[]): Point {
     return [mat[0] * vec[0] + mat[2] * vec[1] + mat[4],
-    mat[1] * vec[0] + mat[3] * vec[1] + mat[5]];
+    mat[1] * vec[0] + mat[3] * vec[1] + mat[5]]
   }
 
   matrixGetScale(mat) {
     // extract absolute scale from matrix
-    var sx = Math.sqrt(mat[0] * mat[0] + mat[1] * mat[1]);
-    var sy = Math.sqrt(mat[2] * mat[2] + mat[3] * mat[3]);
+    const sx = Math.sqrt(mat[0] * mat[0] + mat[1] * mat[1])
+    const sy = Math.sqrt(mat[2] * mat[2] + mat[3] * mat[3])
     // return dominant axis
     if (sx > sy) {
-      return sx;
+      return sx
     } else {
-      return sy;
+      return sy
     }
   }
 
 
   vertexDistanceSquared(v1, v2) {
-    return Math.pow(v2[0] - v1[0], 2) + Math.pow(v2[1] - v1[1], 2);
+    return Math.pow(v2[0] - v1[0], 2) + Math.pow(v2[1] - v1[1], 2)
   }
 
   vertexMiddle(v1, v2) {
-    return [(v2[0] + v1[0]) / 2.0, (v2[1] + v1[1]) / 2.0];
+    return [(v2[0] + v1[0]) / 2.0, (v2[1] + v1[1]) / 2.0]
   }
 
   strip(val: string) {
-    return val.replace(/^\s+|\s+$/g, '');
+    return val.replace(/^\s+|\s+$/g, '')
   }
 }
 

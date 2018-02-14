@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component } from '@angular/core'
 import { CCodeEditorComponent } from './ccode-editor.component'
 
 @Component({

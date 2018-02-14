@@ -1,4 +1,4 @@
-import { Observer } from 'rxjs/Rx';
+import { Observer } from 'rxjs/Rx'
 
 export abstract class ModelTransformer<Source, Target> {
   inputMime: string[]

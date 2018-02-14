@@ -21,18 +21,18 @@ export class SocketMessageBroker implements SocketMessageHandler {
     if (data instanceof ArrayBuffer) {
       this.onBinaryMessage(data)
     } else if (data instanceof Blob) {
-      let reader = new FileReader();
+      const reader = new FileReader()
       // reader.result contains the contents of blob as a typed array
-      reader.addEventListener('loadend', this.onBinaryMessage.bind(this, reader.result));
-      reader.readAsArrayBuffer(data);
+      reader.addEventListener('loadend', this.onBinaryMessage.bind(this, reader.result))
+      reader.readAsArrayBuffer(data)
     } else {
       if (data !== 'KMotionX') {
         //try{ //try catch disables optimization in chrome
-        let ctrlMessage = JSON.parse(data) as ControlMessage;
-        this.post(new ControlMessage(ctrlMessage));
+        const ctrlMessage = JSON.parse(data) as ControlMessage
+        this.post(new ControlMessage(ctrlMessage))
         //ack messages that don't require users answer here
         if (ctrlMessage.payload.block === false) {
-          this.acknowledge(ctrlMessage.id, -1);
+          this.acknowledge(ctrlMessage.id, -1)
         }
 
         //} catch(e){
@@ -47,7 +47,7 @@ export class SocketMessageBroker implements SocketMessageHandler {
 
 
   onSocketLog(message: string, type: number) {
-    this.post(new LogMessage(message, type));
+    this.post(new LogMessage(message, type))
 
   }
 
@@ -60,23 +60,23 @@ export class SocketMessageBroker implements SocketMessageHandler {
       this.acknowledge(data.id, data.ret)
     } else if (data.command == 'disconnect') {
       //no need to acually disconnect at the moment
-      this.socket.destroy();
-      this.post(new TextMessage('done'));
+      this.socket.destroy()
+      this.post(new TextMessage('done'))
     }
 
   }
 
   private onBinaryMessage(data: ArrayBuffer) {
-    const status = this.kmxStatusStream.readBuffer(data);
-    this.post(status);
+    const status = this.kmxStatusStream.readBuffer(data)
+    this.post(status)
   }
 
   private acknowledge(id, ret) {
-    this.socket.sendMessage(JSON.stringify({ type: 'CB_ACK', id, returnValue: ret }));
+    this.socket.sendMessage(JSON.stringify({ type: 'CB_ACK', id, returnValue: ret }))
   }
 
   private post(payload: TextMessage | LogMessage | KmxStatus | ControlMessage) {
-    this.messagePort.postMessage(this.serializer.serialize(payload));
+    this.messagePort.postMessage(this.serializer.serialize(payload))
   }
 
 }

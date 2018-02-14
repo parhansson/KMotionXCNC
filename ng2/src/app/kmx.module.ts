@@ -1,25 +1,25 @@
 
-import { NgModule } from '@angular/core';
-import { enableProdMode } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
-import { HttpClientModule } from '@angular/common/http';
-import { FormsModule } from '@angular/forms';
-import { RouteReuseStrategy } from '@angular/router';
-import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
-import { TabsModule } from 'ngx-bootstrap/tabs';
-import { routing, appRoutingProviders } from './kmx.routing';
-import { BackendService } from './backend/backend.service';
-import { KFlopBackendService } from './backend/kflop/kflop.backend.service';
+import { NgModule } from '@angular/core'
+import { enableProdMode } from '@angular/core'
+import { BrowserModule } from '@angular/platform-browser'
+import { HttpClientModule } from '@angular/common/http'
+import { FormsModule } from '@angular/forms'
+import { RouteReuseStrategy } from '@angular/router'
+import { BsDropdownModule } from 'ngx-bootstrap/dropdown'
+import { TabsModule } from 'ngx-bootstrap/tabs'
+import { routing, appRoutingProviders } from './kmx.routing'
+import { BackendService } from './backend/backend.service'
+import { KFlopBackendService } from './backend/kflop/kflop.backend.service'
 import { SocketService } from './backend/socket.service'
-import { LogService } from './log';
+import { LogService } from './log'
 import { KmxComponent } from './kmx.component'
-import { ModelSettingsService } from './model/model.settings.service';
+import { ModelSettingsService } from './model/model.settings.service'
 import { StaticTransformer } from './model/transformers'
 import { SharedModule } from './shared'
 import { GCodeModule } from './gcode'
 import { CCodeModule } from './ccode'
-import { LogModule } from './log';
-import { EditorModule } from './editor';
+import { LogModule } from './log'
+import { EditorModule } from './editor'
 import { ResourceModule, FileServiceToken } from './resources'
 import { SettingsModule, SettingsService } from './settings'
 import { DebugModule } from './debug'

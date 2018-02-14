@@ -1,4 +1,4 @@
-import {Directive, Component, Input, Output, EventEmitter, ElementRef} from '@angular/core';
+import {Directive, Component, Input, Output, EventEmitter, ElementRef} from '@angular/core'
 import {FileResource} from './file-resource'
 @Component({
   selector: 'file-path',
@@ -16,7 +16,7 @@ export class FilePathComponent {
 
   }
   openIndex(index: number) {
-    this.resource.goto(index + 1);
-    this.changed.emit(this.resource);
+    this.resource.goto(index + 1)
+    this.changed.emit(this.resource)
   }
 }

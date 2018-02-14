@@ -1,6 +1,6 @@
 
-import { IGM, IgmObject, GCodeSource, BoundRect } from '../igm';
-import { GCodeVector, GCodeCurve3 } from '../vector';
+import { IGM, IgmObject, GCodeSource, BoundRect } from '../igm'
+import { GCodeVector, GCodeCurve3 } from '../vector'
 import { GCodeTransformer, State } from './gcode.transformer'
 //Copyright (c) 2014 par.hansson@gmail.com
 
@@ -13,10 +13,10 @@ export class Gcode2IgmTransformer extends GCodeTransformer<IgmObject, IGM>{
   }
 
   protected startShape() {
-    const shape = new IgmObject();
+    const shape = new IgmObject()
     //shape.userData = { lineNo: this.state.lineNo }
     this.output.addToLayerObject('layer1',shape)
-    return shape;
+    return shape
   }
 
   protected endShape(){
@@ -24,12 +24,12 @@ export class Gcode2IgmTransformer extends GCodeTransformer<IgmObject, IGM>{
   }
 
   protected addLinearPoint(newPosition: GCodeVector, shape: IgmObject) {
-    shape.vectors.push(newPosition);
+    shape.vectors.push(newPosition)
   }
   protected addCurve(curve: GCodeCurve3, shape: IgmObject) {
-    const vectors = curve.getPoints(50);
-    for (let point of vectors) {
-      shape.vectors.push(point);
+    const vectors = curve.getPoints(50)
+    for (const point of vectors) {
+      shape.vectors.push(point)
     }
   }
 

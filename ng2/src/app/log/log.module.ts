@@ -1,7 +1,7 @@
-import { NgModule } from '@angular/core';
-import { FormsModule }   from '@angular/forms';
-import { CommonModule } from '@angular/common';
-import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
+import { NgModule } from '@angular/core'
+import { FormsModule }   from '@angular/forms'
+import { CommonModule } from '@angular/common'
+import { BsDropdownModule } from 'ngx-bootstrap/dropdown'
 import { LogComponent } from './log.component'
 @NgModule({
   imports: [

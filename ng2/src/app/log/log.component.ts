@@ -7,7 +7,7 @@ import {
   OnDestroy,
   ViewChild,
   AfterViewChecked
-} from '@angular/core';
+} from '@angular/core'
 import { Observable, Subscription } from 'rxjs/Rx'
 import { LogService, LogMessage } from './log.service'
 import { LogSubject } from './log-subject'
@@ -38,12 +38,12 @@ export class LogComponent implements OnInit, OnDestroy, AfterViewChecked {
   private subscription: Subscription
 
   constructor(private logService: LogService) {
-    this.logLimit = 200;
+    this.logLimit = 200
   }
   //http://stackoverflow.com/questions/35232731/angular2-scroll-to-bottom-chat-style
   ngOnInit() {
     this.logSubject = this.logService.getLogSubject(this.consoleId)
-    this.logLimit = this.logLimit < 1 ? 1 : this.logLimit;
+    this.logLimit = this.logLimit < 1 ? 1 : this.logLimit
     this.updateLimit()
     this.subscribe()
     //this.logService.log(this.consoleId, 'Test log ' + this.consoleId);
@@ -57,21 +57,21 @@ export class LogComponent implements OnInit, OnDestroy, AfterViewChecked {
   ngAfterViewChecked() {
     //TODO this is called all the time in this view
     if (this.autoscroll) {
-      this.scrollToBottom();
+      this.scrollToBottom()
     }
   }
   scrollToBottom(): void {
-    let container = this.scrollContainer.nativeElement;
-    container.scrollTop = container.scrollHeight;
+    const container = this.scrollContainer.nativeElement
+    container.scrollTop = container.scrollHeight
   }
 
   ngOnDestroy() {
-    this.subscription.unsubscribe();
+    this.subscription.unsubscribe()
   }
 
   prune() {
     this.trimBufferToSize(0)
-    this.logSubject.prune();
+    this.logSubject.prune()
   }
   private pruneLocal() {
     this.logs.splice(0, this.logs.length)
@@ -80,18 +80,18 @@ export class LogComponent implements OnInit, OnDestroy, AfterViewChecked {
     this.subscription = this.logSubject.subscribe(logMessage => {
       this.logs.push(logMessage)
       this.trimBufferToSize(this.logLimit)
-    });
+    })
   }
 
   private trimBufferToSize(_bufferSize:number)  {
-    const _events = this.logs;
+    const _events = this.logs
 
-    let eventsCount = _events.length;
-    let spliceCount = 0;
+    const eventsCount = _events.length
+    let spliceCount = 0
 
     if (eventsCount > _bufferSize) {
-      spliceCount = eventsCount - _bufferSize;
-      _events.splice(0, spliceCount);
+      spliceCount = eventsCount - _bufferSize
+      _events.splice(0, spliceCount)
     }
   }
 

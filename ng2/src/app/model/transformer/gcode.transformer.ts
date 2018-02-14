@@ -1,11 +1,11 @@
 
-import { KMXUtil } from '../../util/kmxutil';
-import { GCodeVector, GCodeCurve3, MoveArcArguments, MoveAngularArguments, MoveArguments } from '../vector';
-import { GCodeParser } from '../gcode-parser';
-import { Block, Word, WordParameters, ControlWord } from '../gcode';
-import { Observable, Observer } from 'rxjs/Rx';
+import { KMXUtil } from '../../util/kmxutil'
+import { GCodeVector, GCodeCurve3, MoveArcArguments, MoveAngularArguments, MoveArguments } from '../vector'
+import { GCodeParser } from '../gcode-parser'
+import { Block, Word, WordParameters, ControlWord } from '../gcode'
+import { Observable, Observer } from 'rxjs/Rx'
 import { GCodeSource } from '../igm'
-import { ModelTransformer } from './model.transformer';
+import { ModelTransformer } from './model.transformer'
 
 //Copyright (c) 2014 par.hansson@gmail.com
 //Modal G codes 
@@ -63,13 +63,13 @@ export class State<ShapeType> extends GCodeState {
   lineNo = -1
   onBlock(block: Block) {
     this.lineNo = block.line
-    this.moveGroup.changed = false;
-    this.unitsGroup.changed = false;
+    this.moveGroup.changed = false
+    this.unitsGroup.changed = false
     //etc
   }
   handleWord(cmd: Word) {
-    const handler = this.wordHandlers[cmd.value] || this.wordHandlers[cmd.literal] || this.wordHandlers.UNKNOWN;
-    handler(cmd);
+    const handler = this.wordHandlers[cmd.value] || this.wordHandlers[cmd.literal] || this.wordHandlers.UNKNOWN
+    handler(cmd)
   }
   private wordHandlers = {
     M: (cmd: Word) => {
@@ -92,24 +92,24 @@ export class State<ShapeType> extends GCodeState {
     },
     G20: (cmd: Word) => {
       this.unitsGroup.setActiveCode(cmd.value)
-      this.scale = 25.4; //Inches
+      this.scale = 25.4 //Inches
     },
     G21: (cmd: Word) => {
       this.unitsGroup.setActiveCode(cmd.value)
-      this.scale = 1.0; //mm
+      this.scale = 1.0 //mm
     },
     G90: (cmd: Word) => {
       //absolute
-      this.absolute = true;
+      this.absolute = true
     },
     G91: (cmd: Word) => {
       //relative
-      this.absolute = false;
+      this.absolute = false
     },
     UNKNOWN: (cmd: Word) => {
-      console.info('Unsupported command:', cmd.value, cmd, this.lineNo);
+      console.info('Unsupported command:', cmd.value, cmd, this.lineNo)
     }
-  };
+  }
 }
 
 export abstract class GCodeTransformer<ShapeType, OutputType> extends ModelTransformer<GCodeSource, OutputType>{
@@ -126,7 +126,7 @@ export abstract class GCodeTransformer<ShapeType, OutputType> extends ModelTrans
   protected abstract addCurve(curve: GCodeCurve3, shape: ShapeType)
 
   execute(gcode: GCodeSource, observer: Observer<OutputType>) {
-    this.output = this.createOutput();
+    this.output = this.createOutput()
     //this.group.name = 'GCODE';
     this.state = new State<ShapeType>()
     //TODO parsing should be done outside of this transformer
@@ -134,16 +134,16 @@ export abstract class GCodeTransformer<ShapeType, OutputType> extends ModelTrans
     const parser = new GCodeParser()
     parser.subject.subscribe(
       (block) => {
-        this.onBlock(block);
+        this.onBlock(block)
       },
       (error) => { observer.error(error) },
       () => {
-        observer.next(this.output);
+        observer.next(this.output)
         //transformedDefer.complete();
 
       })
 
-    parser.parseLines(gcode.lines);
+    parser.parseLines(gcode.lines)
     /*
         if (disableWorker) {
           // parse without worker. Application will freeze during parsing
@@ -186,12 +186,12 @@ export abstract class GCodeTransformer<ShapeType, OutputType> extends ModelTrans
     // X5 Y5
     // Move on second row is made in G1 mode
     this.state.onBlock(block)
-    for (let part of block.parts) {
+    for (const part of block.parts) {
       if (part instanceof Word) {
         this.state.handleWord(part)
       } else if (part instanceof WordParameters) {
         const params: MoveArguments = {}
-        for (let word of part.value) {
+        for (const word of part.value) {
           params[word.literal] = word.address
         }
         this.onWordParameter(params)
@@ -210,7 +210,7 @@ export abstract class GCodeTransformer<ShapeType, OutputType> extends ModelTrans
     }
 
     let currentShape = this.state.currentShape
-    const position = this.state.position;
+    const position = this.state.position
 
 
     if (this.state.moveGroup.changed 
@@ -231,43 +231,43 @@ export abstract class GCodeTransformer<ShapeType, OutputType> extends ModelTrans
 
     switch (this.state.moveGroup.code) {
       case ('G0'):
-        this.addLinearPoint(newPosition, currentShape);
+        this.addLinearPoint(newPosition, currentShape)
         break
       case ('G1'):
-        this.addLinearPoint(newPosition, currentShape);
+        this.addLinearPoint(newPosition, currentShape)
         break
       case ('G2'):
-        this.createCurve(args, position, newPosition, true, currentShape);
+        this.createCurve(args, position, newPosition, true, currentShape)
         break
       case ('G3'):
-        this.createCurve(args, position, newPosition, false, currentShape);
+        this.createCurve(args, position, newPosition, false, currentShape)
         break
     }
 
-    this.state.position = newPosition;
-  };
+    this.state.position = newPosition
+  }
   
   private createCurve(args: MoveArcArguments, position: GCodeVector, newPosition: GCodeVector, clockWise: boolean, currentShape) {
-    const scale = this.state.scale;
+    const scale = this.state.scale
     args.I *= scale
     args.J *= scale
     args.K *= scale
     args.R *= scale
-    let curve = new GCodeCurve3(
+    const curve = new GCodeCurve3(
       position,
       newPosition,
       args,
-      clockWise);
-    this.addCurve(curve, currentShape);
+      clockWise)
+    this.addCurve(curve, currentShape)
   }
   private getNewPosition(args: MoveArguments) {
     if (!this.containsMoveData(args)) {
-      return null;
+      return null
     }
-    const position = this.state.position;
-    const scale = this.state.scale;
-    const absolute = this.state.absolute;
-    const newPosition = new GCodeVector();
+    const position = this.state.position
+    const scale = this.state.scale
+    const absolute = this.state.absolute
+    const newPosition = new GCodeVector()
     if (absolute) {
       newPosition.x = args.X !== undefined ? args.X * scale : position.x
       newPosition.y = args.Y !== undefined ? args.Y * scale : position.y

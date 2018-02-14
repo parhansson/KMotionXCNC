@@ -1,10 +1,10 @@
-import { Routes, RouterModule } from '@angular/router';
-import { ModuleWithProviders } from '@angular/core';
-import { LaserScreenComponent } from './laser';
-import { GCodeScreenComponent } from './gcode';
-import { CCodeScreenComponent } from './ccode';
-import { DebugScreenComponent } from './debug';
-import { SettingsScreenComponent } from './settings';
+import { Routes, RouterModule } from '@angular/router'
+import { ModuleWithProviders } from '@angular/core'
+import { LaserScreenComponent } from './laser'
+import { GCodeScreenComponent } from './gcode'
+import { CCodeScreenComponent } from './ccode'
+import { DebugScreenComponent } from './debug'
+import { SettingsScreenComponent } from './settings'
 import { ImportWizardComponent } from './wizard'
 
 
@@ -39,10 +39,10 @@ const appRoutes: Routes = [
     redirectTo: '/gcode',
     pathMatch: 'full'
   }
-];
+]
 
 export const appRoutingProviders: any[] = [
 
-];
+]
 
-export const routing: ModuleWithProviders = RouterModule.forRoot(appRoutes);
+export const routing: ModuleWithProviders = RouterModule.forRoot(appRoutes)

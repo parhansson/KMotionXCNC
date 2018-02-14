@@ -1,4 +1,4 @@
-import { Component, Inject, Input, Output, ViewChild, ElementRef } from '@angular/core';
+import { Component, Inject, Input, Output, ViewChild, ElementRef } from '@angular/core'
 import { IGM } from '../model/IGM'
 import { SvgPreviewComponent } from './svg-preview.component'
 import { KMXUtil } from '../util/kmxutil'
@@ -66,38 +66,38 @@ export class ImportWizardComponent {
   }
 
   onContentChange(change: any /*AceAjax.EditorChangeEvent*/) {
-    console.log('onContentChange', change);
+    console.log('onContentChange', change)
     // TODO Gcode need to be aware of this in order update 3d view
-    this.dirty = true;
+    this.dirty = true
   }
 
   onSave() {
     this.fileStore.store(this.resource.canonical, this.textContent)
-    this.dirty = false;
+    this.dirty = false
   }
 
   onFileRaw(file: FileResource | Payload) {
     if (file instanceof FileResource) {
-      this.resource = file;
+      this.resource = file
     } else {
       //Use imported name
-      this.resource.canonical = file.name;
+      this.resource.canonical = file.name
     }
     //Selected in file dialog or drop imported file
     //load() should be responsible for returning file resource.
     //then imported files can be saved and get a real name
-    this.fileStore.load(file);
+    this.fileStore.load(file)
 
   }
 
   onFileTransform(file: FileResource | Payload) {
     if (file instanceof FileResource) {
-      this.resource = file;
+      this.resource = file
     } else {
       //Use imported name
       const payload = file
       this.staticTransformer.transform(payload.contentType || payload.name, payload.arrayBuffer())
-      this.resource.canonical = file.name;
+      this.resource.canonical = file.name
     }
     //Selected in file dialog or drop imported file
     //load() should be responsible for returning file resource.

@@ -1,4 +1,4 @@
-import { Component, Inject, Input, Output, ViewChild, ElementRef } from '@angular/core';
+import { Component, Inject, Input, Output, ViewChild, ElementRef } from '@angular/core'
 import { toPath } from 'svg-catmull-rom-spline'
 import { SvgPreviewComponent } from './svg-preview.component'
 @Component({
@@ -15,10 +15,10 @@ export class JigsawWizardComponent {
   rows: number = 2
   columns: number = 1
   width = 450
-  height = 450;
+  height = 450
 
   render() {
-    let svg = this.generate()
+    const svg = this.generate()
     this.previewContainer.render(svg)
   }
   // Returns 6 points representing the shape of one edge of a puzzle piece.
@@ -26,158 +26,158 @@ export class JigsawWizardComponent {
   // and height of the piece.
   private edgeDistributions() {
 
-    let randomBetween = function (min, max) {
-      return Math.random() * (max - min) + min;
-    };
-    let baselineOffsets = {
+    const randomBetween = function (min, max) {
+      return Math.random() * (max - min) + min
+    }
+    const baselineOffsets = {
       xMin: 33,
       xMax: 45,
       yMin: -5,
       yMax: 5
-    };
-    let upperOffsets = {
+    }
+    const upperOffsets = {
       xMin: 30,
       xMax: 40,
       yMin: 20,
       yMax: 34 
-    };
-    let point1 = [0, 0];
-    let point2 = [
+    }
+    const point1 = [0, 0]
+    const point2 = [
       randomBetween(baselineOffsets.xMin, baselineOffsets.xMax),
       randomBetween(baselineOffsets.yMin, baselineOffsets.yMax)
-    ];
-    let point3 = [
+    ]
+    const point3 = [
       randomBetween(upperOffsets.xMin, upperOffsets.xMax),
       randomBetween(upperOffsets.yMin, upperOffsets.yMax)
-    ];
-    let point4 = [
+    ]
+    const point4 = [
       randomBetween(100 - upperOffsets.xMax, 100 - upperOffsets.xMin),
       randomBetween(upperOffsets.yMin, upperOffsets.yMax)
-    ];
-    let point5 = [
+    ]
+    const point5 = [
       randomBetween(100 - baselineOffsets.xMax, 100 - baselineOffsets.xMin),
       randomBetween(baselineOffsets.yMin, baselineOffsets.yMax)
-    ];
-    let point6 = [100, 0];
-    let sign = Math.random() < 0.5 ? -1 : 1;
+    ]
+    const point6 = [100, 0]
+    const sign = Math.random() < 0.5 ? -1 : 1
     return [point1, point2, point3, point4, point5, point6].map((p) => {
-      return [p[0] / 100, p[1] * sign / 100];
-    });
+      return [p[0] / 100, p[1] * sign / 100]
+    })
   }
   // Builds an m + 1 x n matrix of edge shapes. The first and last rows
   // are straight edges.
   private buildDistributions(m, n) {
-    let lineGroups = [];
-    let lines = [];
-    let i, j;
+    const lineGroups = []
+    let lines = []
+    let i, j
     for (j = 0; j < n; j++) {
-      lines.push([[0, 0], [1, 0]]);
+      lines.push([[0, 0], [1, 0]])
     }
-    lineGroups.push(lines);
+    lineGroups.push(lines)
     for (i = 1; i < m; i++) {
-      lines = [];
+      lines = []
       for (j = 0; j < n; j++) {
-        lines.push(this.edgeDistributions());
+        lines.push(this.edgeDistributions())
       }
-      lineGroups.push(lines);
+      lineGroups.push(lines)
     }
-    lines = [];
+    lines = []
     for (j = 0; j < n; j++) {
-      lines.push([[0, 0], [1, 0]]);
+      lines.push([[0, 0], [1, 0]])
     }
-    lineGroups.push(lines);
-    return lineGroups;
-  };
+    lineGroups.push(lines)
+    return lineGroups
+  }
 
   private transposePoint(point) {
-    return [point[1], point[0]];
-  };
+    return [point[1], point[0]]
+  }
 
   private offsetPoint(point, columnIndex: number, rowIndex: number, columnWidth: number, rowHeight: number) {
-    let offsetColumnPosition = (percent, columnWidth, columnIndex) => {
-      let columnOffset = columnWidth * columnIndex;
-      return percent * columnWidth + columnOffset;
-    };
-    let offsetRowPosition = (percent, rowHeight, rowIndex) => {
-      let rowOffset = rowHeight * rowIndex;
-      return percent * rowHeight + rowOffset;
-    };
-    let x = offsetColumnPosition(point[0], columnWidth, columnIndex);
-    let y = offsetRowPosition(point[1], rowHeight, rowIndex);
-    return [x, y];
-  };
+    const offsetColumnPosition = (percent, columnWidth, columnIndex) => {
+      const columnOffset = columnWidth * columnIndex
+      return percent * columnWidth + columnOffset
+    }
+    const offsetRowPosition = (percent, rowHeight, rowIndex) => {
+      const rowOffset = rowHeight * rowIndex
+      return percent * rowHeight + rowOffset
+    }
+    const x = offsetColumnPosition(point[0], columnWidth, columnIndex)
+    const y = offsetRowPosition(point[1], rowHeight, rowIndex)
+    return [x, y]
+  }
   private offsetPoints(lineGroups, offsetter: (point: any, columnIndex: number, rowIndex: number) => any) {
     for (let i = 0; i < lineGroups.length; i++) {
-      let lines = lineGroups[i];
+      const lines = lineGroups[i]
       for (let j = 0; j < lines.length; j++) {
         lines[j] = lines[j].map(function (point) {
-          return offsetter(point, j, i);
-        });
+          return offsetter(point, j, i)
+        })
       }
     }
-  };
+  }
   private buildPieces(rowCount, columnCount) {
-    let rowHeight = this.height / rowCount;
-    let columnWidth = this.width / columnCount;
-    let pieces = [];
-    let rows = this.buildDistributions(rowCount, columnCount);
+    const rowHeight = this.height / rowCount
+    const columnWidth = this.width / columnCount
+    const pieces = []
+    const rows = this.buildDistributions(rowCount, columnCount)
     this.offsetPoints(rows, (point, j, i) => {
-      return this.offsetPoint(point, j, i, columnWidth, rowHeight);
-    });
-    let columns = this.buildDistributions(columnCount, rowCount);
+      return this.offsetPoint(point, j, i, columnWidth, rowHeight)
+    })
+    const columns = this.buildDistributions(columnCount, rowCount)
     this.offsetPoints(columns, (point, j, i) => {
-      return this.offsetPoint(this.transposePoint(point), i, j, columnWidth, rowHeight);
-    });
+      return this.offsetPoint(this.transposePoint(point), i, j, columnWidth, rowHeight)
+    })
     for (let rowIndex = 1; rowIndex <= rowCount; rowIndex++) {
       for (let columnIndex = 0; columnIndex < columnCount; columnIndex++) {
-        var edges = [];
-        edges.push(rows[rowIndex - 1][columnIndex]);
-        edges.push(columns[columnIndex + 1][rowIndex - 1]);
-        edges.push(rows[rowIndex][columnIndex].slice().reverse());
-        edges.push(columns[columnIndex][rowIndex - 1].slice().reverse());
-        pieces.push(edges);
+        const edges = []
+        edges.push(rows[rowIndex - 1][columnIndex])
+        edges.push(columns[columnIndex + 1][rowIndex - 1])
+        edges.push(rows[rowIndex][columnIndex].slice().reverse())
+        edges.push(columns[columnIndex][rowIndex - 1].slice().reverse())
+        pieces.push(edges)
       }
     }
-    return pieces;
-  };
+    return pieces
+  }
 
   private piecePathData(piece: number[][]) {
     return piece.map((edge) => {
       //if (edge.length > 2) {
-        let tolerance = 4;
-        let highestQuality = true;
-        let points = edge
+        const tolerance = 4
+        const highestQuality = true
+        const points = edge
         //let attribute = SVGCatmullRomSpline.toPath(points.map(points), tolerance, highestQuality);
-        let attribute = toPath(points, tolerance, highestQuality);
+        const attribute = toPath(points, tolerance, highestQuality)
         return attribute
       //} else {
       //  return 'M' + edge[0] + 'L' + edge[1]
       //}
       //return [1,1]//this.d3CurvedLine(edge);
-    }).join('');
-  };
+    }).join('')
+  }
 
   buildpoints(pieces: number[][][][]) {
 
-    let piecesCircles = pieces.map((piece) => {
+    const piecesCircles = pieces.map((piece) => {
 
-      let peicecircles = piece.map((edge) => {
+      const peicecircles = piece.map((edge) => {
 
-        let edgecircles = edge.map((point) => {
-          return this.svg.circle(point);
+        const edgecircles = edge.map((point) => {
+          return this.svg.circle(point)
         })
         return edgecircles
-      });
+      })
       return peicecircles.reduce((prev, curr) => prev.concat(curr))
       //return circles;
     })
     return piecesCircles.reduce((prev, curr) => prev.concat(curr))
-  };
+  }
   buildPiecePaths(pieces) {
     return pieces.map((piece) => {
       return this.svg.path(this.piecePathData(piece))
-    });
-  };
+    })
+  }
   // SVG helpers
   svg = {
     docStart: `<?xml version="1.0" standalone="no"?>
@@ -206,24 +206,24 @@ export class JigsawWizardComponent {
     closeTag: '</svg>',
     path: (pathData) => `<path vector-effect="non-scaling-stroke" d="${pathData}"/>` ,
     circle: (point) => `<circle class="EndPoint" cx="${point[0]}" cy="${point[1]}" r="10" />` 
-  };
+  }
 
   private generate() {
-    let rowCount = this.rows//parseInt($("#rowCount").val(), 10);
-    let columnCount = this.columns//parseInt($("#columnCount").val(), 10);
-    let pieces = this.buildPieces(rowCount, columnCount);
+    const rowCount = this.rows//parseInt($("#rowCount").val(), 10);
+    const columnCount = this.columns//parseInt($("#columnCount").val(), 10);
+    const pieces = this.buildPieces(rowCount, columnCount)
     //let pieces = []
     //pieces[0] = this.buildPieces(rowCount, columnCount)[0];
 
-    let piecePaths = this.buildPiecePaths(pieces).join('\n');
-    let points = this.buildpoints(pieces).join('\n');
-    let svgNode = [
+    const piecePaths = this.buildPiecePaths(pieces).join('\n')
+    const points = this.buildpoints(pieces).join('\n')
+    const svgNode = [
       this.svg.openTag,
       this.svg.styletag,
       piecePaths,
       //points,
       this.svg.closeTag
-    ].join('');
+    ].join('')
     console.log(svgNode)
     return svgNode
 
