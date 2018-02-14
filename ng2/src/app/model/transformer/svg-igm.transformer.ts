@@ -127,7 +127,12 @@ export class Svg2IgmTransformer extends ModelTransformer<SVGElement, IGM>{
   private makeModel(node: SvgNode, igm: IGM) {
     if(node.defs) return
     if(node.unsupported) return
-    this.makeShape(node, igm);
+    //if stroke is undefined we do not generate shape
+    //TODO this should be handled in igm.addToLayerObject as invisible layer
+    if(node.stroke || node.text){
+      console.log('stroke', node.stroke)
+      this.makeShape(node, igm);
+    }
     for (let child of node.children) {
       this.makeModel(child, igm);
     }
@@ -261,7 +266,7 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
   }
   parse(rootElement: SVGElement){
     let result = new SvgNode();
-    result.stroke = [255, 0, 0];
+    //result.stroke = [255, 0, 0];
     result.xformToWorld = [1, 0, 0, 1, 0, 0]
     this.accept(rootElement,result)
     return result
