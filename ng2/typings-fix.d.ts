@@ -5,6 +5,8 @@ declare class DxfParser{
   parseSync(fileText:string)
 }
 
+//declare var PDFJS: PDFJSStatic;
+
 // Merge PDFJS typings
 declare namespace PDFJSExtra {
   export interface PDFPageOperatorList {
@@ -31,6 +33,13 @@ interface PDFPageProxy {
 }
 
  interface PDFJSStatic {
+  getDocument(
+    source: ArrayBuffer,
+    pdfDataRangeTransport?: any,
+    passwordCallback?: (fn: (password: string) => void, reason: string) => string,
+    progressCallback?: (progressData: PDFProgressData) => void)
+    : PDFPromise<PDFDocumentProxy>;
+
   SVGGraphics(
     objects: PDFObjects,
     objects1: PDFObjects,

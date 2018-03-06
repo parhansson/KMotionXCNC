@@ -1,5 +1,5 @@
 import { Component, Inject, Input, Output, ViewChild, ElementRef } from '@angular/core'
-import { IGM } from '../model/IGM'
+import { IGM } from '../model/igm'
 import { SvgPreviewComponent } from './svg-preview.component'
 import * as opentype from 'opentype.js'
 

@@ -4,7 +4,7 @@ import { ModelTransformer } from './model.transformer'
 import { IGM, IgmObject } from '../igm'
 import { GCodeVector } from '../vector'
 import * as THREE from 'three'
-//import { DxfParser } from 'dxf-parser'
+import * as DxfParser from 'dxf-parser'
 
 import { KMXUtil } from '../../util'
 

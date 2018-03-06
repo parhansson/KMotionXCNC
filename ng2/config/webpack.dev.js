@@ -1,7 +1,10 @@
-var webpackMerge = require('webpack-merge');
-var ExtractTextPlugin = require('extract-text-webpack-plugin');
-var commonConfig = require('./webpack.common.js');
-var helpers = require('./helpers');
+const webpackMerge = require('webpack-merge');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const commonConfig = require('./webpack.common.js');
+const helpers = require('./helpers');
+
+// Base Href same as in index.html
+const baseHref = '/kmx/'
 
 module.exports = webpackMerge(commonConfig, {
   devtool: 'cheap-module-eval-source-map',
@@ -9,7 +12,7 @@ module.exports = webpackMerge(commonConfig, {
   output: {
     path: helpers.root('dist'),
     pathinfo: true,
-    publicPath: "/kmx/",
+    publicPath: baseHref,
     filename: '[name].js',
     chunkFilename: '[id].chunk.js'
   },
@@ -23,7 +26,7 @@ module.exports = webpackMerge(commonConfig, {
 
   devServer: {
     historyApiFallback: {
-      index: '/kmx/'
+      index: baseHref
     },
     stats: 'minimal',
     proxy: [

@@ -1,5 +1,5 @@
 import { Component, Inject, Input, Output, ViewChild, ElementRef } from '@angular/core'
-import { IGM } from '../model/IGM'
+import { IGM } from '../model/igm'
 import { MitreBox } from '../model/tool/mitre-box'
 import { SvgPreviewComponent } from './svg-preview.component'
 

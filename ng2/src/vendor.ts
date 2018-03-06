@@ -19,7 +19,7 @@ import 'pdfjs-dist/build/pdf.js'
 
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap/dist/css/bootstrap-theme.min.css'
-import '../public/css/style.css'
+import './styles.css'
 
 //https://stackoverflow.com/questions/35968047/using-webpack-threejs-examples-and-typescript
 //THREE is modular but not the TrackballControls example

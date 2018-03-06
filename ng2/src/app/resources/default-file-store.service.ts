@@ -1,12 +1,10 @@
 import { Injectable, Inject } from '@angular/core'
 import { Observable, Subject } from 'rxjs/Rx'
 import { FileStoreToken, FileStore } from './file-store'
-import {
-  FileResource,
-  IFileBackend,
-  FileServiceToken,
-  Payload
-} from '../resources'
+import { FileResource } from './file-resource'
+import { IFileBackend,FileServiceToken} from './file-backend'
+import { Payload } from './payload'
+
 
 @Injectable()
 export class DefaultFileStore implements FileStore {
