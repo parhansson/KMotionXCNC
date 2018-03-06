@@ -16,34 +16,34 @@
             </div>
             <div class="form-group">
               <label>Fractional digits (resolution)</label>
-              <input class="form-control" [(ngModel)]="transformerSettings.svg.fractionalDigits" min="0" type="number" step="any" />
+              <input class="form-control" [(ngModel)]="transformerSettings.igm.fractionalDigits" min="0" type="number" step="any" />
             </div>
             <div class="form-group">
               <label>Init code</label>
-              <input class="form-control" [(ngModel)]="transformerSettings.svg.initCode" type="text" />
+              <input class="form-control" [(ngModel)]="transformerSettings.igm.initCode" type="text" />
             </div>
             <div class="form-group">
               <label>Feed rate</label>
-              <input class="form-control" [(ngModel)]="transformerSettings.svg.feedRate" min="1" type="number" step="any" />
+              <input class="form-control" [(ngModel)]="transformerSettings.igm.feedRate" min="1" type="number" step="any" />
             </div>
             <div class="checkbox">
               <label>
-                <input type="checkbox" [(ngModel)]="transformerSettings.svg.removeOutline" /> Remove outline (not complete)
+                <input type="checkbox" [(ngModel)]="transformerSettings.igm.removeOutline" /> Remove outline (not complete)
               </label>
             </div>
             <div class="checkbox">
               <label>
-                <input type="checkbox" [(ngModel)]="transformerSettings.svg.removeDuplicates" /> Remove duplicates (not complete, might remove too much)
+                <input type="checkbox" [(ngModel)]="transformerSettings.igm.removeDuplicates" /> Remove duplicates (not complete, might remove too much)
               </label>
             </div>
             <div class="checkbox">
               <label>
-                <input type="checkbox" [(ngModel)]="transformerSettings.svg.removeSingularites" /> Remove single points
+                <input type="checkbox" [(ngModel)]="transformerSettings.igm.removeSingularites" /> Remove single points
               </label>
             </div>
             <div class="checkbox">
               <label>
-                <input type="checkbox" [(ngModel)]="transformerSettings.svg.translateToOrigo" /> Move to origin
+                <input type="checkbox" [(ngModel)]="transformerSettings.igm.translateToOrigo" /> Move to origin
               </label>
             </div>
           </div>

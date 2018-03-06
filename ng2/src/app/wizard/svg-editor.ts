@@ -1,63 +1,68 @@
 
+interface Selection {
+  X: number,
+  Y: number,
+  Matrix: number[]
+
+}
 export class SvgEditor {
 
-  deselect: EventListener
-  move: EventListener
+  svgDoc:SVGElement
   selectedElement: Element = null
-  currentX = 0
-  currentY = 0
-  currentMatrix = [1, 0, 0, 1, 0, 0]
+  private current: Selection
 
   constructor() {
-    this.deselect = this.deselectElement.bind(this)
-    this.move = this.moveElement.bind(this)
+
   }
 
 
-  public selectElement = (evt) => {
+  private selectElement: EventListener = (evt: MouseEvent) => {
 
-    this.selectedElement = evt.target
-    this.currentX = evt.clientX
-    this.currentY = evt.clientY
+    this.selectedElement = evt.target as Element
+    
+    this.current = {
+      Matrix: [1, 0, 0, 1, 0, 0],
+      X: evt.clientX,
+      Y: evt.clientY
+    }
     const transformAttr = this.selectedElement.getAttributeNS(null, 'transform')
     if (transformAttr != null) {
-      const parsedMatrix = transformAttr.slice(7, -1).split(',')
-      for (let i = 0; i < this.currentMatrix.length; i++) {
-        this.currentMatrix[i] = parseFloat(parsedMatrix[i])
-      }
+      this.current.Matrix = transformAttr.slice(7, -1).split(',').map(v => parseFloat(v))
     }
-
-
-    this.selectedElement.addEventListener('mousemove', this.move, true)
-    this.selectedElement.addEventListener('mouseout', this.deselect, true)
-    this.selectedElement.addEventListener('mouseup', this.deselect, true)
-
+    
+    this.selectedElement.addEventListener('mousemove', this.moveElement, true)
+    this.selectedElement.addEventListener('mouseout', this.deselectElement, true)
+    this.selectedElement.addEventListener('mouseup', this.deselectElement, true)
+    
+    //Moves element on top
+    this.svgDoc.appendChild(this.selectedElement)
   }
 
-  public moveElement = (evt) => {
-    console.log(evt)
-    const dx = evt.clientX - this.currentX
-    const dy = evt.clientY - this.currentY
-    this.currentMatrix[4] += dx
-    this.currentMatrix[5] += dy
-    const newMatrix = 'matrix(' + this.currentMatrix.join(', ') + ')'
+  private moveElement: EventListener = (evt: MouseEvent) => {
+    //console.log(evt)
+    const dx = evt.clientX - this.current.X
+    const dy = evt.clientY - this.current.Y
+    this.current.Matrix[4] += dx
+    this.current.Matrix[5] += dy
+    const newMatrix = 'matrix(' + this.current.Matrix.join(', ') + ')'
 
     this.selectedElement.setAttributeNS(null, 'transform', newMatrix)
-    this.currentX = evt.clientX
-    this.currentY = evt.clientY
+    this.current.X = evt.clientX
+    this.current.Y = evt.clientY
   }
 
-  public deselectElement = (evt) => {
+  private deselectElement:EventListener = (evt: MouseEvent) => {
     if (this.selectedElement != null) {
-      this.selectedElement.removeEventListener('mousemove', this.move, true)
-      this.selectedElement.removeEventListener('mouseout', this.deselect, true)
-      this.selectedElement.removeEventListener('onmouseup', this.deselect, true)
+      this.selectedElement.removeEventListener('mousemove', this.moveElement, true)
+      this.selectedElement.removeEventListener('mouseout', this.deselectElement, true)
+      this.selectedElement.removeEventListener('onmouseup', this.deselectElement, true)
       this.selectedElement = null
     }
   }
   augment(doc: SVGElement) {
+    this.svgDoc = doc
     //http://www.petercollingridge.co.uk/interactive-svg-components/draggable-svg-element
-    this.visit(doc)
+    this.visit(this.svgDoc)
   }
 
   visit(currentElement: SVGElement) {
@@ -78,7 +83,7 @@ export class SvgEditor {
           // all nodes with child nodes
           // others are irrelevant
 
-          console.log('added eventlistener to ', tag)
+          //console.log('added eventlistener to ', tag)
           tag.setAttributeNS(null, 'pointer-events', 'all')
           tag.addEventListener('mousedown', this.selectElement, true)
 

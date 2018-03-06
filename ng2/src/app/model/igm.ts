@@ -1,6 +1,6 @@
 
 import { GCodeVector } from './vector'
-import { SVGModelSettings } from './model.settings.service'
+import { IGMModelSettings } from './model.settings.service'
 export class IgmPath {
 
 }
@@ -95,7 +95,7 @@ export class IGM {
 
   }
 
-  public applyModifications(settings: SVGModelSettings) {
+  public applyModifications(settings: IGMModelSettings) {
     const paths = this.alllayers
     console.info('Nr of Shapes: ', paths.length)
 

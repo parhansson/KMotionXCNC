@@ -36,7 +36,6 @@
     "opentype.js": "^0.7.3",
     "pdfjs-dist": "^2.0.108",
     "rxjs": "5.5.6",
-    "svg-catmull-rom-spline": "^0.0.1",
     "three": "0.89.0",
     "zone.js": "0.8.20"
   },

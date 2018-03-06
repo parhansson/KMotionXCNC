@@ -10,7 +10,7 @@ export class SvgPreviewComponent {
   @ViewChild('preview')
   private previewContainer: ElementRef
   private svgEditor: SvgEditor
-
+  private svgDoc: SVGElement
   constructor(private staticTransformer: StaticTransformer) {
     this.svgEditor = new SvgEditor()
   }
@@ -20,11 +20,10 @@ export class SvgPreviewComponent {
     //Open in new window
     //let blob = new Blob([svg], { type: 'image/svg+xml' });
     //window.open(window.URL.createObjectURL(blob));
-    let doc: SVGElement
-    if (typeof svg  === 'string') {
-       doc = new DOMParser().parseFromString(svg, 'image/svg+xml').documentElement as any as SVGElement
+    if (typeof svg === 'string') {
+      this.svgDoc = new DOMParser().parseFromString(svg, 'image/svg+xml').documentElement as any as SVGElement
     } else {
-      doc = svg
+      this.svgDoc = svg
     }
 
     const node = this.previewContainer.nativeElement as Element
@@ -32,12 +31,13 @@ export class SvgPreviewComponent {
       node.removeChild(node.firstChild)
     }
 
-    this.svgEditor.augment(doc)
-    node.appendChild(doc)
+    this.svgEditor.augment(this.svgDoc)
+    node.appendChild(this.svgDoc)
 
-    //TODO only content of currently loaded gcode file is changed not the file name
-    //this.staticTransformer.transform('image/svg+xml', svg)
   }
-
+  transformGCode() {
+    //TODO only content of currently loaded gcode file is changed not the file name
+    this.staticTransformer.transform('image/svg+xml', this.svgDoc)
+  }
 
 }

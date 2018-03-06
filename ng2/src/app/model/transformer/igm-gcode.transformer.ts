@@ -1,5 +1,5 @@
 import { IGM, IgmObject, GCodeSource, BoundRect } from '../igm'
-import { SVGModelSettings } from '../model.settings.service'
+import { IGMModelSettings } from '../model.settings.service'
 import { ModelTransformer } from './model.transformer'
 import { Observer } from 'rxjs/Rx'
 
@@ -47,7 +47,7 @@ export class Igm2GcodeTransformer extends ModelTransformer<IGM, GCodeSource>{
   name: 'IGM to G-Code'
   inputMime: ['application/x-kmx-gcode']
   outputMime: 'application/x-gcode'
-  constructor(private settings: SVGModelSettings) {
+  constructor(private settings: IGMModelSettings) {
     super()
   }
 
