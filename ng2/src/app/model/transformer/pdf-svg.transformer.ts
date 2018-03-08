@@ -1,7 +1,11 @@
 import { Observer } from 'rxjs/Rx'
 import { ModelSettingsService, ModelSettings } from '../model.settings.service'
 import { ModelTransformer } from './model.transformer'
-import { PDFJS as pdfjs} from 'pdfjs-dist'
+//import { PDFJS as pdfjs} from 'pdfjs-dist'
+//import PDFJ from 'pdf'
+//import 'pdfjs-dist/build/pdf.worker'
+import * as _PDFJSStatic from 'pdfjs-dist'
+const PDFJS:PDFJSStatic = _PDFJSStatic
 
 export class Pdf2SvgTransformer extends ModelTransformer<ArrayBuffer, SVGElement> {
   transformerSettings: ModelSettings
@@ -15,15 +19,18 @@ export class Pdf2SvgTransformer extends ModelTransformer<ArrayBuffer, SVGElement
     //this will use base64 encoded instead of bloburls for images
     //PDFJS.disableCreateObjectURL = true;
     //
-    const PDFJS:PDFJSStatic = pdfjs
+    
     PDFJS.disableFontFace = true
-    PDFJS.workerSrc='assets/pdf.worker.js'
+    PDFJS.disableWorker = true
+    //PDFJS.workerSrc='assets/pdf.worker.js'
+    //_PDFJSStatic.GlobalWorkerOptions.workerSrc = 'pdf.worker.js'
+    //PDFJS.workerSrc='pdf.worker.js'
     // Fetch the PDF document from the URL using promises
     const transformer = this
     const scale = transformer.transformerSettings.pdf.scale
     const page = transformer.transformerSettings.pdf.page
     const rotate = transformer.transformerSettings.pdf.rotate
-    
+
     PDFJS.getDocument(source).then((pdf) => {
       const numPages = pdf.numPages
       // Using promise to fetch the page

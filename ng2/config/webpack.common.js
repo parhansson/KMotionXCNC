@@ -7,13 +7,34 @@ module.exports = {
   entry: {
     'polyfills': './src/polyfills.ts',
     'vendor': './src/vendor.ts',
-    'app': './src/main.ts'
+    'app': './src/main.ts',
+    //'pdf.worker': 'pdfjs-dist/build/pdf.worker.entry'
+    //'pdf.worker': 'pdfjs-dist/build/pdf.worker'
   },
+  optimization: {
+    runtimeChunk: false,
+    splitChunks: {
+      chunks: "all",
+      // chunks: "initial",
+      // cacheGroups: {
+      // //     default: false,
+      // //     vendors: false,
+      //   commons: {
+      //     test: /[\\/]node_modules[\\/]/,
+      //     name: "vendors",
+      //     chunks: "all"
+      //   }            
+      // },
+    },
+},
 
   resolve: {
     //extensions: ['', '.js', '.ts']
     //extensions: ['*', '.js', '.ts']
-    extensions: ['.js', '.ts']
+    extensions: ['.js', '.ts'],
+    alias: {
+      'three/three-trackballcontrols': helpers.root('node_modules/three/examples/js/controls/TrackballControls.js')
+    }
   },
 
   module: {
@@ -26,7 +47,14 @@ module.exports = {
           configFile: './tslint.json',
           emitErrors: false,
           failOnHint: false
-      }
+        }
+      },
+      {
+        test: /TrackballControls\.js$/,
+        loader: 'imports-loader',
+        options : {
+          THREE :'three'
+        }
       },
       {
         test: /\.component.ts$/,
@@ -52,9 +80,13 @@ module.exports = {
         loader: 'html-loader'
       },
       {
-        test: /pdf.worker.js$/,
-        loader: 'file-loader',
-        options: { name: 'assets/[name].[ext]' }
+        test: /pdf\.worker\.js$/,
+        loader: 'worker-loader',
+        options: { publicPath: '/assets/' }
+        // loader: 'file-loader',
+        // options: { 
+        //   name: 'assets/[name].[ext]'
+        // }
       },
       {
         test: /\.(png|jpe?g|gif|svg|woff|woff2|ttf|eot|ico)$/,
@@ -64,8 +96,6 @@ module.exports = {
       {
         test: /\.css$/,
         exclude: helpers.root('src', 'app'),
-        //use: ExtractTextPlugin.extract({ fallbackLoader: 'style-loader', loader: 'css?sourceMap'})
-        //loader: ExtractTextPlugin.extract({ fallback: 'style-loader', use: 'css-loader' })
         loader: ExtractTextPlugin.extract({ 
           fallback: 'style-loader', 
           use: { 
@@ -81,23 +111,22 @@ module.exports = {
         include: helpers.root('src', 'app'),
         loader: 'raw-loader'
       }
-    ]
+    ],
+    noParse: [
+      /pdfjs-dist\/build\/pdf\.js$/,
+      /pdfjs-dist\/build\/pdf\.min\.js$/,
+      /pdfjs-dist\/build\/pdf\.worker\.js$/
+    ],
   },
 
   plugins: [
     // Workaround for angular/angular#11580
     new webpack.ContextReplacementPlugin(
       // The (\\|\/) piece accounts for path separators in *nix and Windows
-      ///angular(\\|\/)core(\\|\/)(esm(\\|\/)src|src)(\\|\/)linker/,
-      ///angular(\\|\/)core(\\|\/)@angular/,
       /\@angular(\\|\/)core(\\|\/)esm5/, 
       helpers.root('./src'), // location of your src
       {} // a map of your routes
     ),
-    
-    new webpack.optimize.CommonsChunkPlugin({
-      names: ['app', 'vendor', 'polyfills', 'manifest']
-    }),
 
     new HtmlWebpackPlugin({
       template: 'src/index.html'
@@ -105,9 +134,6 @@ module.exports = {
     /*
         new webpack.ProvidePlugin({
           "StringView": "vendor/mozilla/stringview.js"
-        }) 
-        new webpack.ProvidePlugin({
-          "THREE": "three"
         }) 
         */
   ]
