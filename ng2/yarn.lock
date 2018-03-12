@@ -534,7 +534,7 @@ autoprefixer@^7.2.3:
     postcss "^6.0.17"
     postcss-value-parser "^3.2.3"
 
-awesome-typescript-loader@^5.0.0-0:
+awesome-typescript-loader@^5.0.0-1:
   version "5.0.0-1"
   resolved "https://registry.yarnpkg.com/awesome-typescript-loader/-/awesome-typescript-loader-5.0.0-1.tgz#ab618ae4071f714825f0306871a0452fd1b347e8"
   dependencies:
@@ -5149,9 +5149,9 @@ opener@^1.4.3:
   version "1.4.3"
   resolved "https://registry.yarnpkg.com/opener/-/opener-1.4.3.tgz#5c6da2c5d7e5831e8ffa3964950f8d6674ac90b8"
 
-opentype.js@^0.7.3:
-  version "0.7.3"
-  resolved "https://registry.yarnpkg.com/opentype.js/-/opentype.js-0.7.3.tgz#40fb8ce18bfd60e74448efdfe442834098397aab"
+opentype.js@^0.8.0:
+  version "0.8.0"
+  resolved "https://registry.yarnpkg.com/opentype.js/-/opentype.js-0.8.0.tgz#acabcfa1642fbe894a3e4d759e43ba694e02bd35"
   dependencies:
     tiny-inflate "^1.0.2"
 
@@ -5411,7 +5411,7 @@ pbkdf2@^3.0.3:
     safe-buffer "^5.0.1"
     sha.js "^2.4.8"
 
-pdfjs-dist@^2.0.419:
+pdfjs-dist@^2.0.428:
   version "2.0.428"
   resolved "https://registry.yarnpkg.com/pdfjs-dist/-/pdfjs-dist-2.0.428.tgz#2b100c8ce69a921433b0fa92abda06fd9675e966"
   dependencies:
@@ -7005,7 +7005,7 @@ strip-json-comments@~2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/strip-json-comments/-/strip-json-comments-2.0.1.tgz#3c531942e908c2697c0ec344858c286c7ca0a60a"
 
-style-loader@^0.20.2:
+style-loader@^0.20.2, style-loader@^0.20.3:
   version "0.20.3"
   resolved "https://registry.yarnpkg.com/style-loader/-/style-loader-0.20.3.tgz#ebef06b89dec491bcb1fdb3452e913a6fd1c10c4"
   dependencies:
@@ -7628,7 +7628,7 @@ webpack-bundle-analyzer@^2.11.1:
     opener "^1.4.3"
     ws "^4.0.0"
 
-webpack-cli@^2.0.10:
+webpack-cli@^2.0.11:
   version "2.0.11"
   resolved "https://registry.yarnpkg.com/webpack-cli/-/webpack-cli-2.0.11.tgz#9493fad75fe948a80cfa38c72e56d2f812a42145"
   dependencies:
@@ -7689,7 +7689,7 @@ webpack-dev-middleware@^2.0.6:
     url-join "^2.0.2"
     webpack-log "^1.0.1"
 
-webpack-dev-server@^3.0.1-beta.0, webpack-dev-server@^3.1.0:
+webpack-dev-server@^3.0.1-beta.0, webpack-dev-server@^3.1.1:
   version "3.1.1"
   resolved "https://registry.yarnpkg.com/webpack-dev-server/-/webpack-dev-server-3.1.1.tgz#3c0fdd1ba3b50ebc79858a0e6b9ccdd1565b0c24"
   dependencies:

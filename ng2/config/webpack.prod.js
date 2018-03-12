@@ -24,14 +24,14 @@ module.exports = webpackMerge(commonConfig, {
   plugins: [
     new webpack.NoEmitOnErrorsPlugin(),
     //new webpack.optimize.DedupePlugin(),
-    new webpack.optimize.UglifyJsPlugin({ // https://github.com/angular/angular/issues/10618
-      mangle: {
-        keep_fnames: true
-      },
-      compress: {
-        warnings: true
-      }
-    }),
+    // new webpack.optimize.UglifyJsPlugin({ // https://github.com/angular/angular/issues/10618
+    //   mangle: {
+    //     keep_fnames: true
+    //   },
+    //   compress: {
+    //     warnings: true
+    //   }
+    // }),
     new ExtractTextPlugin({
       filename: '[name].[contenthash].css',
       allChunks: true
