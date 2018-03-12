@@ -21,9 +21,9 @@ export class Pdf2SvgTransformer extends ModelTransformer<ArrayBuffer, SVGElement
     //
     
     PDFJS.disableFontFace = true
-    PDFJS.disableWorker = true
+    PDFJS.disableWorker = true;
     //PDFJS.workerSrc='assets/pdf.worker.js'
-    //_PDFJSStatic.GlobalWorkerOptions.workerSrc = 'pdf.worker.js'
+    (PDFJS as any).GlobalWorkerOptions.workerSrc = 'pdf.worker.js'
     //PDFJS.workerSrc='pdf.worker.js'
     // Fetch the PDF document from the URL using promises
     const transformer = this

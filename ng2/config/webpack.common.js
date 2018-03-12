@@ -8,8 +8,7 @@ module.exports = {
     'polyfills': './src/polyfills.ts',
     'vendor': './src/vendor.ts',
     'app': './src/main.ts',
-    //'pdf.worker': 'pdfjs-dist/build/pdf.worker.entry'
-    //'pdf.worker': 'pdfjs-dist/build/pdf.worker'
+    'pdf.worker': 'pdfjs-dist/build/pdf.worker.entry'
   },
   optimization: {
     runtimeChunk: false,
@@ -78,15 +77,6 @@ module.exports = {
       {
         test: /\.html$/,
         loader: 'html-loader'
-      },
-      {
-        test: /pdf\.worker\.js$/,
-        loader: 'worker-loader',
-        options: { publicPath: '/assets/' }
-        // loader: 'file-loader',
-        // options: { 
-        //   name: 'assets/[name].[ext]'
-        // }
       },
       {
         test: /\.(png|jpe?g|gif|svg|woff|woff2|ttf|eot|ico)$/,
