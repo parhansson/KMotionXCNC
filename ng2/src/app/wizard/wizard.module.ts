@@ -8,6 +8,8 @@ import { TextWizardComponent } from './text-wizard.component'
 import { JigsawWizardComponent } from './jigsaw-wizard.component'
 import { SvgPreviewComponent } from './svg-preview.component'
 import { ImportWizardComponent } from './import-wizard.component'
+import { PatternWizardComponent } from './pattern-wizard.component'
+  
 @NgModule({
   imports: [
     CommonModule,
@@ -19,6 +21,7 @@ import { ImportWizardComponent } from './import-wizard.component'
     ImportWizardComponent,
     JigsawWizardComponent,
     MitreBoxWizardComponent,
+    PatternWizardComponent,
     SvgPreviewComponent,
     TextWizardComponent
   ], 
@@ -26,6 +29,7 @@ import { ImportWizardComponent } from './import-wizard.component'
     ImportWizardComponent,
     JigsawWizardComponent,
     MitreBoxWizardComponent,
+    PatternWizardComponent,
     SvgPreviewComponent,
     TextWizardComponent
   ],  

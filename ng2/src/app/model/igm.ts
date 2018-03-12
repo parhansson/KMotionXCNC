@@ -16,6 +16,13 @@ export class IgmObject {
   constructor() {
 
   }
+  clone(): IgmObject {
+    const copy = new IgmObject()
+    for (const vec of this.vectors) {
+      copy.vectors.push(new GCodeVector(vec.x, vec.y, vec.z, vec.a, vec.b, vec.c))
+    }
+    return copy
+  }
   start() {
     return this.vectors[0]
   }
@@ -23,19 +30,21 @@ export class IgmObject {
     return this.vectors[this.vectors.length - 1]
   }
 
-  translate(translateVec: GCodeVector) {
+  translate(translateVec: GCodeVector): IgmObject {
     let subidx = this.vectors.length
     while (subidx--) {
       const vec = this.vectors[subidx]
       vec.add(translateVec)
     }
+    return this
   }
-  scale(ratio: number) {
+  scale(ratio: number): IgmObject {
     let subidx = this.vectors.length
     while (subidx--) {
       const vec = this.vectors[subidx]
       vec.scale(ratio)
     }
+    return this
   }
   rotate() { //TODO
     //transpose coordinates
