@@ -2,7 +2,7 @@
   "name": "laser",
   "description": "My cheap laser",
   "dimX": 300,
-  "dimY": 200,
+  "dimY": 210,
   "dimZ": 60,
   "initProgram": "KMX",
   "initThread": 1,
@@ -23,7 +23,7 @@
     },
     {
       "name": "Z",
-      "countsPerUnit": 40640,
+      "countsPerUnit": 81280,
       "maxAccel": 40,
       "maxVel": 40,
       "jogVel": 2000
@@ -248,7 +248,10 @@
       "name": "Blinka3"
     },
     {
-      "action": 0
+      "action": "4",
+      "name": "Enable",
+      "dParam0": 2,
+      "file": "settings/c-programs/EnableAxes.c"
     },
     {
       "action": 0

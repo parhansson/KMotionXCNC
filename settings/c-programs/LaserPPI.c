@@ -164,7 +164,7 @@ main() {
 
   SET_LASER_STATE(OFF);
 
-  if(ppi == 0){
+  if(ppi == 0.0){
       printf("Mode Constant\n");
       for (;;) {
         WaitNextTimeSlice(); // No need to update more often
