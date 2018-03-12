@@ -5189,10 +5189,6 @@ silent-error@^1.0.0:
   dependencies:
     debug "^2.2.0"
 
-simplify-js@^1.2.1:
-  version "1.2.3"
-  resolved "https://registry.yarnpkg.com/simplify-js/-/simplify-js-1.2.3.tgz#a3422c1b9884d60421345eb44d2b872662df27f5"
-
 slash@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/slash/-/slash-1.0.0.tgz#c41f2f6c39fc16d1cd17ad4b5d896114ae470d55"
@@ -5560,12 +5556,6 @@ supports-color@^5.2.0:
   resolved "https://registry.yarnpkg.com/supports-color/-/supports-color-5.2.0.tgz#b0d5333b1184dd3666cbe5aa0b45c5ac7ac17a4a"
   dependencies:
     has-flag "^3.0.0"
-
-svg-catmull-rom-spline@^0.0.1:
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/svg-catmull-rom-spline/-/svg-catmull-rom-spline-0.0.1.tgz#ae3bf714db19ad0a7657d76056c3da8b1856cfd8"
-  dependencies:
-    simplify-js "^1.2.1"
 
 svgo@^0.7.0:
   version "0.7.2"
