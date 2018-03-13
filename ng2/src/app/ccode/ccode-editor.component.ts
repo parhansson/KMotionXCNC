@@ -6,12 +6,23 @@ import { FileResource, FileStoreToken, FileStore, DefaultFileStore } from '../re
 @Component({
   selector: 'ccode-editor',
   template: `
-    <code-editor id="ccodeEditor" mode="c_cpp" >
+    <code-editor mode="c_cpp" >
       <div buttons>
         <span class="btn btn-primary glyphicon glyphicon-link" title="Compile" (click)="onCompile()"></span>
         <span class="btn btn-primary glyphicon glyphicon-transfer" title="Compile and Execute" (click)="onCompile()"></span>
       </div>
     </code-editor>`,
+  styles : [
+  `
+  :host {
+    display: block;
+  }`,
+  `
+  code-editor {
+    display: block;
+    height: 80vh;
+  }`,
+],
   viewProviders: [
     { provide: FileStoreToken, useClass: DefaultFileStore }
   ]

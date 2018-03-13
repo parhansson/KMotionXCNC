@@ -36,7 +36,17 @@ import * as THREE from 'three'
         <user-defined-buttons></user-defined-buttons>
       </div>
     </div>  
-  `
+  `,
+  styles: [
+    `
+    .threerenderer {
+      background-color: #EEEEEE;
+      height: 600px;
+      display: block;
+    }
+    `,
+    '.fill { min-height: 100%;}'
+  ]
 })
 export class GCodeScreenComponent {
   @ViewChild(ThreeViewComponent)

@@ -1,0 +1,44 @@
+div.status {
+  color:green
+}
+
+div.output {
+  color:black
+}
+div.error {
+  color:red
+}
+div.console {
+  color:blue;
+  
+}
+.log-post > .outgoing::before{
+  content:"SENT: ";
+  color:green;
+}
+.log-post > .incomming::before{
+  content:"RECEIVED: ";
+  color:blue;
+}
+
+.log-post > .error::before{
+  content:"ERROR: ";
+  color:red;
+}
+.log-post > .info::before{
+  content:"INFO: ";
+  color:black;
+}
+
+.status_message {
+  width: 100%;
+  height: 100px;
+  padding: 3px;
+  margin-bottom: 3px;
+  border: 1px solid #9ac;
+  overflow: scroll;
+}
+
+.status_small {
+  font-size: 8px;
+}

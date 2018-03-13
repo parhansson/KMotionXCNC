@@ -1,4 +1,4 @@
-import { Component, Inject, Input, ViewChild } from '@angular/core'
+import { Component, Inject, Input, ViewChild, ViewEncapsulation } from '@angular/core'
 import { AceDirective } from './ace.directive'
 import { KMXUtil } from '../util/kmxutil'
 import {
@@ -15,7 +15,9 @@ import {
 
 @Component({
   selector: 'code-editor',
-  templateUrl: './ace-editor.component.html'
+  templateUrl: './ace-editor.component.html',
+  styleUrls: ['./ace-editor.component.css'],
+  encapsulation: ViewEncapsulation.None
 
 })
 export class AceEditorComponent {

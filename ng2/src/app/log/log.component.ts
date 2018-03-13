@@ -15,7 +15,8 @@ import { LimitBuffer } from '../util'
 
 @Component({
   selector: 'kmx-log',
-  templateUrl: './log.component.html'
+  templateUrl: './log.component.html',
+  styleUrls: ['./log.component.css']
 })
 export class LogComponent implements OnInit, OnDestroy, AfterViewChecked {
   @Input()

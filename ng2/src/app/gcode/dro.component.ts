@@ -19,7 +19,8 @@ import { SettingsService, Machine } from '../settings/settings.service'
               </span>
           </div>
       </div>    
-    `
+    `,
+    styleUrls: ['./dro.component.css']
 })
 export class DroComponent {
     droAxes = ['X', 'Y', 'Z']

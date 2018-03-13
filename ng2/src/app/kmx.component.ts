@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core'
+import { Component, HostBinding, Inject } from '@angular/core'
 import { ActivatedRoute, Router } from '@angular/router'
 
 import { SocketService } from './backend/socket.service'
@@ -8,7 +8,10 @@ import { BackendService } from './backend/backend.service'
 @Component({
     selector: 'kmx-app',
     templateUrl: './kmx.component.html',
-    styles: ['.router-link-active { background-color: #AAA; }'],
+    styles: [
+        '.router-link-active { background-color: #AAA; }',
+        ':host.import a.importer {color:red}'
+    ],
     host: {
         '(dragover)': 'processDragOverOrEnter($event)',
         '(dragenter)': 'processDragOverOrEnter($event)',
@@ -24,20 +27,25 @@ export class KmxComponent {
         this.intStatus = this.socketService.data
         //socketService.simluateObservable.subscribe(()=>this.intStatus = this.socketService.data)
     }
+    // alternatively also the host parameter in the @Component()` decorator can be used
+    @HostBinding('class.import')
+    dragOver: boolean = false
+
     onSimulate() {
         this.backend.onSimulate()
     }
     processDrop(event:DragEvent){
         event.preventDefault()
         event.stopImmediatePropagation()
+        this.dragOver = false
     }
     processDragExit(){
         //this.router.navigateByUrl('/gcode', {relativeTo:this.route});
-        document.body.classList.remove('import')
+        this.dragOver = false
      }  
   
     processDragOverOrEnter(){
        //this.router.navigateByUrl('/import', {relativeTo:this.route});
-       document.body.classList.add('import')
+       this.dragOver = true
     }    
 }

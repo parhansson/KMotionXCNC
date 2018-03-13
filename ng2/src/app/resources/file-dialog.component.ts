@@ -28,8 +28,21 @@ import { Payload } from './payload'
         </div>
       </div>
       </div>
-    `
-
+    `,
+    styles : [
+    `.modal-file-list {
+        height: 300px;
+        width: 97%;
+        padding: 3px;
+        margin-bottom: 3px;
+        border: 1px solid #79f;
+        font-size: 12px;
+        color: #753;
+        white-space: pre;
+        word-wrap: normal;
+        overflow-x: scroll;
+        cursor: pointer;
+    }`]
 })
 export class FileDialogComponent {
   @Input() resource: FileResource

@@ -12,7 +12,14 @@ import { BackendService } from '../backend/backend.service'
         (click)="onUserButton(index, action)">{{action.name || '[Unnamed]'}}
       </button>
     </span>   
-    `
+    `,
+    styles: [`
+    .btn-grid {
+      width:32%;
+      margin-top:2px;
+      margin-bottom: 2px;
+    }
+  `]
 })
 export class UserButtonsComponent {
   userActions: Action[] = []

@@ -11,7 +11,7 @@ import * as THREE from 'three'
   //     <div (window:resize)="onResize2($event)">
   //     </div>    
   //   `
-  template: '<div></div>'
+  template: ''
 })
 export class ThreeViewComponent implements AfterViewInit {
   private renderer: THREE.WebGLRenderer

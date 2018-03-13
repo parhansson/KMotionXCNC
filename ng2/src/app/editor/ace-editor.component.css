@@ -1,0 +1,19 @@
+.ace_gutter-active-line::before {
+  font-family: 'Glyphicons Halflings';
+  content:"\e072";
+}
+div[file-dropzone] {
+  height :100%;
+}
+file-path {
+  display: inline-block;
+}
+.codeEditor {
+  height :100%;
+}
+
+/* Not working need to set direct on element */
+/* .ace_editor {
+  height: '100%';
+  width: '100%';
+} */

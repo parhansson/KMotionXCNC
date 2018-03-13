@@ -46,9 +46,6 @@ export class AceDirective {
         this.textChanged = new EventEmitter<AceAjax.EditorChangeEvent>()
 
         const el = elementRef.nativeElement as HTMLElement
-        el.classList.add('editor')
-        //el.style.height = '250px';
-        //el.style.width = '300px';
         el.style.height = '100%'
         el.style.width = '100%'
 

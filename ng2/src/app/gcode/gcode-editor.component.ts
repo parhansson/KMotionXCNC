@@ -8,8 +8,21 @@ import { BackendService } from '../backend/backend.service'
 @Component({
   selector: 'gcode-editor',
   template: `
-        <code-editor id="gcodeEditor" mode="gcode"></code-editor>
+        <code-editor mode="gcode"></code-editor>
   `,
+  styles : [
+    `
+    :host {
+      display: block;
+      height:340px;
+    }`,
+    `
+    code-editor {
+      display: block;
+      width:400px;
+      height:300px;
+    }`,
+  ],  
   viewProviders: [
     { provide: FileStoreToken, useClass: TransformingFileStore }
   ]
