@@ -8,8 +8,8 @@ import { FileResource, FileStoreToken, FileStore, DefaultFileStore } from '../re
   template: `
     <code-editor mode="c_cpp" >
       <div buttons>
-        <span class="btn btn-primary glyphicon glyphicon-link" title="Compile" (click)="onCompile()"></span>
-        <span class="btn btn-primary glyphicon glyphicon-transfer" title="Compile and Execute" (click)="onCompile()"></span>
+        <span class="btn btn-primary fa fa-link" title="Compile" (click)="onCompile()"></span>
+        <span class="btn btn-primary fa fa-exchange" title="Compile and Execute" (click)="onCompile()"></span>
       </div>
     </code-editor>`,
   styles : [

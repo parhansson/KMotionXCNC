@@ -1,3 +1,4 @@
+const webpack = require('webpack');
 const webpackMerge = require('webpack-merge');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const commonConfig = require('./webpack.common.js');
@@ -7,6 +8,7 @@ const helpers = require('./helpers');
 const baseHref = '/kmx/'
 
 module.exports = webpackMerge(commonConfig, {
+  mode: 'development',
   devtool: 'cheap-module-eval-source-map',
 
   output: {
@@ -22,6 +24,11 @@ module.exports = webpackMerge(commonConfig, {
       filename: '[name].css',
       allChunks: true
     })
+    // ,
+    // new webpack.WatchIgnorePlugin([
+    //   /\.js$/,
+    //   /\.d\.ts$/
+    // ])
   ],
 
   devServer: {
@@ -50,10 +57,10 @@ module.exports = webpackMerge(commonConfig, {
     ],
     //bug in filesystem events on osx
     //hence watchoptions added 
-    watchOptions: {
-      aggregateTimeout: 300,
-      poll: 500,
-      ignored: /node_modules/
-    }
+    // watchOptions: {
+    //   aggregateTimeout: 300,
+    //   poll: 500,
+    //   ignored: /node_modules/
+    // }
   }
 });

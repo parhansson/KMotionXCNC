@@ -4,6 +4,7 @@ var ExtractTextPlugin = require('extract-text-webpack-plugin');
 var helpers = require('./helpers');
 
 module.exports = {
+
   entry: {
     'polyfills': './src/polyfills.ts',
     'vendor': './src/vendor.ts',
@@ -25,11 +26,11 @@ module.exports = {
       //   }            
       // },
     },
-},
-
+  },
   resolve: {
-    //extensions: ['', '.js', '.ts']
-    //extensions: ['*', '.js', '.ts']
+    //added es2015 for use with angular instead of esm5
+    //mainFields: ["browser", "es2015", "module", "main"],
+    
     extensions: ['.js', '.ts'],
     alias: {
       'three/three-trackballcontrols': helpers.root('node_modules/three/examples/js/controls/TrackballControls.js')
@@ -110,14 +111,16 @@ module.exports = {
   },
 
   plugins: [
-    // Workaround for angular/angular#11580
     new webpack.ContextReplacementPlugin(
       // The (\\|\/) piece accounts for path separators in *nix and Windows
-      /\@angular(\\|\/)core(\\|\/)esm5/, 
-      helpers.root('./src'), // location of your src
-      {} // a map of your routes
+    
+      // For Angular 5, see also https://github.com/angular/angular/issues/20357#issuecomment-343683491
+      /\@angular(\\|\/)core(\\|\/)fesm5/,
+      helpers.root('src'), // location of your src
+      {
+        // your Angular Async Route paths relative to this root directory
+      }
     ),
-
     new HtmlWebpackPlugin({
       template: 'src/index.html'
     }),

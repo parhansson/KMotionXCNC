@@ -1,5 +1,5 @@
 import { Injectable, Inject, SkipSelf } from '@angular/core'
-import { Observable, Subject } from 'rxjs/Rx'
+import { Observable, Subject } from 'rxjs'
 import { FileResource, Payload, IFileBackend, FileServiceToken, FileStore } from '../resources'
 import { BackendService } from '../backend/backend.service'
 import { StaticTransformer } from './transformers'

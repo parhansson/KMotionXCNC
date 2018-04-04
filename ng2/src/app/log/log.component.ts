@@ -8,10 +8,9 @@ import {
   ViewChild,
   AfterViewChecked
 } from '@angular/core'
-import { Observable, Subscription } from 'rxjs/Rx'
+import { Observable, Subscription } from 'rxjs'
 import { LogService, LogMessage } from './log.service'
 import { LogSubject } from './log-subject'
-import { LimitBuffer } from '../util'
 
 @Component({
   selector: 'kmx-log',
@@ -31,7 +30,6 @@ export class LogComponent implements OnInit, OnDestroy, AfterViewChecked {
   @Input()
   autoscroll: boolean = true
   logs: LogMessage[] = []
-  private buffer = new LimitBuffer<LogMessage>()
 
   @ViewChild('scrollContainer')
   private scrollContainer: ElementRef

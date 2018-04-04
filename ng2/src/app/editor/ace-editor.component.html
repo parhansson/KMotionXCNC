@@ -1,9 +1,9 @@
 <file-dialog #fd (selectedFile)="onFile($event)" [resource]="resource"></file-dialog>
 <div>
   <span class="glyphButtonBar">
-      <span class="btn btn-primary glyphicon glyphicon-folder-open" title="Open" (click)="fd.show()"></span>
-      <span class="btn btn-primary glyphicon glyphicon-floppy-save" title="Save" (click)="onSave()"></span>
-      <span class="btn btn-primary glyphicon glyphicon-floppy-save" title="Save As" (click)="onSaveAs()"></span>
+      <span class="btn btn-primary fa fa-folder-open" title="Open" (click)="fd.show()"></span>
+      <span class="btn btn-primary fa fa-save" title="Save" (click)="onSave()"></span>
+      <span class="btn btn-primary fa fa-save" title="Save As" (click)="onSaveAs()"></span>
   </span>
   <ng-content select="div[buttons]"></ng-content>
 </div>

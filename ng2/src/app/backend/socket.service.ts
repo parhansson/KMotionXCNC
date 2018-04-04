@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core'
-import { Subject, BehaviorSubject } from 'rxjs/Rx'
+import { Subject, BehaviorSubject } from 'rxjs'
 import { LogService, LogLevel } from '../log'
 import { SerializedObject } from '../util'
 import { KmxStatus, ControlMessagePayload, ControlMessage } from '../hal/kflop'

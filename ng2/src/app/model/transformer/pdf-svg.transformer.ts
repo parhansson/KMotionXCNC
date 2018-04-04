@@ -1,11 +1,11 @@
-import { Observer } from 'rxjs/Rx'
+import { Observer } from 'rxjs'
 import { ModelSettingsService, ModelSettings } from '../model.settings.service'
 import { ModelTransformer } from './model.transformer'
 //import { PDFJS as pdfjs} from 'pdfjs-dist'
 //import PDFJ from 'pdf'
 //import 'pdfjs-dist/build/pdf.worker'
-import * as _PDFJSStatic from 'pdfjs-dist'
-const PDFJS:PDFJSStatic = _PDFJSStatic
+import * as PDFJS from 'pdfjs-dist'
+//const PDFJS:PDFJSStatic = _PDFJSStatic
 
 export class Pdf2SvgTransformer extends ModelTransformer<ArrayBuffer, SVGElement> {
   transformerSettings: ModelSettings
@@ -21,10 +21,13 @@ export class Pdf2SvgTransformer extends ModelTransformer<ArrayBuffer, SVGElement
     //
     
     PDFJS.disableFontFace = true
-    PDFJS.disableWorker = true;
-    //PDFJS.workerSrc='assets/pdf.worker.js'
-    (PDFJS as any).GlobalWorkerOptions.workerSrc = 'pdf.worker.js'
-    //PDFJS.workerSrc='pdf.worker.js'
+    PDFJS.disableWorker = false
+    //currently does not work. fake worker is used
+    PDFJS.GlobalWorkerOptions.workerSrc = 'pdf.worker.js'
+    //Another option is to set workerPort instead of workerSrc althogh workerSrc is promoted
+    //var PdfjsWorker = require('worker-loader!./build/pdf.worker.js')
+    //PDFJS.GlobalWorkerOptions.workerPort = new PdfjsWorker()
+
     // Fetch the PDF document from the URL using promises
     const transformer = this
     const scale = transformer.transformerSettings.pdf.scale
@@ -53,7 +56,7 @@ export class Pdf2SvgTransformer extends ModelTransformer<ArrayBuffer, SVGElement
             //  anchor.appendChild(container);
 
             return page.getOperatorList().then(opList => {
-              const svgGfx: PDFJSExtra.SVGGraphics = new PDFJS.SVGGraphics(page.commonObjs, page.objs)
+              const svgGfx: PDFJSStatic.SVGGraphics = new PDFJS.SVGGraphics(page.commonObjs, page.objs)
               return svgGfx.getSVG(opList, viewport).then(svg => {
                 transformer.logSvg(svg)
                 targetObserver.next(svg)

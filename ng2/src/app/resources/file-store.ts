@@ -1,5 +1,5 @@
 import { InjectionToken } from '@angular/core'
-import { Observable, Subject } from 'rxjs/Rx'
+import { Observable, Subject } from 'rxjs'
 import { FileResource, Payload } from '../resources'
 
 export const FileStoreToken = new InjectionToken('editor-file-store')

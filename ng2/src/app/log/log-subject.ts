@@ -1,8 +1,5 @@
-import { Subject } from 'rxjs/Subject'
-import { Subscriber } from 'rxjs/Subscriber'
-import { Subscription } from 'rxjs/Subscription'
-import { ObjectUnsubscribedError } from 'rxjs/util/ObjectUnsubscribedError'
-import { SubjectSubscription } from 'rxjs/SubjectSubscription'
+import { Observer, Subject,Subscriber, Subscription} from 'rxjs'
+//import { ObjectUnsubscribedError } from 'rxjs/util/ObjectUnsubscribedError'
 import { LimitBuffer } from '../util'
 /**
  * @class LogSubject<T>
@@ -36,7 +33,7 @@ export class LogSubject<T> extends Subject<T> {
     let subscription: Subscription
 
     if (this.closed) {
-      throw new ObjectUnsubscribedError()
+      throw new Error('ObjectUnsubscribedError()')
     } else if (this.hasError) {
       subscription = Subscription.EMPTY
     } else if (this.isStopped) {
@@ -60,4 +57,36 @@ export class LogSubject<T> extends Subject<T> {
     return subscription
   }
 }
+/**
+ * This class is a copy of SubjectSubscription that is no longer exported
+ */
+class SubjectSubscription<T> extends Subscription {
+  closed: boolean = false
 
+  constructor(public subject: Subject<T>, public subscriber: Observer<T>) {
+    super()
+  }
+
+  unsubscribe() {
+    if (this.closed) {
+      return
+    }
+
+    this.closed = true
+
+    const subject = this.subject
+    const observers = subject.observers
+
+    this.subject = null
+
+    if (!observers || observers.length === 0 || subject.isStopped || subject.closed) {
+      return
+    }
+
+    const subscriberIndex = observers.indexOf(this.subscriber)
+
+    if (subscriberIndex !== -1) {
+      observers.splice(subscriberIndex, 1)
+    }
+  }
+}

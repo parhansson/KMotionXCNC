@@ -1,4 +1,4 @@
-import { Observer } from 'rxjs/Rx'
+import { Observer } from 'rxjs'
 import { ModelSettingsService, ModelSettings } from '../model.settings.service'
 import { ModelTransformer } from './model.transformer'
 import { IGM, IgmObject } from '../igm'

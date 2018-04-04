@@ -1,7 +1,7 @@
 import { IGM, IgmObject, GCodeSource, BoundRect } from '../igm'
 import { IGMModelSettings } from '../model.settings.service'
 import { ModelTransformer } from './model.transformer'
-import { Observer } from 'rxjs/Rx'
+import { Observer } from 'rxjs'
 
 
 class GCodeOutput {

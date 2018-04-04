@@ -14,22 +14,12 @@
 //import 'ngx-bootstrap/dropdown'
 //import 'ngx-bootstrap/tabs'
 
-//import 'opentype.js'
 //import 'pdfjs-dist/build/pdf.js'
 //import 'pdfjs-dist/build/pdf.worker.js'
 
+import 'font-awesome/css/font-awesome.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
-import 'bootstrap/dist/css/bootstrap-theme.min.css'
 import './styles.css'
-
-//https://stackoverflow.com/questions/35968047/using-webpack-threejs-examples-and-typescript
-//THREE is modular but not the TrackballControls example
-// imports-loader provides THREE to the TrackballControls example
-// exports-loader gets THREE.TrackballControls
-//import THREE from 'three';
-
-// import * as THREE from 'three'
-// import 'imports-loader?THREE=three!three/examples/js/controls/TrackballControls'
 
 //import 'script-loader!dxf-parser/dist/dxf-parser.js'
 

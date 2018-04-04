@@ -2,7 +2,7 @@ import { Injectable, Inject } from '@angular/core'
 import { BackendService } from '../backend/backend.service'
 import { IFileBackend, FileServiceToken } from '../resources'
 import { KMXUtil } from '../util/kmxutil'
-import { Subject, ReplaySubject } from 'rxjs/Rx'
+import { Subject, ReplaySubject } from 'rxjs'
 
 export class Machine {
   private static mcodes = ['M0', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9', 'S']
@@ -113,6 +113,7 @@ export class Action {
   dParam2?: number
   dParam3?: number
   dParam1?: number
+  dParam4?: number
   file?: string
 }
 export class TPlanner {

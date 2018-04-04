@@ -1,5 +1,5 @@
 import { Component, ViewChild, SkipSelf, Inject } from '@angular/core'
-import { Subject } from 'rxjs/Rx'
+import { Subject } from 'rxjs'
 import { LogComponent } from '../log/log.component'
 import { BackendService } from '../backend/backend.service'
 import { SocketService } from '../backend/socket.service'
