@@ -3,7 +3,7 @@ import { Subject, BehaviorSubject } from 'rxjs'
 import { LogService, LogLevel } from '../log'
 import { SerializedObject } from '../util'
 import { KmxStatus, ControlMessagePayload, ControlMessage } from '../hal/kflop'
-import { LogMessage, TextMessage } from './socket/messages'
+import { LogMessage } from './socket/messages'
 
 import { FileResource } from '../resources'
 
@@ -34,32 +34,32 @@ export class SocketService {
     //      }
   }
   //Message type guards
-  private isText(payload: SerializedObject<any>): payload is SerializedObject<TextMessage> {
-    return payload.key === 'TextMessage'
+  private isText(payload: SerializedObject<any>): payload is SerializedObject<string> {
+    return payload.Command !== undefined
   }
 
   private isControl(payload: SerializedObject<any>): payload is SerializedObject<ControlMessage> {
-    return payload.key === 'ControlMessage'
+    return payload.ControlMessage !== undefined
   }
 
   private isStatus(payload: SerializedObject<any>): payload is SerializedObject<KmxStatus> {
-    return payload.key === 'KmxStatus'
+    return payload.KmxStatus !== undefined
   }
 
   private isLog(payload: SerializedObject<any>): payload is SerializedObject<LogMessage> {
-    return payload.key === 'LogMessage'
+    return payload.LogMessage !== undefined
   }
 
   private onWorkerMessage(event: MessageEvent) {
     const payload = event.data as SerializedObject<any>
     if (this.isText(payload)) {
-      this.onTextMessage(payload.object)
+      this.onTextMessage(payload.Command)
     } else if (this.isControl(payload)) {
-      this.onControlMessage(payload.object)
+      this.onControlMessage(payload.ControlMessage)
     } else if (this.isStatus(payload)) {
-      this.onStatusMessage(payload.object)
+      this.onStatusMessage(payload.KmxStatus)
     } else if (this.isLog(payload)) {
-      this.onLogMessage(payload.object)
+      this.onLogMessage(payload.LogMessage)
     }
   }
 
@@ -67,8 +67,8 @@ export class SocketService {
     this.socketWorker.postMessage({ command: 'acknowledge', id, ret })
   }
 
-  private onTextMessage(textMessage: TextMessage) {
-    if (textMessage.message === 'WorkerReady') {
+  private onTextMessage(textMessage: string) {
+    if (textMessage === 'WorkerReady') {
       const url = 'ws://' + window.location.host + '/ws'
       this.socketWorker.postMessage({ command: 'connect', url })
     }

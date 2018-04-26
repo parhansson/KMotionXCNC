@@ -1,20 +1,18 @@
 
-import { SocketConnector, SocketMessageHandler, JsonSerializer } from '../../util'
+import { SocketConnector, SocketMessageHandler, SerializedObject } from '../../util'
 import { KmxStatusParser, KmxStatus, ControlMessage } from '../../hal/kflop'
-import { LogMessage, TextMessage } from './messages'
+import { LogMessage } from './messages'
 
 export class SocketMessageBroker implements SocketMessageHandler {
 
   socket: SocketConnector
   kmxStatusStream: KmxStatusParser
-  serializer: JsonSerializer
 
   constructor(private messagePort: any) {
     //messagePort.onmessage = this.onmessage.bind(this);
-    this.serializer = new JsonSerializer()
     this.kmxStatusStream = new KmxStatusParser()
     this.socket = new SocketConnector(this, 'KMotionX')
-    this.post(new TextMessage('WorkerReady'))
+    this.post('WorkerReady')
   }
 
   onSocketMessage(data: ArrayBuffer | Blob | string) {
@@ -61,7 +59,7 @@ export class SocketMessageBroker implements SocketMessageHandler {
     } else if (data.command == 'disconnect') {
       //no need to acually disconnect at the moment
       this.socket.destroy()
-      this.post(new TextMessage('done'))
+      this.post('done')
     }
 
   }
@@ -75,8 +73,19 @@ export class SocketMessageBroker implements SocketMessageHandler {
     this.socket.sendMessage(JSON.stringify({ type: 'CB_ACK', id, returnValue: ret }))
   }
 
-  private post(payload: TextMessage | LogMessage | KmxStatus | ControlMessage) {
-    this.messagePort.postMessage(this.serializer.serialize(payload))
+  private post(payload: string | LogMessage | KmxStatus | ControlMessage) {
+    let message:SerializedObject<string | LogMessage | KmxStatus | ControlMessage> 
+    if(payload instanceof KmxStatus) {
+      message = {KmxStatus: payload }
+    } else if(payload instanceof LogMessage) {
+      message = {LogMessage: payload }
+    } else if(payload instanceof ControlMessage) {
+      message = {ControlMessage: payload }
+    } else  {
+      message = {Command: payload }
+    }
+    
+    this.messagePort.postMessage(message)
   }
 
 }
