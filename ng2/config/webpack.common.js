@@ -1,7 +1,8 @@
-var webpack = require('webpack');
-var HtmlWebpackPlugin = require('html-webpack-plugin');
-var ExtractTextPlugin = require('extract-text-webpack-plugin');
-var helpers = require('./helpers');
+const webpack = require('webpack');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const helpers = require('./helpers');
+const rxPaths = require('rxjs/_esm2015/path-mapping');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
 
@@ -9,10 +10,10 @@ module.exports = {
     'polyfills': './src/polyfills.ts',
     'vendor': './src/vendor.ts',
     'app': './src/main.ts',
-    'pdf.worker': 'pdfjs-dist/build/pdf.worker.entry'
+   // 'pdf.worker': 'pdfjs-dist/build/pdf.worker.entry'
   },
   optimization: {
-    runtimeChunk: false,
+    runtimeChunk: 'single',
     splitChunks: {
       chunks: "all",
       // chunks: "initial",
@@ -26,6 +27,8 @@ module.exports = {
       //   }            
       // },
     },
+    noEmitOnErrors: false, // NoEmitOnErrorsPlugin
+    concatenateModules: true //ModuleConcatenationPlugin
   },
   resolve: {
     //added es2015 for use with angular instead of esm5
@@ -33,7 +36,8 @@ module.exports = {
     
     extensions: ['.js', '.ts'],
     alias: {
-      'three/three-trackballcontrols': helpers.root('node_modules/three/examples/js/controls/TrackballControls.js')
+      ...rxPaths(),
+      'three/three-trackballcontrols': 'three/examples/js/controls/TrackballControls'
     }
   },
 
@@ -103,11 +107,11 @@ module.exports = {
         loader: 'raw-loader'
       }
     ],
-    noParse: [
-      /pdfjs-dist\/build\/pdf\.js$/,
-      /pdfjs-dist\/build\/pdf\.min\.js$/,
-      /pdfjs-dist\/build\/pdf\.worker\.js$/
-    ],
+    // noParse: [
+    //   /pdfjs-dist\/build\/pdf\.js$/,
+    //   /pdfjs-dist\/build\/pdf\.min\.js$/,
+    //   /pdfjs-dist\/build\/pdf\.worker\.js$/
+    // ],
   },
 
   plugins: [
@@ -115,6 +119,7 @@ module.exports = {
       // The (\\|\/) piece accounts for path separators in *nix and Windows
     
       // For Angular 5, see also https://github.com/angular/angular/issues/20357#issuecomment-343683491
+      // /\@angular(\\|\/)core(\\|\/)fesm2015/,
       /\@angular(\\|\/)core(\\|\/)fesm5/,
       helpers.root('src'), // location of your src
       {

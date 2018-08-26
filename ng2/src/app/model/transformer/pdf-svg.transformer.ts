@@ -4,7 +4,8 @@ import { ModelTransformer } from './model.transformer'
 //import { PDFJS as pdfjs} from 'pdfjs-dist'
 //import PDFJ from 'pdf'
 //import 'pdfjs-dist/build/pdf.worker'
-import * as PDFJS from 'pdfjs-dist'
+import * as pdfjs from 'pdfjs-dist/webpack'
+//var PdfjsWorker = require('worker-loader!./build/pdf.worker.js');
 //const PDFJS:PDFJSStatic = _PDFJSStatic
 
 export class Pdf2SvgTransformer extends ModelTransformer<ArrayBuffer, SVGElement> {
@@ -16,16 +17,16 @@ export class Pdf2SvgTransformer extends ModelTransformer<ArrayBuffer, SVGElement
   }
 
   execute(source: ArrayBuffer, targetObserver: Observer<SVGElement>) {
+    const PDFJS:PDFJSStatic = pdfjs
     //this will use base64 encoded instead of bloburls for images
     //PDFJS.disableCreateObjectURL = true;
     //
-    
     PDFJS.disableFontFace = true
     PDFJS.disableWorker = false
     //currently does not work. fake worker is used
-    PDFJS.GlobalWorkerOptions.workerSrc = 'pdf.worker.js'
+    //PDFJS.GlobalWorkerOptions.workerSrc = 'pdf.worker.js'
     //Another option is to set workerPort instead of workerSrc althogh workerSrc is promoted
-    //var PdfjsWorker = require('worker-loader!./build/pdf.worker.js')
+    //const PdfjsWorker = require('worker-loader!./build/pdf.worker.js')
     //PDFJS.GlobalWorkerOptions.workerPort = new PdfjsWorker()
 
     // Fetch the PDF document from the URL using promises

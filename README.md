@@ -29,9 +29,9 @@ Build project
 ```
 make
 ```
-Install project (some platforms require 'sudo make install') 
+Install project (some platforms (MacOS) do not require 'sudo' just make install')
 ```
-make install
+sudo make install
 ```
 
 Start server

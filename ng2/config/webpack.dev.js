@@ -3,7 +3,7 @@ const webpackMerge = require('webpack-merge');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const commonConfig = require('./webpack.common.js');
 const helpers = require('./helpers');
-
+const { BaseHrefWebpackPlugin } = require('base-href-webpack-plugin');
 // Base Href same as in index.html
 const baseHref = '/kmx/'
 
@@ -23,7 +23,8 @@ module.exports = webpackMerge(commonConfig, {
     new ExtractTextPlugin({
       filename: '[name].css',
       allChunks: true
-    })
+    }),
+    new BaseHrefWebpackPlugin({ baseHref: baseHref })
     // ,
     // new webpack.WatchIgnorePlugin([
     //   /\.js$/,
@@ -36,6 +37,7 @@ module.exports = webpackMerge(commonConfig, {
       index: baseHref
     },
     stats: 'minimal',
+    //stats: 'normal',
     proxy: [
       {
         context: ['/ws'],

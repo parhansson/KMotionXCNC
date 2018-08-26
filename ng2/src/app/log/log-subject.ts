@@ -28,7 +28,7 @@ export class LogSubject<T> extends Subject<T> {
     super.next(value)
   }
 
-  protected _subscribe(subscriber: Subscriber<T>): Subscription {
+  public _subscribe(subscriber: Subscriber<T>): Subscription {
     const _events = this._buffer.getEvents()
     let subscription: Subscription
 
