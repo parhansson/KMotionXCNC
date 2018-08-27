@@ -33,3 +33,5 @@ bin/
 config\.mak
 
 config\.h
+
+kmx/
