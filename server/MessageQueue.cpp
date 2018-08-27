@@ -6,7 +6,7 @@
  */
 
 #include "MessageQueue.h"
-#include "CMutex.h"
+#include "KMotionX.h"
 #include <stdlib.h>
 #include "dbg.h"
 
@@ -15,7 +15,7 @@ MessageQueue::MessageQueue(AbstractController *ctrl) {
   mut = PTHREAD_MUTEX_INITIALIZER;
   con = PTHREAD_COND_INITIALIZER;
   controller = ctrl;
-  poll_TID = getThreadId("MessageQueue::MessageQueue");
+  poll_TID = kmx::getThreadId("MessageQueue::MessageQueue");
 }
 
 MessageQueue::~MessageQueue() {
@@ -53,7 +53,7 @@ int MessageQueue::EnqueueCallback(int id, const char * payload, bool blocking) {
   //Callbacks are created here and sent to clients in next poll
 
   int result = 0;
-  bool sameThread = poll_TID == getThreadId("MessageQueue::EnqueueCallback");
+  bool sameThread = poll_TID == kmx::getThreadId("MessageQueue::EnqueueCallback");
   bool waitForResult = blocking;
 
   if (sameThread && waitForResult) {
