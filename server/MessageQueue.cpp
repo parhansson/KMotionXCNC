@@ -28,6 +28,11 @@ struct callback * MessageQueue::InitCallback(struct callback *item, int mid, boo
   item->status = CBS_ENQUEUED;
   item->blocking = blocking;
   item->ret = -1;
+  item->payload = (char *)malloc(sizeof(char)*(strlen(payload)+1)*10000);
+  if(item->payload == NULL){
+    log_info("Failed to allocate memory");
+    exit(-1);
+  }
   strcpy(item->payload, payload);
   return item;
 
@@ -127,6 +132,7 @@ void MessageQueue::MaintainQueue(int id, int results) {
 
     //Delete callback if completed
     if(it->status == CBS_COMPLETE){
+      free(it->payload);
       it = queue.erase(it);
     } else {
       ++it;

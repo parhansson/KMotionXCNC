@@ -32,7 +32,7 @@ struct callback {
   bool blocking;
   time_t sent_time;
   int ret;
-  char payload[512]; //TODO malloc correct size
+  char * payload;
 };
 
 //template<class T> //In the future this might be implemented
