@@ -6,8 +6,13 @@
                 "/usr/include",
                 "/usr/local/include",
                 "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/",
-                "${workspaceRoot}"
+                "/usr/local/include/kmx/DSP_KFLOP",
+                "/usr/local/include/kmx/KMotion",
+                "/usr/local/include/kmx/GCodeInterpreter",
+                "/usr/local/include/kmx/KMotionX",
+                "${workspaceRoot}/server"
             ],
+            "defines": ["_KMOTIONX"],
             "browse": {
                 "limitSymbolsToIncludedHeaders": true,
                 "databaseFilename": "",

@@ -1,7 +1,12 @@
-import { Observer } from 'rxjs/Rx'
+import { Observer } from 'rxjs'
 import { ModelSettingsService, ModelSettings } from '../model.settings.service'
 import { ModelTransformer } from './model.transformer'
-import { PDFJS as pdfjs} from 'pdfjs-dist'
+//import { PDFJS as pdfjs} from 'pdfjs-dist'
+//import PDFJ from 'pdf'
+//import 'pdfjs-dist/build/pdf.worker'
+import * as pdfjs from 'pdfjs-dist/webpack'
+//var PdfjsWorker = require('worker-loader!./build/pdf.worker.js');
+//const PDFJS:PDFJSStatic = _PDFJSStatic
 
 export class Pdf2SvgTransformer extends ModelTransformer<ArrayBuffer, SVGElement> {
   transformerSettings: ModelSettings
@@ -12,18 +17,24 @@ export class Pdf2SvgTransformer extends ModelTransformer<ArrayBuffer, SVGElement
   }
 
   execute(source: ArrayBuffer, targetObserver: Observer<SVGElement>) {
+    const PDFJS:PDFJSStatic = pdfjs
     //this will use base64 encoded instead of bloburls for images
     //PDFJS.disableCreateObjectURL = true;
     //
-    const PDFJS:PDFJSStatic = pdfjs
     PDFJS.disableFontFace = true
-    PDFJS.workerSrc='assets/pdf.worker.js'
+    PDFJS.disableWorker = false
+    //currently does not work. fake worker is used
+    //PDFJS.GlobalWorkerOptions.workerSrc = 'pdf.worker.js'
+    //Another option is to set workerPort instead of workerSrc althogh workerSrc is promoted
+    //const PdfjsWorker = require('worker-loader!./build/pdf.worker.js')
+    //PDFJS.GlobalWorkerOptions.workerPort = new PdfjsWorker()
+
     // Fetch the PDF document from the URL using promises
     const transformer = this
     const scale = transformer.transformerSettings.pdf.scale
     const page = transformer.transformerSettings.pdf.page
     const rotate = transformer.transformerSettings.pdf.rotate
-    
+
     PDFJS.getDocument(source).then((pdf) => {
       const numPages = pdf.numPages
       // Using promise to fetch the page
@@ -46,7 +57,7 @@ export class Pdf2SvgTransformer extends ModelTransformer<ArrayBuffer, SVGElement
             //  anchor.appendChild(container);
 
             return page.getOperatorList().then(opList => {
-              const svgGfx: PDFJSExtra.SVGGraphics = new PDFJS.SVGGraphics(page.commonObjs, page.objs)
+              const svgGfx: PDFJSStatic.SVGGraphics = new PDFJS.SVGGraphics(page.commonObjs, page.objs)
               return svgGfx.getSVG(opList, viewport).then(svg => {
                 transformer.logSvg(svg)
                 targetObserver.next(svg)

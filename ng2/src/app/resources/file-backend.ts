@@ -1,5 +1,5 @@
 import { InjectionToken } from '@angular/core'
-import { Observable } from 'rxjs/Rx'
+import { Observable } from 'rxjs'
 import { Payload } from './payload'
 
 export const FileServiceToken = new InjectionToken('fileservice')

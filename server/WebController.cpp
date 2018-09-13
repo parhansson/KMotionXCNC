@@ -236,7 +236,7 @@ int WebController::OnEventRequest(struct mg_connection *conn) {
     //Starts with /api but can be anything
     return HandleApiRequest(conn);
   } else if(isRegisteredRoute(conn)){
-    const char * file = "ng2/index.html";
+    const char * file = "kmx/index.html";
     const char * headers ="";
     mg_send_file(conn, file,headers);
     return MG_MORE;
@@ -318,7 +318,8 @@ bool WebController::isRegisteredRoute(struct mg_connection *conn){
   if(strstr(conn->uri, "/kmx/gcode") == conn->uri || 
       strstr(conn->uri, "/kmx/debug") == conn->uri || 
       strstr(conn->uri, "/kmx/ccode") == conn->uri ||
-      strstr(conn->uri, "/kmx/laser-calc") == conn->uri ||
+      strstr(conn->uri, "/kmx/laser") == conn->uri ||
+      strstr(conn->uri, "/kmx/import") == conn->uri ||
       strstr(conn->uri, "/kmx/settings") == conn->uri){
       //printf("%s\n", conn->uri);
       return true;

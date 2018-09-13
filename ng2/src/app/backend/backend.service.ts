@@ -1,4 +1,4 @@
-import { Observable } from 'rxjs/Rx'
+import { Observable } from 'rxjs'
 import { FileResource, IFileBackend, Payload, DirList } from '../resources'
 
 export abstract class BackendService implements IFileBackend {

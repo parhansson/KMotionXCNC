@@ -3,7 +3,7 @@ import { KMXUtil } from '../../util/kmxutil'
 import { GCodeVector, GCodeCurve3, MoveArcArguments, MoveAngularArguments, MoveArguments } from '../vector'
 import { GCodeParser } from '../gcode-parser'
 import { Block, Word, WordParameters, ControlWord } from '../gcode'
-import { Observable, Observer } from 'rxjs/Rx'
+import { Observable, Observer } from 'rxjs'
 import { GCodeSource } from '../igm'
 import { ModelTransformer } from './model.transformer'
 

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
-import { Observable, Observer, Subject, AsyncSubject } from 'rxjs/Rx'
+import { Observable, Observer, Subject, AsyncSubject } from 'rxjs'
+import { map } from 'rxjs/operators'
 import { FileResource, Payload, IFileBackend, DirList } from '../../resources'
 import { BackendService } from '../backend.service'
 
@@ -71,10 +72,11 @@ export class KFlopBackendService extends BackendService implements IFileBackend 
       {
         responseType: 'arraybuffer',
         observe: 'response'
-      })
-      .map((res) => {
-        return new Payload(res.body, res.headers.get('Content-Type'))
-      })
+      }).pipe(
+        map((res) => {
+          return new Payload(res.body, res.headers.get('Content-Type'))
+        })
+      )
     //return this.onEvent('openFile', { 'params': path });
   }
 

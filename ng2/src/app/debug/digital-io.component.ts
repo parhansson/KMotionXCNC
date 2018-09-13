@@ -32,71 +32,64 @@ import { Connector, IOPin } from '../hal'
   selector: 'connector',
   //pipes: [ConnectorPipe],
   template: `
-            {{connector.name}}
-            <div *ngIf="single" class="well">
-              <div class="row">
-                <div class="iopin outer_circle" *ngFor="let pin of getConnectorPins(); let pinNumber = index" [title]="(pinNumber + 1) + ' - ' + pin.name + ' - ' + pin.description">
-                  <div class="circle" [ngClass]="{'iopin-output': pin.output, 'iopin-input': !pin.output}">
-                    <span class="glyphicon" [ngClass]="{'glyphicon-resize-full': pin.output, 'glyphicon-resize-small': !pin.output}" ></span>
-                  </div>
+            
+            <div *ngIf="single" class="card mx-auto">
+              <h6 class="card-header text-center">{{connector.name}}</h6>
+              <div class="row  p-1">
+                <div class="iopin" *ngFor="let pin of getConnectorPins(); let pinNumber = index" [title]="(pinNumber + 1) + ' - ' + pin.name + ' - ' + pin.description">
+                  <div class="iopin-shape fa" [ngClass]="{'iopin-output fa-external-link': pin.output, 'iopin-input fa-sign-in': !pin.output}"></div>
                 </div>
               </div>
             </div>
-            <div *ngIf="!single" class="well">
-              <div class="row">
-                <div class="iopin outer_circle" *ngFor="let pin of getConnectorPins(true); let pinNumber = index" [title]="((pinNumber + 1)*2) + ' - ' + pin.name + ' - ' + pin.description">
-                  <div class="circle" [ngClass]="{'iopin-output': pin.output, 'iopin-input': !pin.output}">
-                    <span class="glyphicon" [ngClass]="{'glyphicon-resize-full': pin.output, 'glyphicon-resize-small': !pin.output}" ></span>
-                  </div>
+            <div *ngIf="!single" class="card">
+              <h6 class="card-header text-center">{{connector.name}}</h6>
+              <div class="row p-1">
+                <div class="iopin" *ngFor="let pin of getConnectorPins(true); let pinNumber = index" [title]="((pinNumber + 1)*2) + ' - ' + pin.name + ' - ' + pin.description">
+                  <div class="iopin-shape fa" [ngClass]="{'iopin-output fa-external-link': pin.output, 'iopin-input fa-sign-in': !pin.output}"></div>
                 </div>
               </div>
-              <div class="row">
-                <div class="iopin outer_circle" *ngFor="let pin of getConnectorPins(false); let pinNumber = index" [title]="((pinNumber *2 )+1) + ' - ' + pin.name + ' - ' + pin.description">
-                  <div class="circle" [ngClass]="{'iopin-output': pin.output, 'iopin-input': !pin.output}">
-                    <span class="glyphicon" [ngClass]="{'glyphicon-resize-full': pin.output, 'glyphicon-resize-small': !pin.output}" ></span>
-                  </div>
+              <div class="row p-1">
+                <div class="iopin" *ngFor="let pin of getConnectorPins(false); let pinNumber = index" [title]="((pinNumber *2 )+1) + ' - ' + pin.name + ' - ' + pin.description">
+                  <div class="iopin-shape fa" [ngClass]="{'iopin-output fa-external-link': pin.output, 'iopin-input fa-sign-in': !pin.output}"></div>
                 </div>
               </div>
             </div>
             `,
   styles: [`
       .iopin {
-        display: inline-block;
-        width: 40px;
+        /*height: 4em;*/
         height: 40px;
-        margin: 1em;
+        width: 40px;
+        line-height: 40px;
+        font-size: 18px;
+        margin: 0.3em;
       }
+
+      .iopin-shape {
+        /*height:100%;*/
+        width: 100%;
+        border-radius:50%;
+        border: solid 4px #000000;
+        background-color:#aeaeae;
+        /* this will add 2 times border width on size of iopin*/
+        /*box-sizing: content-box; */
+        /*display:block;*/
+        text-align: center;
+        
+    }
 
       .iopin-output {
-        color:#FF0000;
+        border-color:#FF0000;
+        color:#000000;
       }
       .iopin-input {
-        color:#00FF00;
-      }
-      .outer_circle {
-          height:20px;
-          line-height:20px;
-          width:20px;
-          border-radius:50%;
-          background-color:#000000;
-          position:relative;
-          margin:0 auto;
-          cursor:pointer;
-          }
-          
-      .outer_circle:after {
-        position:clear
+        border-color:#00FF00;
+        color:#000000;
       }
 
-      .circle {
-          background-color:#aeaeae;
-          border-radius:50%;
-          height:14px;
-          line-height:10px;
-          width:14px;
-          position:absolute;
-          margin:3px;
-          }
+
+          
+
           
      `]
 })
@@ -130,10 +123,18 @@ export class ConnectorComponent {
 @Component({
   selector: 'digital-io',
   template: `
-            <connector name="JP7"></connector>
-            <connector name="JP4"></connector>
-            <connector name="JP6"></connector>
-            <connector name="JP5" [single]="true"></connector>
+  <div class="container">
+    <div class="row justify-content-center">
+      <connector class="col-6 m-1" name="JP7"></connector>
+    </div>
+    <div class="row justify-content-center">
+      <connector class="col-4 m-1" name="JP4"></connector>
+      <connector class="col-4 m-1" name="JP6"></connector>    
+    </div>
+    <div class="row justify-content-center">
+        <connector class="col-4 m-1" name="JP5" [single]="true"></connector>
+    </div>
+  <div>
             `,
 
 })

@@ -3,7 +3,7 @@
  * Parses a string of gcode instructions, and invokes codeHandlers for each type of
  * command or values.
  */
-import { Subject } from 'rxjs/Rx'
+import { Subject } from 'rxjs'
 import {
   Word,
   BlockPart,

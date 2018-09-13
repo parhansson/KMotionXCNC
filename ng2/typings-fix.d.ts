@@ -5,10 +5,8 @@ declare class DxfParser{
   parseSync(fileText:string)
 }
 
-//declare var PDFJS: PDFJSStatic;
-
 // Merge PDFJS typings
-declare namespace PDFJSExtra {
+declare namespace PDFJSStatic {
   export interface PDFPageOperatorList {
     argsArray: Object[],
     fnArray: Object[],
@@ -20,28 +18,33 @@ declare namespace PDFJSExtra {
       objects1: PDFObjects,
       forceDataSchema?: boolean)
 
-    getSVG(opList: PDFJSExtra.PDFPageOperatorList, viewport: PDFPageViewport):PDFPromise<SVGElement>;
+    getSVG(opList: PDFJSStatic.PDFPageOperatorList, viewport: PDFPageViewport):PDFPromise<SVGElement>;
+  }
+
+  export interface GlobalWorkerOptions {
+    workerSrc: string
+    workerPort: any //PdfjsWorker
   }
 }
 interface PDFObjects {
   objs: Object
 }
+
+//Extend PDFPageProxy
 interface PDFPageProxy {
-  getOperatorList(): PDFPromise<PDFJSExtra.PDFPageOperatorList>
+  getOperatorList(): PDFPromise<PDFJSStatic.PDFPageOperatorList>
   commonObjs: PDFObjects
   objs: PDFObjects
 }
 
- interface PDFJSStatic {
+interface PDFJSStatic {
   getDocument(
     source: ArrayBuffer,
     pdfDataRangeTransport?: any,
     passwordCallback?: (fn: (password: string) => void, reason: string) => string,
     progressCallback?: (progressData: PDFProgressData) => void)
     : PDFPromise<PDFDocumentProxy>;
-
-  SVGGraphics(
-    objects: PDFObjects,
-    objects1: PDFObjects,
-    forceDataSchema?: boolean): void //PDFJSExtra.SVGGraphics
+    
+  GlobalWorkerOptions: PDFJSStatic.GlobalWorkerOptions 
+  SVGGraphics: typeof PDFJSStatic.SVGGraphics
  }

@@ -4,6 +4,7 @@ import { OrientationCube } from './orientation-cube'
 import { RaycastDetector } from './raycast-detector'
 
 import * as THREE from 'three'
+import 'three/three-trackballcontrols' //aliased in webpack config and loaded with import-loader
 
 @Component({
   selector: 'three-viewer',

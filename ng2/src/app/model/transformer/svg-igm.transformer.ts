@@ -1,5 +1,5 @@
 
-import { Observer } from 'rxjs/Rx'
+import { Observer } from 'rxjs'
 import { IGM, IgmObject } from '../igm'
 import { GCodeVector } from '../vector'
 import { ModelTransformer } from './model.transformer'
@@ -21,15 +21,15 @@ function createAnchor(name, url) {
   document.body.appendChild(anchor)
   return anchor
 }
-
+type Matrix = [number, number, number, number, number, number]
 type Point = [number, number]
 type Subpath = Point[]
 type PathDValue = string | number
 
 class SvgNode {
   path: Subpath[]
-  xformToWorld = [1, 0, 0, 1, 0, 0] //2d Transformation vector
-  xform = [1, 0, 0, 1, 0, 0]//2d Transformation vector
+  xformToWorld: Matrix = [1, 0, 0, 1, 0, 0] //2d Transformation vector
+  xform: Matrix = [1, 0, 0, 1, 0, 0]//2d Transformation vector
   id: string
   display: string
   visibility: string
@@ -130,7 +130,7 @@ export class Svg2IgmTransformer extends ModelTransformer<SVGElement, IGM>{
     //if stroke is undefined we do not generate shape
     //TODO this should be handled in igm.addToLayerObject as invisible layer
     if(node.stroke || node.text){
-      console.log('stroke', node.stroke)
+      //console.log('stroke', node.stroke)
       this.makeShape(node, igm)
     }
     for (const child of node.children) {
@@ -216,7 +216,7 @@ interface ISVGParser {
   font: opentype.Font
   addPath(d: string | PathDValue[], node: SvgNode)
   parseUnit(val: string)
-  matrixMult(mA: number[], mB: number[])
+  matrixMult(mA: Matrix, mB: Matrix): Matrix
   strip(val: string): string
 }
 abstract class SVGElementWalker<T> {
@@ -395,7 +395,7 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
 
     'transform': (parser: ISVGParser, node: SvgNode, val: string) => {
       // http://www.w3.org/TR/SVG11/coords.html#EstablishingANewUserSpace
-      const xforms: number[][] = []
+      const xforms: Matrix[] = []
       const segs = val.match(/[a-z]+\s*\([^)]*\)/ig)
       for (const seg of segs) {
         const kv = seg.split('(')
@@ -444,7 +444,7 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
           // matrix
         } else if (xformKind == 'matrix') {
           if (params.length == 6) {
-            xforms.push(params)
+            xforms.push(params as Matrix)
           }
           // skewX
         } else if (xformKind == 'skewX') {
@@ -466,7 +466,7 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
       }
 
       //calculate combined transformation matrix
-      let xform_combined = [1, 0, 0, 1, 0, 0]
+      let xform_combined: Matrix = [1, 0, 0, 1, 0, 0]
       for (const xform of xforms) {
         xform_combined = parser.matrixMult(xform_combined, xform)
       }
@@ -486,9 +486,9 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
       for (const seg of segs) {
         const kv = seg.split(':')
         const k = parser.strip(kv[0])
-        if (this[k]) {
+        if (this.SVGAttributeMapping[k]) {
           const v = parser.strip(kv[1])
-          this[k](parser, node, v)
+          this.SVGAttributeMapping[k](parser, node, v)
         }
       }
     },
@@ -1401,7 +1401,7 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
   }
 
 
-  matrixMult(mA: number[], mB: number[]) {
+  matrixMult(mA: Matrix, mB: Matrix): Matrix {
     return [mA[0] * mB[0] + mA[2] * mB[1],
     mA[1] * mB[0] + mA[3] * mB[1],
     mA[0] * mB[2] + mA[2] * mB[3],
@@ -1411,7 +1411,7 @@ class SvgParser extends SVGElementWalker<SvgNode> implements ISVGParser {
   }
 
 
-  matrixApply(mat: number[], vec: number[]): Point {
+  matrixApply(mat: Matrix, vec: Point): Point {
     return [mat[0] * vec[0] + mat[2] * vec[1] + mat[4],
     mat[1] * vec[0] + mat[3] * vec[1] + mat[5]]
   }

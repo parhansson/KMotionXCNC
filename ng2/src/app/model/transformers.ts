@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core'
-import { Observable, Observer, Subject } from 'rxjs/Rx'
+import { Observable, Observer, Subject } from 'rxjs'
 import {
   ModelTransformer,
   Igm2GcodeTransformer,

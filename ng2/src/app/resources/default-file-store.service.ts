@@ -1,5 +1,5 @@
 import { Injectable, Inject } from '@angular/core'
-import { Observable, Subject } from 'rxjs/Rx'
+import { Observable, Subject } from 'rxjs'
 import { FileStoreToken, FileStore } from './file-store'
 import { FileResource } from './file-resource'
 import { IFileBackend,FileServiceToken} from './file-backend'

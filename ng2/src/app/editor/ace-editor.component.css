@@ -1,9 +1,9 @@
 .ace_gutter-active-line::before {
-  font-family: 'Glyphicons Halflings';
-  content:"\e072";
+  font-family: 'FontAwesome';
+  content: "\f0da";
 }
 div[file-dropzone] {
-  height :100%;
+  height: 100%;
 }
 file-path {
   display: inline-block;

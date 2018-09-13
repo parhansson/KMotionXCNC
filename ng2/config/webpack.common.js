@@ -1,19 +1,44 @@
-var webpack = require('webpack');
-var HtmlWebpackPlugin = require('html-webpack-plugin');
-var ExtractTextPlugin = require('extract-text-webpack-plugin');
-var helpers = require('./helpers');
+const webpack = require('webpack');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const helpers = require('./helpers');
+const rxPaths = require('rxjs/_esm2015/path-mapping');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
+
   entry: {
     'polyfills': './src/polyfills.ts',
     'vendor': './src/vendor.ts',
-    'app': './src/main.ts'
+    'app': './src/main.ts',
+   // 'pdf.worker': 'pdfjs-dist/build/pdf.worker.entry'
   },
-
+  optimization: {
+    runtimeChunk: 'single',
+    splitChunks: {
+      chunks: "all",
+      // chunks: "initial",
+      // cacheGroups: {
+      // //     default: false,
+      // //     vendors: false,
+      //   commons: {
+      //     test: /[\\/]node_modules[\\/]/,
+      //     name: "vendors",
+      //     chunks: "all"
+      //   }            
+      // },
+    },
+    noEmitOnErrors: false, // NoEmitOnErrorsPlugin
+    concatenateModules: true //ModuleConcatenationPlugin
+  },
   resolve: {
-    //extensions: ['', '.js', '.ts']
-    //extensions: ['*', '.js', '.ts']
-    extensions: ['.js', '.ts']
+    //added es2015 for use with angular instead of esm5
+    //mainFields: ["browser", "es2015", "module", "main"],
+    
+    extensions: ['.js', '.ts'],
+    alias: {
+      ...rxPaths(),
+      'three/three-trackballcontrols': 'three/examples/js/controls/TrackballControls'
+    }
   },
 
   module: {
@@ -26,7 +51,14 @@ module.exports = {
           configFile: './tslint.json',
           emitErrors: false,
           failOnHint: false
-      }
+        }
+      },
+      {
+        test: /TrackballControls\.js$/,
+        loader: 'imports-loader',
+        options : {
+          THREE :'three'
+        }
       },
       {
         test: /\.component.ts$/,
@@ -52,11 +84,6 @@ module.exports = {
         loader: 'html-loader'
       },
       {
-        test: /pdf.worker.js$/,
-        loader: 'file-loader',
-        options: { name: 'assets/[name].[ext]' }
-      },
-      {
         test: /\.(png|jpe?g|gif|svg|woff|woff2|ttf|eot|ico)$/,
         loader: 'file-loader',
         options: { name: 'assets/[name].[hash].[ext]' }
@@ -64,8 +91,6 @@ module.exports = {
       {
         test: /\.css$/,
         exclude: helpers.root('src', 'app'),
-        //use: ExtractTextPlugin.extract({ fallbackLoader: 'style-loader', loader: 'css?sourceMap'})
-        //loader: ExtractTextPlugin.extract({ fallback: 'style-loader', use: 'css-loader' })
         loader: ExtractTextPlugin.extract({ 
           fallback: 'style-loader', 
           use: { 
@@ -81,33 +106,32 @@ module.exports = {
         include: helpers.root('src', 'app'),
         loader: 'raw-loader'
       }
-    ]
+    ],
+    // noParse: [
+    //   /pdfjs-dist\/build\/pdf\.js$/,
+    //   /pdfjs-dist\/build\/pdf\.min\.js$/,
+    //   /pdfjs-dist\/build\/pdf\.worker\.js$/
+    // ],
   },
 
   plugins: [
-    // Workaround for angular/angular#11580
     new webpack.ContextReplacementPlugin(
       // The (\\|\/) piece accounts for path separators in *nix and Windows
-      ///angular(\\|\/)core(\\|\/)(esm(\\|\/)src|src)(\\|\/)linker/,
-      ///angular(\\|\/)core(\\|\/)@angular/,
-      /\@angular(\\|\/)core(\\|\/)esm5/, 
-      helpers.root('./src'), // location of your src
-      {} // a map of your routes
-    ),
     
-    new webpack.optimize.CommonsChunkPlugin({
-      names: ['app', 'vendor', 'polyfills', 'manifest']
-    }),
-
+      // For Angular 5, see also https://github.com/angular/angular/issues/20357#issuecomment-343683491
+      // /\@angular(\\|\/)core(\\|\/)fesm2015/,
+      /\@angular(\\|\/)core(\\|\/)fesm5/,
+      helpers.root('src'), // location of your src
+      {
+        // your Angular Async Route paths relative to this root directory
+      }
+    ),
     new HtmlWebpackPlugin({
       template: 'src/index.html'
     }),
     /*
         new webpack.ProvidePlugin({
           "StringView": "vendor/mozilla/stringview.js"
-        }) 
-        new webpack.ProvidePlugin({
-          "THREE": "three"
         }) 
         */
   ]

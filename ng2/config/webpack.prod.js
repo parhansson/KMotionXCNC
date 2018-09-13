@@ -1,20 +1,41 @@
-var webpack = require('webpack');
-var webpackMerge = require('webpack-merge');
-var ExtractTextPlugin = require('extract-text-webpack-plugin');
-var commonConfig = require('./webpack.common.js');
-var helpers = require('./helpers');
+const webpack = require('webpack');
+const webpackMerge = require('webpack-merge');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const commonConfig = require('./webpack.common.js');
+const helpers = require('./helpers');
+const UglifyJSPlugin = require('uglifyjs-webpack-plugin')
+const { BaseHrefWebpackPlugin } = require('base-href-webpack-plugin');
 
 const ENV = process.env.NODE_ENV = process.env.ENV = 'production';
 
+const baseHref = '/kmx/'
+
 module.exports = webpackMerge(commonConfig, {
+  mode: 'production',
   devtool: 'source-map',
 
   output: {
-    path: helpers.root('dist'),
-    //publicPath: '/',
-    publicPath: "/kmx/",
+    path: helpers.root('../kmx'),
+    publicPath: baseHref,
     filename: '[name].[chunkhash].js',
     chunkFilename: '[id].[chunkhash].chunk.js'
+  },
+  optimization: {
+    noEmitOnErrors: true, // NoEmitOnErrorsPlugin
+    minimizer: [
+      // Added to makte opentype work when miminized. bug in uglify, reuses variables names in inlined functions
+      new UglifyJSPlugin({
+          parallel: true,  // Webpack default
+          cache: true,      // Webpack default
+          uglifyOptions: {
+              /*
+                  inlining is broken sometimes where inlined function uses the same variable name as inlining function.
+                  See https://github.com/mishoo/UglifyJS2/issues/2842, https://github.com/mishoo/UglifyJS2/issues/2843
+               */
+              compress: { inline: false },
+          },
+      })
+  ],    
   },
   /*
     htmlLoader: {
@@ -22,18 +43,10 @@ module.exports = webpackMerge(commonConfig, {
     },
   */
   plugins: [
-    new webpack.NoEmitOnErrorsPlugin(),
-    //new webpack.optimize.DedupePlugin(),
-    new webpack.optimize.UglifyJsPlugin({ // https://github.com/angular/angular/issues/10618
-      mangle: {
-        keep_fnames: true
-      },
-      compress: {
-        warnings: true
-      }
-    }),
+    //new UglifyJSPlugin(),
+    new BaseHrefWebpackPlugin({ baseHref: baseHref }),
     new ExtractTextPlugin({
-      filename: '[name].[contenthash].css',
+      filename: '[name].[chunkhash].css',
       allChunks: true
     }),
     new webpack.DefinePlugin({
