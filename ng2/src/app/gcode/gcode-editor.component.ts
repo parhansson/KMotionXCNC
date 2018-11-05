@@ -42,16 +42,13 @@ export class GCodeEditorComponent {
     //this.editorComponent.onContentChange()
     this.socketService.gcodeFileSubject.subscribe(gcodeFile => {
       this.editorComponent.resource = gcodeFile
-      if (gcodeFile.file) {
-        const subscription = this.fileBackend.loadFile(gcodeFile.canonical).subscribe(
-          payload => {
-            this.fileStore.payloadSubject.next(payload)
-          },
-          null,
-          () => subscription.unsubscribe()
-        )
-      }
-
+      const subscription = this.fileBackend.loadFile(gcodeFile.canonical).subscribe(
+        payload => {
+          this.fileStore.payloadSubject.next(payload)
+        },
+        null,
+        () => subscription.unsubscribe()
+      )
     })
   }
 

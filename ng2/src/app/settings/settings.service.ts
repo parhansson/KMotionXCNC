@@ -1,8 +1,8 @@
 import { Injectable, Inject } from '@angular/core'
 import { BackendService } from '../backend/backend.service'
+import { JsonFileStore } from '../backend/json-file-store'
+import { SocketService } from '../backend/socket.service'
 import { IFileBackend, FileServiceToken } from '../resources'
-import { KMXUtil } from '../util/kmxutil'
-import { Subject, ReplaySubject } from 'rxjs'
 
 export class Machine {
   private static mcodes = ['M0', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9', 'S']
@@ -125,40 +125,30 @@ export class TPlanner {
 }
 
 @Injectable()
-export class SettingsService {
-  private machine: Machine
-  public subject: Subject<Machine>
+export class SettingsService extends JsonFileStore<Machine>{
+  
   constructor(
     private kmxBackend: BackendService,
-    @Inject(FileServiceToken) private fileBackend: IFileBackend) {
-    this.machine = new Machine()    
-    this.subject = new ReplaySubject<Machine>(1)
-    this.load('./settings/machines/laser.cnf')
-  }
-  public save(): void {
-    const file = this.fileName()
-    this.fileBackend.saveFile(file, JSON.stringify(this.machine, null, '  ')).subscribe(
-      () => {
-        this.subject.next(this.machine)
-        this.kmxBackend.onUpdateMotionParams()
-      })
-  }
-  public load(file) {
+    private socketService: SocketService,
+    @Inject(FileServiceToken) fileBackend: IFileBackend) {
+    super(fileBackend, new Machine())
+    this.socketService.machineSetupFileSubject.subscribe(machineFile => {
+      //console.log(machineFile, machineFile.canonical)
+      this.load(machineFile.canonical)
 
-    this.fileBackend.loadFile(file).subscribe(
-      (payload) => {
-        this.machine.update(payload.json())
-        this.subject.next(this.machine)
-      },
-      err => {
-        console.error(err)
-        this.subject.next(this.machine)
-      },
-      () => console.log('File loaded: ' + file)
-    )
+    })
   }
-  public fileName(): string {
-    return 'settings/machines/' + this.machine.name + '.cnf'
+  private get machine() {
+    return this.obj
   }
-
+  get fileName(): string {
+    return `settings/machines/${this.machine.name}.cnf`
+  }
+  onSave(){
+    this.kmxBackend.onUpdateMotionParams()
+  }
+  onLoad(settings: Machine) {
+    this.obj.update(settings)
+  }
 }
+

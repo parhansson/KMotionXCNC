@@ -1,4 +1,7 @@
-import { Injectable } from '@angular/core'
+import { Injectable, Inject } from '@angular/core'
+import { JsonFileStore } from '../backend/json-file-store'
+import { IFileBackend, FileServiceToken } from '../resources'
+
 export class Material {
   name: string
   ppi: string
@@ -8,11 +11,25 @@ export class Material {
 
 }
 export class SVGModelSettings {
-  scale: number = 1
+  private UnitsPerInch = {
+    mm: 25.4,
+    in: 1
+  }
   unit: 'mm'|'in' = 'mm'
   //unit: string = 'in'
   dpi: number = 72
   renderText: boolean = false
+
+  getDPIScaleFactor(dpi?:number){
+    const DPI = dpi || this.dpi || 72
+
+    if (this.UnitsPerInch[this.unit]) {
+      return this.UnitsPerInch[this.unit] / DPI
+    } else {
+      console.log('Invalid unit ' + this.unit)
+      return 1
+    }
+  }
 }
 export class IGMModelSettings {
   scale: number = 1
@@ -38,27 +55,42 @@ export class ModelSettings {
   svg = new SVGModelSettings()
   pdf = new PDFModelSettings()
   igm = new IGMModelSettings()
-  materials: Material[] = [
-    { name: 'Cut 2mm polysterene', ppi: 'M100 P900 Q100', speed: 'F250', passes: 1, thickness: 2 },
-    { name: 'Cut 3mm acrylic', ppi: 'M100 P1000 Q100', speed: 'F200', passes: 1, thickness: 3 },
-    { name: 'Cut 6mm acrylic', ppi: 'M100 P2200 Q100 ', speed: 'F90', passes: 1, thickness: 6 },
-    { name: 'Cut 4mm plywood', ppi: 'M100 P300 Q100 ', speed: 'F250', passes: 1, thickness: 4 },
-    { name: 'Cut 10mm pine P900 down to P600', ppi: 'M100 P900 Q100', speed: 'F50', passes: 1, thickness: 10 },
-    { name: 'Cut 3mm expensive hobby plywood many layers', ppi: 'M100 P700 Q100', speed: 'F150', passes: 3, thickness: 3 },
-    { name: 'Cut paper 220-240g', ppi: 'M100 P400 Q100', speed: 'F1000', passes: 1, thickness: 0.1 }
+  materials: Material[] = [] //ex { name: 'Cut 2mm polysterene', ppi: 'M100 P900 Q100', speed: 'F250', passes: 1, thickness: 2 },
+  update(from: ModelSettings) {
 
-  ]
+    this.svg = from.svg
+    this.pdf = from.pdf
+    this.igm = from.igm
+    this.materials = from.materials
 
+    //Object.assign(new Foo, { a: 1 })
+    //Reattach prototype of svg since there are functions in that class
+    //setPrototype of is said to be slow. This does not happen often though
+    Object.setPrototypeOf(this.svg, SVGModelSettings.prototype)
+  }
 }
 
 @Injectable()
-export class ModelSettingsService {
-  settings: ModelSettings = new ModelSettings()
-
-  constructor() {
+export class ModelSettingsService extends JsonFileStore<ModelSettings>{
+  
+  constructor(
+    @Inject(FileServiceToken) fileBackend: IFileBackend) {
+    super(fileBackend, new ModelSettings())
+    this.load(this.fileName)
+  }
+  get settings() {
+    return this.obj
+  }
+  get fileName(): string {
+    return './settings/import.cnf'
+  }
+  onSave(){
 
   }
-
+  onLoad(settings: ModelSettings) {
+    this.obj.update(settings)
+    
+  }
 }
 
 

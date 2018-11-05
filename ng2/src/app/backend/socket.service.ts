@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core'
-import { Subject, BehaviorSubject } from 'rxjs'
+import { Subject, BehaviorSubject, ReplaySubject } from 'rxjs'
 import { LogService, LogLevel } from '../log'
 import { SerializedObject } from '../util'
 import { KmxStatus, ControlMessagePayload, ControlMessage } from '../hal/kflop'
@@ -12,7 +12,8 @@ import * as SocketWorker from '../../socket.worker'
 
 @Injectable()
 export class SocketService {
-  gcodeFileSubject: Subject<FileResource> = new BehaviorSubject<FileResource>(new FileResource())
+  gcodeFileSubject: Subject<FileResource> = new ReplaySubject<FileResource>(1)
+  machineSetupFileSubject: Subject<FileResource> = new ReplaySubject<FileResource>(1)
   simulateSubject: Subject<boolean> = new BehaviorSubject<boolean>(true)
   data: KmxStatus = new KmxStatus()
 
@@ -89,6 +90,14 @@ export class SocketService {
       gcodeResource.canonical = this.data.gcodeFile
       this.gcodeFileSubject.next(gcodeResource)
     }
+    if (this.data.machineSettingsFileTimestamp !== raw.machineSettingsFileTimestamp || this.data.machineSettingsFile !== raw.machineSettingsFile) {
+      //timestamp in StatusMessage to detect file modifications
+      this.data.machineSettingsFile = raw.machineSettingsFile
+      const machineSetupResource = new FileResource()
+      machineSetupResource.canonical = this.data.machineSettingsFile
+      this.machineSetupFileSubject.next(machineSetupResource)
+    }
+    
 
     this.data.copyFrom(raw)
   }

@@ -7,10 +7,6 @@
         <input class="form-control" [(ngModel)]="transformerSettings.pdf.page" min="1" type="number" step="any" />
       </div>
       <div class="form-group">
-        <label>SVG scale</label>
-        <input class="form-control" [(ngModel)]="transformerSettings.svg.scale" min="0" type="number" step="any" />
-      </div>
-      <div class="form-group">
         <label>SVG DPI</label>
         <input class="form-control" [(ngModel)]="transformerSettings.svg.dpi" min="1" type="number" step="any" />
       </div>
@@ -26,6 +22,10 @@
         <label>Feed rate</label>
         <input class="form-control" [(ngModel)]="transformerSettings.igm.feedRate" min="1" type="number" step="any" />
       </div>
+      <div class="form-group">
+        <label>Scale on import</label>
+        <input class="form-control" [(ngModel)]="transformerSettings.igm.scale" min="0" type="number" step="any" />
+      </div>      
       <div class="checkbox">
         <label>
           <input type="checkbox" [(ngModel)]="transformerSettings.igm.removeOutline" /> Remove outline (not complete)

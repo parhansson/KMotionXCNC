@@ -11,8 +11,4 @@ export class TransformerSettingsComponent {
   constructor(private settingsService: SettingsService, private modelSettingsService: ModelSettingsService) {
     this.transformerSettings = modelSettingsService.settings
   }
-
-  save() {
-
-  }
 }

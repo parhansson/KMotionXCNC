@@ -81,7 +81,8 @@ export class GCodeParser {
     K: 'K parameter on G2,G3',
     R: 'R parameter on G2,G3',
     L: 'G10 parameter',
-    P: 'G10 parameter'
+    P: 'G10 parameter',
+    Q: 'G73, G83 parameter Peck increment in canned cycles (peck drilling cycles)'
   }
 
   private static valueChars = '+-0123456789.'

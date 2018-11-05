@@ -129,7 +129,11 @@ export class Svg2IgmTransformer extends ModelTransformer<SVGElement, IGM>{
     if(node.unsupported) { return }
     //if stroke is undefined we do not generate shape
     //TODO this should be handled in igm.addToLayerObject as invisible layer
-    if(node.stroke || node.text){
+    //sometimes an invisible outline is present in pdf files
+    //if both fill and stroke is undefined skip since it is invisible
+    const hasFill = node.fill && node.fill !== 'none' 
+    const hasStroke = node.stroke && node.stroke !== 'none' 
+    if(hasFill || hasStroke || node.text) {
       //console.log('stroke', node.stroke)
       this.makeShape(node, igm)
     }
@@ -137,22 +141,9 @@ export class Svg2IgmTransformer extends ModelTransformer<SVGElement, IGM>{
       this.makeModel(child, igm)
     }
   }
-  private makeShape(node: SvgNode, igm: IGM) {
-    const unitsPerInch = {
-      mm: 25.4,
-      in: 1
-    }
-    const settings = this.settings
-    let dpiScale
-    if (settings.dpi) {
-      if (unitsPerInch[settings.unit]) {
-        dpiScale = unitsPerInch[settings.unit] / settings.dpi
-      } else {
-        dpiScale = 1
-        console.log('Invalid unit ' + settings.unit)
-      }
-    }
 
+  private makeShape(node: SvgNode, igm: IGM) {
+    const dpiScaleFactor = this.settings.getDPIScaleFactor()
     for (const subpath of node.path) {
       const shape = new IgmObject()
       shape.type = 'Linear interpolation'
@@ -162,7 +153,7 @@ export class Svg2IgmTransformer extends ModelTransformer<SVGElement, IGM>{
         shape.vectors.push(new GCodeVector(point[0], point[1], 0))
         //TODO clip on clipPath here. this will be extremely difficult
       }
-      shape.scale(dpiScale)
+      shape.scale(dpiScaleFactor)
 
       if (node.unsupported === true) {
         igm.unsupported.push(subpath)

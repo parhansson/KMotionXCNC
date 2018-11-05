@@ -1,0 +1,82 @@
+{
+  "svg": {
+    "UnitsPerInch": {
+      "mm": 25.4,
+      "in": 1
+    },
+    "unit": "mm",
+    "dpi": 72,
+    "renderText": false
+  },
+  "pdf": {
+    "page": 1,
+    "rotate": 90,
+    "scale": 1
+  },
+  "igm": {
+    "scale": 1,
+    "unit": "mm",
+    "cutZ": 0,
+    "safeZ": 0,
+    "fractionalDigits": 3,
+    "translateToOrigo": true,
+    "removeOutline": false,
+    "removeDuplicates": true,
+    "removeSingularites": true,
+    "initCode": "M100 P200 Q100",
+    "feedRate": 250,
+    "passes": 1,
+    "materialWidth": 10
+  },
+  "materials": [
+    {
+      "name": "Cut 2mm polysterene",
+      "ppi": "M100 P900 Q100",
+      "speed": "F250",
+      "passes": 1,
+      "thickness": 2
+    },
+    {
+      "name": "Cut 3mm acrylic",
+      "ppi": "M100 P1000 Q100",
+      "speed": "F200",
+      "passes": 1,
+      "thickness": 3
+    },
+    {
+      "name": "Cut 6mm acrylic",
+      "ppi": "M100 P2200 Q100 ",
+      "speed": "F90",
+      "passes": 1,
+      "thickness": 6
+    },
+    {
+      "name": "Cut 4mm plywood",
+      "ppi": "M100 P300 Q100 ",
+      "speed": "F250",
+      "passes": 1,
+      "thickness": 4
+    },
+    {
+      "name": "Cut 10mm pine P900 down to P600",
+      "ppi": "M100 P900 Q100",
+      "speed": "F50",
+      "passes": 1,
+      "thickness": 10
+    },
+    {
+      "name": "Cut 3mm expensive hobby plywood many layers",
+      "ppi": "M100 P700 Q100",
+      "speed": "F150",
+      "passes": 3,
+      "thickness": 3
+    },
+    {
+      "name": "Cut paper 220-240g",
+      "ppi": "M100 P400 Q100",
+      "speed": "F1000",
+      "passes": 1,
+      "thickness": 0.1
+    }
+  ]
+}
