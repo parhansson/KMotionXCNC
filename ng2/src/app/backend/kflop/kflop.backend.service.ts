@@ -28,8 +28,9 @@ export class KFlopBackendService extends BackendService implements IFileBackend 
         formData.append('file' + i, files[i], files[i].name)
       }
     } else {
+      console.info('File has no constructor. Fallback to blob')
       //Some browsers (Safari) does not support File constructor.
-      const blob = new Blob([content], { type: 'plain/text', endings: 'transparent' })
+      const blob = new Blob([content], { type: 'plain/text'})
       formData.append('file', blob, name)
 
     }
