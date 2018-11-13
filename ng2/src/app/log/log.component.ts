@@ -1,56 +1,58 @@
 import {
+  AfterViewChecked,
   Component,
-  Inject,
-  Input,
   ElementRef,
+  Input,
   OnInit,
   OnDestroy,
-  ViewChild,
-  AfterViewChecked
+  ViewChild
 } from '@angular/core'
-import { Observable, Subscription } from 'rxjs'
+import { Subscription } from 'rxjs'
+import { bufferTime} from 'rxjs/operators'
 import { LogService, LogMessage } from './log.service'
-import { LogSubject } from './log-subject'
+import { LimitBuffer } from '../util'
 
 @Component({
   selector: 'kmx-log',
   templateUrl: './log.component.html',
-  styleUrls: ['./log.component.css']
+  styleUrls: ['./log.component.css'],
 })
 export class LogComponent implements OnInit, OnDestroy, AfterViewChecked {
+   
   @Input()
   title: string
-
+  
   @Input()
   consoleId: string
-
+  
   @Input()
   logLimit: number
-
+  
   @Input()
   autoscroll: boolean = true
   logs: LogMessage[] = []
 
+  private loggBuffer: LimitBuffer<LogMessage>
+
+  private subscription: Subscription
   @ViewChild('scrollContainer')
   private scrollContainer: ElementRef
-  private logSubject: LogSubject<LogMessage>
-  private subscription: Subscription
+  
 
   constructor(private logService: LogService) {
     this.logLimit = 200
+    this.loggBuffer = new LimitBuffer<LogMessage>(this.logLimit)
+    this.logs = this.loggBuffer.getEvents()
   }
   //http://stackoverflow.com/questions/35232731/angular2-scroll-to-bottom-chat-style
   ngOnInit() {
-    this.logSubject = this.logService.getLogSubject(this.consoleId)
     this.logLimit = this.logLimit < 1 ? 1 : this.logLimit
     this.updateLimit()
     this.subscribe()
-    //this.logService.log(this.consoleId, 'Test log ' + this.consoleId);
   }
 
-  updateLimit() {
-    this.logSubject.setBufferSize(this.logLimit)
-    this.trimBufferToSize(this.logLimit)
+  ngOnDestroy() {
+    this.subscription.unsubscribe()
   }
 
   ngAfterViewChecked() {
@@ -58,40 +60,29 @@ export class LogComponent implements OnInit, OnDestroy, AfterViewChecked {
     if (this.autoscroll) {
       this.scrollToBottom()
     }
+    //console.log('ngAfterViewChecked')
   }
-  scrollToBottom(): void {
+  updateLimit() {
+    //this.logSubject.setBufferSize(this.logLimit)
+    this.loggBuffer.setBufferSize(this.logLimit)
+  }
+  
+  prune() {
+    this.loggBuffer.prune()
+  }
+
+  private scrollToBottom(): void {
     const container = this.scrollContainer.nativeElement
     container.scrollTop = container.scrollHeight
   }
 
-  ngOnDestroy() {
-    this.subscription.unsubscribe()
-  }
-
-  prune() {
-    this.trimBufferToSize(0)
-    this.logSubject.prune()
-  }
-  private pruneLocal() {
-    this.logs.splice(0, this.logs.length)
-  }
   private subscribe() {
-    this.subscription = this.logSubject.subscribe(logMessage => {
-      this.logs.push(logMessage)
-      this.trimBufferToSize(this.logLimit)
+    const buffered = this.logService.getLogSubject(this.consoleId).pipe(bufferTime(100))
+    this.subscription = buffered.subscribe(logMessages => {
+      if(logMessages.length > 0) {
+        console.log('added messagecount' + logMessages.length)
+        this.loggBuffer.addValues(logMessages)
+      } 
     })
   }
-
-  private trimBufferToSize(_bufferSize:number)  {
-    const _events = this.logs
-
-    const eventsCount = _events.length
-    let spliceCount = 0
-
-    if (eventsCount > _bufferSize) {
-      spliceCount = eventsCount - _bufferSize
-      _events.splice(0, spliceCount)
-    }
-  }
-
 }

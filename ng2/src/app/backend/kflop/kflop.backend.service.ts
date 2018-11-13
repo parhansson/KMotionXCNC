@@ -1,12 +1,17 @@
 import { Injectable } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
 import { Observable, Observer, Subject, AsyncSubject } from 'rxjs'
-import { map } from 'rxjs/operators'
+import { map, shareReplay } from 'rxjs/operators'
 import { FileResource, Payload, IFileBackend, DirList } from '../../resources'
 import { BackendService } from '../backend.service'
 
 
-@Injectable()
+@Injectable(
+// TODO declare as tree shakable provider
+// {
+//   providedIn: 'root',
+// }
+)
 export class KFlopBackendService extends BackendService implements IFileBackend {
   constructor(private http: HttpClient) { super() }
 
@@ -29,7 +34,7 @@ export class KFlopBackendService extends BackendService implements IFileBackend 
       }
     } else {
       console.info('File has no constructor. Fallback to blob')
-      //Some browsers (Safari) does not support File constructor.
+      //Some browsers (IE and Edge) does not support File constructor.
       const blob = new Blob([content], { type: 'plain/text'})
       formData.append('file', blob, name)
 
@@ -68,17 +73,23 @@ export class KFlopBackendService extends BackendService implements IFileBackend 
 
     const url = '/api/kmx/openFile'
     const data = { params: path }
-
-    return this.http.post(url, JSON.stringify(data),
+    //make cold hot to prevent reposting with shareReplay operator
+    const hotObservable = this.http.post(url, JSON.stringify(data),
       {
         responseType: 'arraybuffer',
         observe: 'response'
       }).pipe(
-        map((res) => {
-          return new Payload(res.body, res.headers.get('Content-Type'))
-        })
+        map((res) => new Payload(res.body, res.headers.get('Content-Type')))
+      ).pipe(shareReplay())
+      const subscr = hotObservable.subscribe(
+        data => { },
+        err => console.error('There was an error on openFile ', err),
+        () => {
+          subscr.unsubscribe()
+          console.log('openFile Complete')
+        }
       )
-    //return this.onEvent('openFile', { 'params': path });
+      return hotObservable
   }
 
   protected onEvent<R>(eventName: string, parameters?: any): Observable<R> {
@@ -89,14 +100,17 @@ export class KFlopBackendService extends BackendService implements IFileBackend 
     } else {
       payload = JSON.stringify({ params: parameters })
     }
-    // TODO make cold hot to prevent reposting
-    const coldObservable = this.http.post(url, payload)
-    coldObservable.subscribe(
+    // make cold hot to prevent reposting with shareReplay operator
+    const hotObservable = this.http.post(url, payload).pipe(shareReplay())
+    const subscr = hotObservable.subscribe(
       data => { },
       err => console.error('There was an error on event: ' + eventName, err),
-      () => console.log(eventName + ' Complete')
+      () => {
+        subscr.unsubscribe()
+        console.log(eventName + ' Complete')
+      }
     )
-    return coldObservable as Observable<R>
+    return hotObservable as Observable<R>
   }
 
 }

@@ -1,10 +1,9 @@
 
-import { KMXUtil } from '../../util/kmxutil'
-import { GCodeVector, GCodeCurve3, MoveArcArguments, MoveAngularArguments, MoveArguments } from '../vector'
+import { GCodeCurve3, MoveArcArguments, MoveAngularArguments, MoveArguments } from '../vector'
 import { GCodeParser } from '../gcode-parser'
 import { Block, Word, WordParameters, ControlWord } from '../gcode'
 import { Observable, Observer } from 'rxjs'
-import { GCodeSource } from '../igm'
+import { GCodeSource, IGMDriver, GCodeVector } from '../igm'
 import { ModelTransformer } from './model.transformer'
 
 //Copyright (c) 2014 par.hansson@gmail.com
@@ -27,7 +26,7 @@ import { ModelTransformer } from './model.transformer'
 // Group 9	{M48, M49} - feed and speed override bypass
 
 export class ModalGroup {
-  constructor(initialState: string, groupCodes?: string[]) {
+  constructor(initialState: string, private groupCodes?: string[]) {
     this.code = initialState
   }
   changed: boolean
@@ -36,6 +35,9 @@ export class ModalGroup {
     //TODO throw error if state literal is not allowed in this group
     //also check line number (block) if two or more states are set in the same block
     // this is not allowed
+    if(this.groupCodes.indexOf(newCode) < 0){
+      console.error(`Unknown modal group code ${newCode} allowed are ${this.groupCodes.join(', ')}`)
+    }
     this.changed = this.code !== newCode
     this.code = newCode
   }
@@ -51,7 +53,7 @@ export class GCodeState {
   spindleSpeedGroup = new ModalGroup(null, ['G93', 'G94'])
   //units defaults to mm
   unitsGroup = new ModalGroup('G21', ['G20', 'G21'])
-  position = new GCodeVector()
+  position = IGMDriver.newGCodeVector()
 
 }
 export class State<ShapeType> extends GCodeState {
@@ -100,10 +102,12 @@ export class State<ShapeType> extends GCodeState {
     },
     G90: (cmd: Word) => {
       //absolute
+      this.distanceGroup.setActiveCode(cmd.value)
       this.absolute = true
     },
     G91: (cmd: Word) => {
       //relative
+      this.distanceGroup.setActiveCode(cmd.value)
       this.absolute = false
     },
     UNKNOWN: (cmd: Word) => {
@@ -115,10 +119,11 @@ export class State<ShapeType> extends GCodeState {
 export abstract class GCodeTransformer<ShapeType, OutputType> extends ModelTransformer<GCodeSource, OutputType>{
   // Create the final Object3d to add to the scene
   output: OutputType
-
   protected state: State<ShapeType>
 
-  constructor(protected disableWorker?: boolean) { super() }
+  constructor(protected disableWorker?: boolean) { super()
+    
+  }
   protected abstract createOutput(): OutputType
   protected abstract startShape(): ShapeType
   protected abstract endShape()
@@ -132,12 +137,13 @@ export abstract class GCodeTransformer<ShapeType, OutputType> extends ModelTrans
     //TODO parsing should be done outside of this transformer
     //this transformer should Subject<Block> instead of GCodeSource
     const parser = new GCodeParser()
-    parser.subject.subscribe(
+    const subcripion = parser.subject.subscribe(
       (block) => {
         this.onBlock(block)
       },
       (error) => { observer.error(error) },
       () => {
+        subcripion.unsubscribe()
         observer.next(this.output)
         //transformedDefer.complete();
 
@@ -267,7 +273,7 @@ export abstract class GCodeTransformer<ShapeType, OutputType> extends ModelTrans
     const position = this.state.position
     const scale = this.state.scale
     const absolute = this.state.absolute
-    const newPosition = new GCodeVector()
+    const newPosition = IGMDriver.newGCodeVector()
     if (absolute) {
       newPosition.x = args.X !== undefined ? args.X * scale : position.x
       newPosition.y = args.Y !== undefined ? args.Y * scale : position.y
@@ -275,6 +281,13 @@ export abstract class GCodeTransformer<ShapeType, OutputType> extends ModelTrans
       newPosition.a = args.A !== undefined ? args.A * scale : position.a
       newPosition.b = args.B !== undefined ? args.B * scale : position.b
       newPosition.c = args.C !== undefined ? args.C * scale : position.c
+      //if args.X is undefined then args.X * scale === Nan hence position.x is used
+      // newPosition.x = (args.X * scale) || position.x
+      // newPosition.y = (args.Y * scale) || position.y
+      // newPosition.z = (args.Z * scale) || position.z
+      // newPosition.a = (args.A * scale) || position.a
+      // newPosition.b = (args.B * scale) || position.b
+      // newPosition.c = (args.C * scale) || position.c
     } else {
       newPosition.x = args.X !== undefined ? args.X * scale + position.x : position.x
       newPosition.y = args.Y !== undefined ? args.Y * scale + position.y : position.y

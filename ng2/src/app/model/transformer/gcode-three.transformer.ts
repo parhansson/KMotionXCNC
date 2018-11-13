@@ -1,13 +1,14 @@
 
-import { GCodeVector, GCodeCurve3 } from '../vector'
+import { GCodeCurve3 } from '../vector'
+import { GCodeVector } from '../igm'
 import { GCodeTransformer, State } from './gcode.transformer'
 import * as THREE from 'three'
 import { Group, Geometry } from 'three'
 
 //Copyright (c) 2014 par.hansson@gmail.com
-class ExtendedGCodeVector extends GCodeVector {
-  e = 0
-  extruding = false
+interface ExtendedGCodeVector extends GCodeVector {
+  e:number// 0
+  extruding:boolean// = false
 }
 class ThreeShapeData {
   material: THREE.LineBasicMaterial

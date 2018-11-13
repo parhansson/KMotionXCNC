@@ -1,8 +1,6 @@
-import { Directive, Component, Input, Output, EventEmitter, ElementRef, Inject } from '@angular/core'
+import { Component, Input, Output, EventEmitter, Inject } from '@angular/core'
 import { FileResource } from './file-resource'
 import { IFileBackend, FileServiceToken, FileEntry } from './file-backend'
-import { DropZoneDirective } from './drop-zone.directive'
-import { FilePathComponent } from './file-path.component'
 import { Payload } from './payload'
 
 @Component({

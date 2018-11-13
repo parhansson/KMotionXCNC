@@ -1,6 +1,5 @@
 import { Component, Inject, Input, Output, ViewChild, ElementRef } from '@angular/core'
-import { IGM, IgmObject, IgmPath } from '../model/igm'
-import { GCodeVector } from '../model/vector'
+import { IGM, IgmObject, IGMDriver } from '../model/igm'
 import { SvgPreviewComponent } from './svg-preview.component'
 
 
@@ -42,12 +41,12 @@ export class PatternWizardComponent {
 
   }
   private rect(width, height) {
-    const shape = new IgmObject()
-    shape.vectors.push(new GCodeVector(0, 0))
-    shape.vectors.push(new GCodeVector(width, 0))
-    shape.vectors.push(new GCodeVector(width, height))
-    shape.vectors.push(new GCodeVector(0, height))
-    shape.vectors.push(new GCodeVector(0, 0))
+    const shape = IGMDriver.newIgmObject()
+    shape.vectors.push(IGMDriver.newGCodeVector(0, 0))
+    shape.vectors.push(IGMDriver.newGCodeVector(width, 0))
+    shape.vectors.push(IGMDriver.newGCodeVector(width, height))
+    shape.vectors.push(IGMDriver.newGCodeVector(0, height))
+    shape.vectors.push(IGMDriver.newGCodeVector(0, 0))
     return shape
   }
 
@@ -79,23 +78,24 @@ M2
     // */
     const shape = this.rect(53, 38)
     const shape2 = this.rect(43.5, 11.5)
-    shape2.translate(new GCodeVector(4.75, 13.25))
+    IGMDriver.translate(shape2, IGMDriver.newGCodeVector(4.75, 13.25))
 
     // const shape = this.rect(38,53)
     // const shape2 = this.rect(11.5,43.5)
     // shape2.translate(new GCodeVector(13.25,4.75))
     
-
+    
     const igm = new IGM()
-    igm.setBounds([shape, shape2])
+    const driver = new IGMDriver(igm)
+    IGMDriver.updateBounds([shape, shape2])
     const width = shape.bounds.width()
     const height = shape.bounds.height()
 
     for (let row = 0; row < this.rows; row++) {
       for (let col = 0; col < this.columns; col++) {
-        const translate = new GCodeVector(col * (width + this.colSpacing), row * (height + this.rowSpacing))
-        igm.addToLayerObject('one', shape.clone().translate(translate))
-        igm.addToLayerObject('one', shape2.clone().translate(translate))
+        const translate = IGMDriver.newGCodeVector(col * (width + this.colSpacing), row * (height + this.rowSpacing))
+        driver.addToLayerObject('one', IGMDriver.translate(IGMDriver.clone(shape), translate))
+        driver.addToLayerObject('one', IGMDriver.translate(IGMDriver.clone(shape2), translate))
       }
     }
     const svg = this.toSVG(igm)
@@ -106,9 +106,10 @@ M2
     let svg = ''
 
     const res = 1
-    const paths = model.alllayers
-    model.setBounds(paths)
-    const bounds = model.getMaxBounds(paths)
+    const driver = new IGMDriver(model)
+    const paths = driver.allObjectsFlat
+    IGMDriver.updateBounds(paths)
+    const bounds = driver.getMaxBounds(paths)
     const w = bounds.x2
     const h = bounds.y2
     const dpi = 72 //output DPI
@@ -118,8 +119,9 @@ M2
     svg += '<svg width="' + w / res + 'mm" height="' + h / res + 'mm" viewBox="0 0 ' + w * dpiScale + ' ' + h * dpiScale + '" xmlns="http://www.w3.org/2000/svg" version="1.1">\r\n'
 
 
-    for (const part of model.alllayers) {
-      part.scale(dpiScale)
+    for (const part of driver.allObjectsFlat) {
+      //TODO rescaling after calculating bounds???
+      IGMDriver.scale(part, dpiScale)
       svg += ('<polyline points="')
       const points = []
       for (const vec of part.vectors) {

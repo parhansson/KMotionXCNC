@@ -37,7 +37,9 @@ module.exports = {
     extensions: ['.js', '.ts'],
     alias: {
       ...rxPaths(),
-      'three/three-trackballcontrols': 'three/examples/js/controls/TrackballControls'
+      'three/three-trackballcontrols': 'three/examples/js/controls/TrackballControls',
+      '@workers': helpers.root('src/workers'),
+      '@kmx': helpers.root('src/app')
     }
   },
 
@@ -68,11 +70,14 @@ module.exports = {
         ]
       },
       {
-        test: /\.worker.ts$/,
+        test: /workers\/.*\.worker\.ts$/,
         use: [
-          'worker-loader',
-          'ts-loader'
-        ]
+          { 
+            loader: 'worker-loader',
+            options: { name: '[name].[hash].js' }
+          },
+          { loader: 'ts-loader' }
+        ],
       },
       {
         test: /\.ts$/,

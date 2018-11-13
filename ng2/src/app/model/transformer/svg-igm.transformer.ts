@@ -1,7 +1,6 @@
 
 import { Observer } from 'rxjs'
-import { IGM, IgmObject } from '../igm'
-import { GCodeVector } from '../vector'
+import { IGM, IGMDriver, IgmObject } from '../igm'
 import { ModelTransformer } from './model.transformer'
 import { SVGModelSettings } from '../model.settings.service'
 import * as opentype from 'opentype.js'
@@ -98,7 +97,7 @@ export class Svg2IgmTransformer extends ModelTransformer<SVGElement, IGM>{
   execute(svgRootElement: SVGElement, targetObserver: Observer<IGM>) {
 
     const igm = new IGM()
-
+    const driver = new IGMDriver(igm)
 
     // let the fun begin
     const cssFilterAllowed = ['svg', 'g', 'defs', 'style', 'use']
@@ -120,11 +119,11 @@ export class Svg2IgmTransformer extends ModelTransformer<SVGElement, IGM>{
     }
     const parser = new SvgParser(contentFilter, this.font)
     const node2 = parser.parse(svgRootElement)    
-    this.makeModel(node2, igm)
+    this.makeModel(node2, driver)
     targetObserver.next(igm)
   }
 
-  private makeModel(node: SvgNode, igm: IGM) {
+  private makeModel(node: SvgNode, driver: IGMDriver) {
     if(node.defs) { return }
     if(node.unsupported) { return }
     //if stroke is undefined we do not generate shape
@@ -135,31 +134,31 @@ export class Svg2IgmTransformer extends ModelTransformer<SVGElement, IGM>{
     const hasStroke = node.stroke && node.stroke !== 'none' 
     if(hasFill || hasStroke || node.text) {
       //console.log('stroke', node.stroke)
-      this.makeShape(node, igm)
+      this.makeShape(node, driver)
     }
     for (const child of node.children) {
-      this.makeModel(child, igm)
+      this.makeModel(child, driver)
     }
   }
 
-  private makeShape(node: SvgNode, igm: IGM) {
+  private makeShape(node: SvgNode, driver: IGMDriver) {
     const dpiScaleFactor = this.settings.getDPIScaleFactor()
     for (const subpath of node.path) {
-      const shape = new IgmObject()
+      const shape = IGMDriver.newIgmObject()
       shape.type = 'Linear interpolation'
       shape.cmd = 'G1'
       shape.node = node //Not currently in use
       for (const point of subpath) {
-        shape.vectors.push(new GCodeVector(point[0], point[1], 0))
+        shape.vectors.push(IGMDriver.newGCodeVector(point[0], point[1], 0))
         //TODO clip on clipPath here. this will be extremely difficult
       }
-      shape.scale(dpiScaleFactor)
+      IGMDriver.scale(shape,dpiScaleFactor)
 
       if (node.unsupported === true) {
-        igm.unsupported.push(subpath)
+        driver.addUnsupported(subpath)
       } else {
         //this.boundarys.allcolors.push(subpath);
-        igm.addToLayerObject(node.stroke, shape)
+        driver.addToLayerObject(node.stroke, shape)
       }
     }
   }

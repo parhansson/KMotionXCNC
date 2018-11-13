@@ -1,6 +1,8 @@
 {
   "compilerOptions": {
-    "target": "es2015",
+    "allowSyntheticDefaultImports":true,
+    "esModuleInterop": true,
+    "target": "es2015", 
     "module": "es2015",
     "moduleResolution": "node",
     "sourceMap": true,
@@ -11,7 +13,12 @@
     "suppressImplicitAnyIndexErrors": true,
     "removeComments": false,
     "outDir": "dist/unbundled",
-    "declaration": true
+    "declaration": true,
+    "baseUrl": "./",
+    "paths": {
+      "@kmx/*": [ "./src/app/*" ] 
+      //"@workers/*": [ "./src/workers/*" ]
+    }
   },
   "exclude": [
     "dist",

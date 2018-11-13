@@ -8,7 +8,8 @@ export class SocketMessageBroker implements SocketMessageHandler {
   socket: SocketConnector
   kmxStatusStream: KmxStatusParser
 
-  constructor(private messagePort: any) {
+  constructor(private workerInstance: Worker) {
+    workerInstance.addEventListener('message',(event) => this.onmessage(event))
     //messagePort.onmessage = this.onmessage.bind(this);
     this.kmxStatusStream = new KmxStatusParser()
     this.socket = new SocketConnector(this, 'KMotionX')
@@ -84,8 +85,8 @@ export class SocketMessageBroker implements SocketMessageHandler {
     } else  {
       message = {Command: payload }
     }
-    
-    this.messagePort.postMessage(message)
+    this.workerInstance.postMessage(message)
+
   }
 
 }

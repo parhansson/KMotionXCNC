@@ -1,4 +1,4 @@
-import { IGM, IgmObject, GCodeSource, BoundRect } from '../igm'
+import { IGM, IGMDriver, IgmObject, GCodeSource, BoundRect } from '../igm'
 import { IGMModelSettings } from '../model.settings.service'
 import { ModelTransformer } from './model.transformer'
 import { Observer } from 'rxjs'
@@ -59,14 +59,14 @@ export class Igm2GcodeTransformer extends ModelTransformer<IGM, GCodeSource>{
     //settings.bitWidth = settings.bitWidth || 1; // in mm 
     const multipass = false //false when lasering in one pass
 
-
-    const shapes = igm.applyModifications(settings)
+    const driver = new IGMDriver(igm)
+    const shapes = driver.applyModifications(settings)
 
     //var LaserON = '(BUF,SetBitBuf14)';
     //var LaserOFF = '(BUF,ClearBitBuf14)';
     const gcode = new GCodeOutput('M3 (laser on)', 'M5 (laser off)', true)
 
-    const maxBounds = igm.getMaxBounds(shapes)
+    const maxBounds = driver.getMaxBounds(shapes)
 
 
     gcode.comment(this.describe(maxBounds))

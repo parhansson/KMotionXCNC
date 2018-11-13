@@ -1,13 +1,8 @@
 import { Component, Inject, Input, ViewChild, ViewEncapsulation } from '@angular/core'
 import { AceDirective } from './ace.directive'
-import { KMXUtil } from '../util/kmxutil'
 import {
-  DropZoneDirective,
   FileDialogComponent,
-  FilePathComponent,
   FileResource,
-  IFileBackend,
-  FileServiceToken,
   Payload,
   FileStoreToken,
   FileStore

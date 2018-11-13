@@ -1,9 +1,8 @@
 import { Component, Inject, Injectable } from '@angular/core'
-import { LogComponent } from './log.component'
-import { LogSubject } from './log-subject'
+import { ReplaySubject } from 'rxjs'
 
 interface LogIdToLogSubjectMap {
-  [id: string]: LogSubject<LogMessage>
+  [id: string]: ReplaySubject<LogMessage>
 }
 export class LogMessage {
   constructor(public message: string, public styleClass?: string) {
@@ -22,13 +21,9 @@ export class LogService {
   public getLogSubject(logId: string) {
     let subject = this.logs[logId]
     if (subject === undefined) {
-      subject = this.logs[logId] = new LogSubject<LogMessage>()
+      subject = this.logs[logId] = new ReplaySubject<LogMessage>(1000)
     }
     return subject
-  }
-
-  public clearLog(logId: string) {
-    this.logs[logId].prune()
   }
 
   public logExist(logId: string) {

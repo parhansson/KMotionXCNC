@@ -1,15 +1,8 @@
 import { Component, ViewChild, SkipSelf, Inject } from '@angular/core'
-import { Subject } from 'rxjs'
-import { LogComponent } from '../log/log.component'
-import { BackendService } from '../backend/backend.service'
 import { SocketService } from '../backend/socket.service'
 import { KmxStatus } from '../hal/kflop'
-import { DroComponent } from './dro.component'
 import { ThreeViewComponent } from './view.component'
-import { UserButtonsComponent } from './user-buttons.component'
-import { ControlButtonsComponent } from './control-buttons.component'
 import { StaticTransformer } from '../model/transformers'
-import { FileResource, Payload, FileServiceToken, IFileBackend } from '../resources'
 import { SettingsService, Machine } from '../settings/settings.service'
 import { GCodeEditorComponent } from './gcode-editor.component'
 import * as THREE from 'three'
@@ -55,8 +48,7 @@ export class GCodeScreenComponent {
   editorComponent: GCodeEditorComponent
   kmxStatus: KmxStatus
 
-  constructor(private backendService: BackendService,
-    private socketService: SocketService,
+  constructor(socketService: SocketService,
     private settingsService: SettingsService,
     private staticTransformer: StaticTransformer) {
     this.kmxStatus = socketService.data

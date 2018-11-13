@@ -1,5 +1,4 @@
-import { IGM, IgmObject } from '../igm'
-import { GCodeVector } from '../vector'
+import { IGM, IGMDriver, IgmObject } from '../igm'
 
 interface MitreOptions {
   mitreTop: boolean
@@ -97,9 +96,9 @@ export class MitreBox {
     //console.log(this.svg);
 
     const igm = new IGM()
-    for (const model of this.models) {
-      igm.addToLayerObject('', model)
-    }
+    const driver = new IGMDriver(igm)
+    driver.addToLayerObject('', this.models)
+
     return igm
 
   }
@@ -286,13 +285,13 @@ export class MitreBox {
   }
 
   protected PolyStart() {
-    this.models.push(new IgmObject())
+    this.models.push(IGMDriver.newIgmObject())
   }
   private getLast() {
     return this.models[this.models.length - 1]
   }
   protected PolyPoint(x, y) {
-    this.getLast().vectors.push(new GCodeVector(x, y))
+    this.getLast().vectors.push(IGMDriver.newGCodeVector(x, y))
   }
 
   protected PolyEnd() {

@@ -1,6 +1,4 @@
-import { BackendService } from '../backend/backend.service'
 import { IFileBackend, FileServiceToken } from '../resources'
-import { KMXUtil } from '../util/kmxutil'
 import { Subject, ReplaySubject } from 'rxjs'
 
 export abstract class JsonFileStore<T>{

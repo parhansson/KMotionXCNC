@@ -1,26 +1,31 @@
 
-import { IGM, IgmObject, GCodeSource, BoundRect } from '../igm'
-import { GCodeVector, GCodeCurve3 } from '../vector'
+import { IGM, IGMDriver, IgmObject, GCodeVector } from '../igm'
+import { GCodeCurve3 } from '../vector'
 import { GCodeTransformer, State } from './gcode.transformer'
 //Copyright (c) 2014 par.hansson@gmail.com
 
 
 export class Gcode2IgmTransformer extends GCodeTransformer<IgmObject, IGM>{
- 
-  constructor(disableWorker?: boolean) { super(disableWorker) }
+  private driver: IGMDriver
+  constructor(disableWorker?: boolean) { 
+    super(disableWorker) 
+  }
   protected createOutput() {
-    return new IGM()
+    const model = new IGM()
+    this.driver = new IGMDriver(model)
+    return model
   }
 
   protected startShape() {
-    const shape = new IgmObject()
+    const shape = IGMDriver.newIgmObject()
     //shape.userData = { lineNo: this.state.lineNo }
-    this.output.addToLayerObject('layer1',shape)
+    this.driver.addToLayerObject('layer1',shape)
     return shape
   }
 
   protected endShape(){
-    
+    //TODO
+    //setBounds on shape since it is modified without knowledge by driver
   }
 
   protected addLinearPoint(newPosition: GCodeVector, shape: IgmObject) {

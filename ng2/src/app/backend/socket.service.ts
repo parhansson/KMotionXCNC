@@ -7,8 +7,7 @@ import { LogMessage } from './socket/messages'
 
 import { FileResource } from '../resources'
 
-import * as SocketWorker from '../../socket.worker'
-//import SocketWorker from '../../socket.worker';
+import SocketWorker from '@workers/socket.worker'
 
 @Injectable()
 export class SocketService {
@@ -26,9 +25,8 @@ export class SocketService {
     this.data.simulating = false
     this.data.currentLine = -1
     
-    //this.socketWorker = new SocketWorker()
-    this.socketWorker = new (SocketWorker as any)()
-    this.socketWorker.onmessage = this.onWorkerMessage.bind(this)
+    this.socketWorker = new SocketWorker() //new (SocketWorker as any)()
+    this.socketWorker.addEventListener('message', (event) => {this.onWorkerMessage(event)})
     //does not seem to work, at least not in chrome
     //      window.onbeforeunload = function(){
     //        socketWorker.postMessage({command:'disconnect'})

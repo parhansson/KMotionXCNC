@@ -1,4 +1,4 @@
-
+import { GCodeVector, IGMDriver } from './igm'
 export interface MoveArcArguments {
   I?: number
   J?: number
@@ -18,50 +18,7 @@ export interface MoveArguments extends MoveAngularArguments, MoveArcArguments {
 
 }
 
-export class GCodeVector {
 
-  constructor(public x?: number, public y?: number, public z?: number, public a?: number, public b?: number, public c?: number) {
-    this.x = x || 0
-    this.y = y || 0
-    this.z = z || 0
-    this.a = a || 0
-    this.b = b || 0
-    this.c = c || 0
-
-  }
-
-  scale(scale: number) {
-
-    this.x = this.x * scale
-    this.y = this.y * scale
-    this.z = this.z * scale
-    return this
-  }
-
-  add(v: GCodeVector) {
-    this.x += v.x
-    this.y += v.y
-    this.z += v.z
-
-    return this
-  }
-
-  equals(v: GCodeVector) {
-
-    return ((v.x === this.x) && (v.y === this.y) && (v.z === this.z))
-
-  }
-
-  distanceSquared(v: GCodeVector) {
-
-    const dx = this.x - v.x
-    const dy = this.y - v.y
-    const dz = this.z - v.z
-
-    return dx * dx + dy * dy + dz * dz
-
-  }
-}
 export class EllipseCurve3 {
   height: number
   sZ: number
@@ -137,7 +94,7 @@ export class EllipseCurve3 {
 
     }
 
-    return new GCodeVector(x, y, this.sZ + h)
+    return IGMDriver.newGCodeVector(x, y, this.sZ + h)
   }
 
   getPoints(divisions: number) {

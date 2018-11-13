@@ -1,8 +1,7 @@
 import { Observer } from 'rxjs'
 import { ModelSettingsService, ModelSettings } from '../model.settings.service'
 import { ModelTransformer } from './model.transformer'
-import { IGM, IgmObject } from '../igm'
-import { GCodeVector } from '../vector'
+import { IGM, IGMDriver, IgmObject } from '../igm'
 import * as THREE from 'three'
 import * as DxfParser from 'dxf-parser'
 
@@ -47,6 +46,7 @@ export class Dxf2IgmTransformer extends ModelTransformer<ArrayBuffer | string, I
       fileText = source
     }
     const model = new IGM()
+    const driver = new IGMDriver(model)
     const parser = new DxfParser()
     try {
       const dxf = parser.parseSync(fileText)
@@ -64,7 +64,7 @@ export class Dxf2IgmTransformer extends ModelTransformer<ArrayBuffer | string, I
           shape = this.doEllipse(entity)
         }
         if (shape) {
-          model.addToLayerObject(entity.layer, this.scale(shape, dxf))
+          driver.addToLayerObject(entity.layer, this.scale(shape, dxf))
         }
       }
       console.log(dxf)
@@ -79,19 +79,19 @@ export class Dxf2IgmTransformer extends ModelTransformer<ArrayBuffer | string, I
     if (unit === undefined) {
       unit = 1 // autocad defaults to Inches(1) if INSUNITS is missing    
     }
-    shape.scale(INSUNITS[unit])
+    IGMDriver.scale(shape, INSUNITS[unit])
     return shape
   }
 
   doArc(entity): IgmObject {
     const geometry = new THREE.CircleGeometry(entity.radius, 128, entity.startAngle, entity.angleLength)
     geometry.vertices.shift()
-    const object = new IgmObject()
+    const object = IGMDriver.newIgmObject()
     for (const v of geometry.vertices) {
-      object.vectors.push(new GCodeVector(v.x, v.y, v.z))
+      object.vectors.push(IGMDriver.newGCodeVector(v.x, v.y, v.z))
     }
     //TODO if circle close path
-    object.translate(new GCodeVector(entity.center.x, entity.center.y, entity.center.z))
+    IGMDriver.translate(object, IGMDriver.newGCodeVector(entity.center.x, entity.center.y, entity.center.z))
     return object
   }
 
@@ -109,15 +109,15 @@ export class Dxf2IgmTransformer extends ModelTransformer<ArrayBuffer | string, I
       false, // Always counterclockwise
       rotation
     )
-    const object = new IgmObject()
+    const object = IGMDriver.newIgmObject()
     for (const v of curve.getPoints(50)) {
-      object.vectors.push(new GCodeVector(v.x, v.y, entity.center.z))
+      object.vectors.push(IGMDriver.newGCodeVector(v.x, v.y, entity.center.z))
     }
     return object
   }
 
   doLine(entity): IgmObject {
-    const object = new IgmObject()
+    const object = IGMDriver.newIgmObject()
     let i = 0
     for (const v of entity.vertices) {
       //const v = entity.vertices[i]
@@ -128,17 +128,17 @@ export class Dxf2IgmTransformer extends ModelTransformer<ArrayBuffer | string, I
         const endPoint = i + 1 < entity.vertices.length ? entity.vertices[i + 1] : object.vectors[0]
         //https://github.com/leandromundim/LaserWeb3/blob/4e883d5e305e0ffd3ce59fea953aa76ed9c6d730/public/lib/dxf/three-dxf.js
         const bulgeGeometry = new BulgeGeometry(startPoint, endPoint, bulge)
-        object.vectors.push.apply(object.vectors, bulgeGeometry.vertices.map(v => new GCodeVector(v.x, v.y, v.z)))
+        object.vectors.push.apply(object.vectors, bulgeGeometry.vertices.map(v => IGMDriver.newGCodeVector(v.x, v.y, v.z)))
 
       } else {
-        object.vectors.push(new GCodeVector(v.x, v.y, v.z))
+        object.vectors.push(IGMDriver.newGCodeVector(v.x, v.y, v.z))
       }
       i++
     }
     //Close shapes
     if (entity.shape) {
       const startPoint = object.vectors[0]
-      object.vectors.push(new GCodeVector(startPoint.x, startPoint.y, startPoint.z))
+      object.vectors.push(IGMDriver.newGCodeVector(startPoint.x, startPoint.y, startPoint.z))
     }
     return object
   }
@@ -158,8 +158,8 @@ export class Dxf2IgmTransformer extends ModelTransformer<ArrayBuffer | string, I
       interpolatedPoints = curve.getPoints(100)
     }
 
-    const splineObject = new IgmObject()
-    splineObject.vectors = interpolatedPoints.map(v => new GCodeVector(v.x, v.y, 0))
+    const splineObject = IGMDriver.newIgmObject()
+    splineObject.vectors = interpolatedPoints.map(v => IGMDriver.newGCodeVector(v.x, v.y, 0))
     return splineObject
   }
 }

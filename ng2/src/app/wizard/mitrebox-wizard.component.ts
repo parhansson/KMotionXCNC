@@ -1,5 +1,5 @@
 import { Component, Inject, Input, Output, ViewChild, ElementRef } from '@angular/core'
-import { IGM } from '../model/igm'
+import { IGM, IGMDriver } from '../model/igm'
 import { MitreBox } from '../model/tool/mitre-box'
 import { SvgPreviewComponent } from './svg-preview.component'
 
@@ -24,11 +24,11 @@ export class MitreBoxWizardComponent {
 
   toSVG(model: IGM) {
     let svg = ''
-
     const res = 1
-    const paths = model.alllayers
-    model.setBounds(paths)
-    const bounds = model.getMaxBounds(paths)
+    const driver = new IGMDriver(model)
+    const paths = driver.allObjectsFlat
+    IGMDriver.updateBounds(paths)
+    const bounds = driver.getMaxBounds(paths)
     const w = bounds.x2
     const h = bounds.y2
     const dpi = 72 //output DPI
@@ -38,8 +38,9 @@ export class MitreBoxWizardComponent {
     svg += '<svg width="' + w / res + 'mm" height="' + h / res + 'mm" viewBox="0 0 ' + w * dpiScale + ' ' + h * dpiScale + '" xmlns="http://www.w3.org/2000/svg" version="1.1">\r\n'
 
 
-    for (const part of model.alllayers) {
-      part.scale(dpiScale)
+    for (const part of driver.allObjectsFlat) {
+      //TODO rescaling after calculating bounds???
+      IGMDriver.scale(part, dpiScale)
       svg += ('<polyline points="')
       const points = []
       for (const vec of part.vectors) {
