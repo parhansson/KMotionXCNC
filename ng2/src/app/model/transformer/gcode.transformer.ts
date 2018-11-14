@@ -92,6 +92,16 @@ export class State<ShapeType> extends GCodeState {
     },
     S: (cmd: Word) => {
     },
+    G17: (cmd: Word) => {
+      this.planeGroup.setActiveCode(cmd.value)
+    },
+    G18: (cmd: Word) => {
+      this.planeGroup.setActiveCode(cmd.value)
+    },
+    G19: (cmd: Word) => {
+      this.planeGroup.setActiveCode(cmd.value)
+
+    },
     G20: (cmd: Word) => {
       this.unitsGroup.setActiveCode(cmd.value)
       this.scale = 25.4 //Inches
@@ -124,9 +134,10 @@ export abstract class GCodeTransformer<ShapeType, OutputType> extends ModelTrans
   constructor(protected disableWorker?: boolean) { super()
     
   }
+
   protected abstract createOutput(): OutputType
   protected abstract startShape(): ShapeType
-  protected abstract endShape()
+  protected abstract endShape(): void
   protected abstract addLinearPoint(newPosition: GCodeVector, shape: ShapeType)
   protected abstract addCurve(curve: GCodeCurve3, shape: ShapeType)
 
@@ -143,9 +154,10 @@ export abstract class GCodeTransformer<ShapeType, OutputType> extends ModelTrans
       },
       (error) => { observer.error(error) },
       () => {
+        this.onEndProgram()
         subcripion.unsubscribe()
         observer.next(this.output)
-        //transformedDefer.complete();
+        //observer.complete();
 
       })
 
@@ -206,6 +218,17 @@ export abstract class GCodeTransformer<ShapeType, OutputType> extends ModelTrans
     }
 
   }
+  private onEndProgram(){
+    this.endShape()
+  }
+  private onStartShape(){
+    //TODO end current shape if present
+    return this.startShape()
+  }
+  private onEndShape(){
+    //TODO track and warn if current shape is ended
+    this.endShape()
+  }
 
   protected onWordParameter(args: MoveArguments) {
 
@@ -215,21 +238,19 @@ export abstract class GCodeTransformer<ShapeType, OutputType> extends ModelTrans
       return
     }
 
-    let currentShape = this.state.currentShape
-    const position = this.state.position
-
-
     if (this.state.moveGroup.changed 
-      || currentShape == null 
+      || this.state.currentShape == null 
       //hack to create new shape on arcs
       || this.state.moveGroup.code === 'G2' 
       || this.state.moveGroup.code === 'G3') 
       {
-        this.endShape()
-        currentShape = this.state.currentShape = this.startShape()
+        //End shape
+        this.onEndShape()
+        //start new Shape
+        this.state.currentShape = this.onStartShape()
         if (this.state.moveGroup.code === 'G0' || this.state.moveGroup.code === 'G1') {
           // add startpoint on linear shapes
-          this.addLinearPoint(position, currentShape)
+          this.addLinearPoint(this.state.position, this.state.currentShape)
         }
     }
 
@@ -237,16 +258,16 @@ export abstract class GCodeTransformer<ShapeType, OutputType> extends ModelTrans
 
     switch (this.state.moveGroup.code) {
       case ('G0'):
-        this.addLinearPoint(newPosition, currentShape)
+        this.addLinearPoint(newPosition, this.state.currentShape)
         break
       case ('G1'):
-        this.addLinearPoint(newPosition, currentShape)
+        this.addLinearPoint(newPosition, this.state.currentShape)
         break
       case ('G2'):
-        this.createCurve(args, position, newPosition, true, currentShape)
+        this.createCurve(args, this.state.position, newPosition, true, this.state.currentShape)
         break
       case ('G3'):
-        this.createCurve(args, position, newPosition, false, currentShape)
+        this.createCurve(args, this.state.position, newPosition, false, this.state.currentShape)
         break
     }
 
@@ -263,7 +284,8 @@ export abstract class GCodeTransformer<ShapeType, OutputType> extends ModelTrans
       position,
       newPosition,
       args,
-      clockWise)
+      clockWise,
+      this.state.planeGroup.code as 'G17' || 'G18' || 'G19')
     this.addCurve(curve, currentShape)
   }
   private getNewPosition(args: MoveArguments) {
@@ -298,7 +320,7 @@ export abstract class GCodeTransformer<ShapeType, OutputType> extends ModelTrans
     }
     return newPosition
   }
-  private containsMoveData(args: any) {
+  private containsMoveData(args: MoveArguments) {
     return args.X !== undefined || args.Y !== undefined || args.Z !== undefined 
            || args.A !== undefined || args.B !== undefined || args.C !== undefined
            || args.I !== undefined || args.J !== undefined || args.K !== undefined

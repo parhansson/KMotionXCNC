@@ -28,6 +28,7 @@ export interface LayerMap {
 }
 // Intermediate Gcode Model
 export class IGM {
+  //TODO Changing IGM to interface will break instanceof when transforming
 
   readonly layers: LayerMap = {} // sort by stroke color
   readonly layerKeys: any[] = [] // layerKey is a mapping to add unnamed layers, layer will get a generated name
@@ -377,7 +378,7 @@ export class IGMDriver {
       paths.push.apply(paths, orderedPaths)
     }
   }
-  private nearest(point: GCodeVector, paths: IgmObject[]) {
+  private nearest(point: GCodeVector, paths: IgmObject[]) : IgmObject {
 
     let dist = Infinity
     let index = -1
@@ -402,7 +403,7 @@ export class IGMDriver {
       } else {
         distanceSquared = startDS
       }
-
+      //TODO add tolerance check. If dist < tolerance*tolerance break loop since finding a closer path probably won't matter
       if (distanceSquared < dist) {
         dist = distanceSquared
         index = pathIdx

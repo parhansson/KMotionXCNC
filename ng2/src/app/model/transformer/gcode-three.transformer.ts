@@ -36,11 +36,19 @@ export class Gcode2ThreeTransformer extends GCodeTransformer<THREE.Geometry, THR
     })
   }
   private moveShapeData: ThreeShapeData = {
-    material: new THREE.LineBasicMaterial({
+    // material: new THREE.LineBasicMaterial({
+    //   opacity: 0.6,
+    //   transparent: true,
+    //   linewidth: 1,
+    //   color: 0xAAAAFF
+    // })
+    material: new THREE.LineDashedMaterial({ 
+      gapSize: 1, 
+      dashSize: 2,
       opacity: 0.6,
       transparent: true,
       linewidth: 1,
-      color: 0xAAAAFF
+      color: 0xAA0000, 
     })
 
   }
@@ -66,8 +74,15 @@ export class Gcode2ThreeTransformer extends GCodeTransformer<THREE.Geometry, THR
   }
 
   protected endShape() {
-    if (this.output.children.length > 0) {
-      this.output.children[this.output.children.length - 1].userData.endLine = this.state.lineNo
+    // if(this.state.currentShape){
+    //   this.state.currentShape.userData.endLine = this.state.lineNo
+    // }
+    const shapes = this.output.children
+    if (shapes.length > 0) {
+      const shape = shapes[shapes.length - 1]
+      shape.userData.endLine = this.state.lineNo;
+      //Needed if line dashed material
+      (shape as any as THREE.Line).computeLineDistances()
     }
   }
 

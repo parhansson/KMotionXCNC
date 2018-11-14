@@ -18,28 +18,27 @@ export interface MoveArguments extends MoveAngularArguments, MoveArcArguments {
 
 }
 
-
-export class EllipseCurve3 {
-  height: number
-  sZ: number
-  aastartDeg: number
-  aaendDeg: number
-  constructor(private aX: number,
-    private aY: number,
-    private xRadius: number,
-    private yRadius: number,
-    private aStartAngle: number,
-    private aEndAngle: number,
-    private aClockwise: boolean,
-    private aRotation: number
-  ) {
-    //Not used only for humans
-    this.aastartDeg = aStartAngle * (180 / Math.PI)
-    this.aaendDeg = aEndAngle * (180 / Math.PI)
-
-  }
-
-  getPoint(t: number, h: number) {
+/**
+ * EllipseCurve is from THREE but also accounts for height (z)
+ */
+export class EllipseCurve {
+  private readonly deltaZ: number
+  private readonly deltaAngle: number
+  constructor(private readonly aX: number,
+    private readonly aY: number,
+    private readonly xRadius: number,
+    private readonly yRadius: number,
+    private readonly aStartAngle: number,
+    private readonly aEndAngle: number,
+    private readonly aClockwise: boolean,
+    private readonly aRotation: number,
+    private readonly startZ: number,
+    private readonly endZ: number
+    ) {
+    //store deltaZ for later
+    this.deltaZ = endZ - startZ
+    
+    //calculate and store deltaAngle for later
     const twoPi = Math.PI * 2
     let deltaAngle = this.aEndAngle - this.aStartAngle
     const samePoints = Math.abs(deltaAngle) < Number.EPSILON
@@ -51,11 +50,8 @@ export class EllipseCurve3 {
     if (deltaAngle < Number.EPSILON) {
 
       if (samePoints) {
-
         deltaAngle = 0
-
       } else {
-
         deltaAngle = twoPi
 
       }
@@ -65,18 +61,21 @@ export class EllipseCurve3 {
     if (this.aClockwise === true && !samePoints) {
 
       if (deltaAngle === twoPi) {
-
         deltaAngle = - twoPi
-
       } else {
-
         deltaAngle = deltaAngle - twoPi
-
       }
 
     }
+    this.deltaAngle = deltaAngle
+  }
+  /**
+   * 
+   * @param t point in percent of arc length
+   */
+  private getPoint(t: number) {
 
-    const angle = this.aStartAngle + t * deltaAngle
+    const angle = this.aStartAngle + t * this.deltaAngle
     let x = this.aX + this.xRadius * Math.cos(angle)
     let y = this.aY + this.yRadius * Math.sin(angle)
 
@@ -94,21 +93,17 @@ export class EllipseCurve3 {
 
     }
 
-    return IGMDriver.newGCodeVector(x, y, this.sZ + h)
+    return IGMDriver.newGCodeVector(x, y, this.startZ + t * this.deltaZ)
   }
 
-  getPoints(divisions: number) {
+  getPoints(divisions?: number) {
 
-    if (!divisions) { divisions = 5 }
+    divisions = divisions || 10 //default to 10
 
     const pts: GCodeVector[] = []
 
-    let h = 0
-    const hdelta = this.height / (divisions + 1)
-
     for (let d = 0; d <= divisions; d++) {
-      pts.push(this.getPoint(d / divisions, h))
-      h += hdelta
+      pts.push(this.getPoint(d / divisions))
     }
     //console.info("ARC height sz ez delta",this.height, this.sZ, h-hdelta, hdelta);
     return pts
@@ -117,9 +112,10 @@ export class EllipseCurve3 {
 
 }
 
-export class GCodeCurve3 extends EllipseCurve3 {
-  constructor(startPoint: GCodeVector, endPoint: GCodeVector, args: MoveArcArguments, clockWise) {
-
+export class GCodeCurve3 extends EllipseCurve {
+  private readonly plane: 'G17' | 'G18' | 'G19'
+  constructor(startPoint: GCodeVector, endPoint: GCodeVector, args: MoveArcArguments, clockWise:boolean, plane: 'G17' | 'G18' | 'G19') {
+    
     const I = args.I || 0
     const J = args.J || 0
     const K = args.K || 0
@@ -134,7 +130,7 @@ export class GCodeCurve3 extends EllipseCurve3 {
 
     const fullCirce = (Math.abs(startPoint.x - endPoint.x) < Number.EPSILON && Math.abs(startPoint.y - endPoint.y) < Number.EPSILON)
     if (fullCirce) {
-      console.log('full circle', startPoint, endPoint)
+      //console.log('full circle', startPoint, endPoint)
     }
     const twoPi = Math.PI * 2
 
@@ -166,7 +162,7 @@ export class GCodeCurve3 extends EllipseCurve3 {
       startAngle = Math.atan2(startPoint.y - centerY, startPoint.x - centerX)
       //radius += 5
       if (fullCirce) {
-        endAngle = startAngle + Math.PI * 2
+        endAngle = startAngle + twoPi
       } else {
         endAngle = Math.atan2(endPoint.y - centerY, endPoint.x - centerX)
       }
@@ -179,13 +175,38 @@ export class GCodeCurve3 extends EllipseCurve3 {
       radius, radius,           // xRadius, yRadius
       startAngle, endAngle,  // aStartAngle, aEndAngle
       clockWise,                     // aClockwise,
-      0                               //rotation
+      0,                               //rotation
+      startPoint.z,
+      endPoint.z
     )
-    this.sZ = startPoint.z
-    this.height = endPoint.z - startPoint.z
-    console.log(startPoint, endPoint, this)
+    this.plane = plane
+    //console.log(startPoint, endPoint, this)
   }
 
+  getPoints(divisions: number) {
+    //console.log('GCodeCurve3.getPoints')
+    const points = super.getPoints(divisions)
+    
+    //handle plane G17-G20
+    // G17 is XY plane, G18 is XZ plane and G19 is YZ on circular interpolation; G03 or G02.
+    //In G17 your circle goes around the Z axis, in G18 around the Y axis and G19 around the X axis.
+    //TODO add function in IGMDriver for this
+    for(const p of points){
+
+      const x = p.x
+      const y = p.y
+      const z = p.z
+      if(this.plane === 'G18'){
+        p.y = z
+        p.z = y
+      } else if(this.plane === 'G19'){
+        p.x = z
+        p.z = x
+      }
+
+    }
+    return points
+  }
 
 
 }
