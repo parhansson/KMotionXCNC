@@ -26,6 +26,9 @@ export class TransformingFileStore implements FileStore {
 
   store(name: string, content: ArrayBuffer | ArrayBufferView | Blob | string) {
     this.fileBackend.saveFile(name, content)
+    //when using save as we need to update loaded gcode file.
+    //TODO needs cleanup - should not be done here
+    this.fileBackend.setGCodeFile(name)
   }
 
   load(file: FileResource | Payload) {
@@ -33,6 +36,7 @@ export class TransformingFileStore implements FileStore {
       this.payloadSubject.next(file)
     } else {
       if (file.file) {
+        //TODO needs cleanup - should not be done here
         this.fileBackend.setGCodeFile(file.canonical)
       }
     }

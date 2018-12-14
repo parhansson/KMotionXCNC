@@ -179,11 +179,15 @@
     </tab>
   </tabset>
   <div class="row">
-    <div class="col-xs-4 col-xs-offset-5">
-      <button type="button" class='btn btn-default'>New machine</button>
-      <button type="button" class="btn btn-primary" (click)="save()">Save</button>
+    <file-dialog #fd (selectedFile)="onFile($event)" [resource]="resource"></file-dialog>
+    <div class="col-sm"></div>
+    <div class="col-sm">
+      <span class="glyphButtonBar">
+          <span class="btn btn-primary fa fa-folder-open" title="Open" (click)="fd.openDialog(false)"> Open</span>
+          <span class="btn btn-primary fa fa-save" title="Save" (click)="onSave()"> Save</span>
+      </span>
+      <ng-content select="div[buttons]"></ng-content>
     </div>
-    <div class="col-xs-2 col-xs-offset-7">
-    </div>
+    <div class="col-sm"></div>
   </div>
 </div>

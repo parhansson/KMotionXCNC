@@ -18,9 +18,14 @@ import { Payload } from './payload'
             <ul class="modal-file-list">
               <li class="button" (click)="selectFile(file)" *ngFor="let file of files">{{file.name}}</li>          
             </ul>
-            <p>Open file by selecting or with drag and drop to editor from desktop</p>
+            <p *ngIf="!saveMode">Open file by selecting or with drag and drop to editor from desktop</p>
+            <div *ngIf="saveMode">
+              <p>Select folder and enter file name</p>
+              <input class="form-control" [(ngModel)]="resource.file" type="text" />
+            </div>
           </div>
           <div class="modal-footer">
+            <a *ngIf="saveMode" class="btn" (click)="doSave()">Save as</a>      
             <a class="btn" (click)="hide()">Cancel</a>      
           </div>
         </div>
@@ -45,15 +50,16 @@ import { Payload } from './payload'
 export class FileDialogComponent {
   @Input() resource: FileResource
   @Output() selectedFile = new EventEmitter<FileResource | Payload>()
+  @Output() saveAsFile = new EventEmitter<FileResource>()
 
   public files: FileEntry[] = []
   public modalDisplay: string = 'none'
   private showModal: boolean = false
+  public saveMode: boolean = false
 
   constructor( @Inject(FileServiceToken) private fileBackend: IFileBackend) {
 
   }
-
 
   selectFile(file: FileEntry) {
     if (file.type === 4) {
@@ -67,11 +73,16 @@ export class FileDialogComponent {
       this.listDir()
     } else {
       this.resource.file = file.name
-      this.openFile()
+      if(this.saveMode){
+
+      } else {
+        this.doOpenFile()
+      }
     }
   }
 
-  show() {
+  openDialog(saveMode:boolean){
+    this.saveMode = saveMode
     this.showModal = true
     this.modalDisplay = 'block'
     this.listDir()
@@ -81,21 +92,25 @@ export class FileDialogComponent {
     this.modalDisplay = 'none'
   }
 
-  saveAs(content: string) {
-    //TODO implement
-    console.warn('Save as not yet implemented')
-  }
   onPayload(payload: Payload) {
     //Dropped file
     console.log('Imported file')
     this.selectedFile.emit(payload)
   }
-  public setFileResource(file: FileResource) {
+
+  protected setFileResource(file: FileResource) {
     this.selectedFile.emit(file)
     this.hide()
   }
-  openFile() {
-    this.setFileResource(this.resource)
+  protected doOpenFile() {
+    this.selectedFile.emit(this.resource)
+    this.hide()        
+  }
+
+  protected doSave(){
+    console.log(this.resource)
+    this.saveAsFile.emit(this.resource)
+    this.hide()
   }
 
   public listDir() {

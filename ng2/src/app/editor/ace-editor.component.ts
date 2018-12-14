@@ -57,9 +57,10 @@ export class AceEditorComponent {
     this.dirty = false
   }
 
-  onSaveAs() {
-    //this.resourceComponent.saveAs(this.textContent)
-  }
+  onSaveAs(resource: FileResource) {
+    //console.log(this.resource, resource)
+    this.onSave()
+}
 
   onFile(file: FileResource | Payload) {
     if (file instanceof FileResource) {

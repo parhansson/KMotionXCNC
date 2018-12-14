@@ -5,11 +5,13 @@ import { TabsModule } from 'ngx-bootstrap/tabs'
 import { MCodeValueComponent } from './mcode-value.component'
 import { SettingsScreenComponent } from './settings-screen.component'
 import { TransformerSettingsComponent } from './transformer-settings.component'
+import { ResourceModule } from '../resources/resource.module'
 
 @NgModule({
   imports: [CommonModule,
     FormsModule,
-    TabsModule
+    TabsModule,
+    ResourceModule
   ],
   declarations: [
     MCodeValueComponent,

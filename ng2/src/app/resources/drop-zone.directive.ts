@@ -28,13 +28,13 @@ export class DropZoneDirective {
       event.preventDefault()
     }
     this.highlight(null)
-    file = (event.dataTransfer as DataTransfer).files.item(0)
+    file = event.dataTransfer.files.item(0)
     if (this.checkSize(file.size) && this.isTypeValid(file.type)) {
       //TODO break this out to utility class and make it optional to actually load or emit  file as payload in FileResource 
       //let p: FilePropertyBag
       const reader = new FileReader()
-      reader.addEventListener('load', (evt) => {
-        const payload = new Payload((evt as any).target.result, file.type)
+      reader.addEventListener('load', (evt: ProgressEvent & {target: {result: ArrayBuffer}}) => {
+        const payload = new Payload(evt.target.result, file.type)
         payload.name = file.name
         this.dropped.emit(payload)
       })

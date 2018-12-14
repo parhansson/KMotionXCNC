@@ -1,9 +1,8 @@
-<file-dialog #fd (selectedFile)="onFileRaw($event)" [resource]="resource">
-</file-dialog>
+<file-dialog #fd (selectedFile)="onFileRaw($event)" [resource]="resource"></file-dialog>
 <file-path [resource]="resource"></file-path>
 <div class="col-xs-12">
   <span class="glyphButtonBar">
-    <span class="btn btn-primary fa fa-folder-open" title="Open" (click)="fd.show()"></span>
+    <span class="btn btn-primary fa fa-folder-open" title="Open" (click)="fd.openDialog(false)"></span>
     <span class="btn btn-primary fa fa-save" title="Save"></span>
   </span>
 </div>
