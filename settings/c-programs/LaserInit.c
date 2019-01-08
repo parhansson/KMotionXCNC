@@ -201,7 +201,7 @@ main()
   SetBitDirection(4, 1);
   SetBitDirection(3, 1);
   
-  printf("Machine initiated\n");
+  printf("Laser initiated\n");
   
   return;
 

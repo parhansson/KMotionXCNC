@@ -27,7 +27,9 @@ declare namespace PDFJSStatic {
       objects: PDFObjects,
       objects1: PDFObjects,
       forceDataSchema?: boolean)
-
+    
+    embedFonts: boolean // "embeds" fonts as blob urls.
+    
     getSVG(opList: PDFJSStatic.PDFPageOperatorList, viewport: PDFPageViewport):PDFPromise<SVGElement>;
   }
 

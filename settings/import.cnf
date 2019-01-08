@@ -6,7 +6,7 @@
     },
     "unit": "mm",
     "dpi": 72,
-    "renderText": false
+    "renderText": true
   },
   "pdf": {
     "page": 1,

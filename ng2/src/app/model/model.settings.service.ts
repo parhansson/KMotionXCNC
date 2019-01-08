@@ -18,7 +18,7 @@ export class SVGModelSettings {
   unit: 'mm'|'in' = 'mm'
   //unit: string = 'in'
   dpi: number = 72
-  renderText: boolean = false
+  renderText: boolean = true
 
   getDPIScaleFactor(dpi?:number){
     const DPI = dpi || this.dpi || 72
