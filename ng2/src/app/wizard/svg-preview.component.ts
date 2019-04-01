@@ -35,6 +35,9 @@ export class SvgPreviewComponent {
     node.appendChild(this.svgDoc)
 
   }
+  rotate(){
+    this.svgEditor.rotate()
+  }
   transformGCode() {
     //TODO only content of currently loaded gcode file is changed not the file name
     this.staticTransformer.transform('image/svg+xml', this.svgDoc)

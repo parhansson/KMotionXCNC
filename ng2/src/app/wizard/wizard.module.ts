@@ -9,6 +9,7 @@ import { JigsawWizardComponent } from './jigsaw-wizard.component'
 import { SvgPreviewComponent } from './svg-preview.component'
 import { ImportWizardComponent } from './import-wizard.component'
 import { PatternWizardComponent } from './pattern-wizard.component'
+import { ChipherWheelWizardComponent } from './cipher-wheel-wizard.component'
   
 @NgModule({
   imports: [
@@ -23,7 +24,8 @@ import { PatternWizardComponent } from './pattern-wizard.component'
     MitreBoxWizardComponent,
     PatternWizardComponent,
     SvgPreviewComponent,
-    TextWizardComponent
+    TextWizardComponent,
+    ChipherWheelWizardComponent
   ], 
   exports: [
     ImportWizardComponent,
@@ -31,7 +33,8 @@ import { PatternWizardComponent } from './pattern-wizard.component'
     MitreBoxWizardComponent,
     PatternWizardComponent,
     SvgPreviewComponent,
-    TextWizardComponent
+    TextWizardComponent,
+    ChipherWheelWizardComponent
   ],  
 })
 export class WizardModule {
