@@ -3,7 +3,7 @@
  * Parses a string of gcode instructions, and invokes codeHandlers for each type of
  * command or values.
  */
-import { Subject } from 'rxjs'
+import { Observer } from 'rxjs'
 import {
   Word,
   BlockPart,
@@ -93,14 +93,7 @@ export class GCodeParser {
 
   private static blockCommentEnd = ')'
 
-  public subject: Subject<Block>
-
-
-  constructor() {
-    this.subject = new Subject<Block>()
-  }
-
-  parseLine(rawText: string) {
+  public static parseBlock(rawText: string) {
     const block = new Block(rawText)
     const text = rawText.toUpperCase()
     const len = text.length
@@ -136,17 +129,17 @@ export class GCodeParser {
     return block
   }
 
-  parseLines(gcodeLines: string[]) {
+  static parse(observer: Observer<Block>, gcodeLines: string[]) {
     console.time('parsing')
     let i = 0
     for (const line of gcodeLines) {
-      const block = this.parseLine(line)
+      const block = GCodeParser.parseBlock(line)
       block.line = i++
-      this.subject.next(block)
+      observer.next(block)
 
     }
-    this.subject.complete()
     console.timeEnd('parsing')
+    observer.complete()
 
   }
 

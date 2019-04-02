@@ -2,7 +2,7 @@
 import { GCodeCurve3, MoveArcArguments, MoveAngularArguments, MoveArguments } from '../vector'
 import { GCodeParser } from '../gcode-parser'
 import { Block, Word, WordParameters, ControlWord } from '../gcode'
-import { Observable, Observer } from 'rxjs'
+import { Observable, Observer, Subject } from 'rxjs'
 import { GCodeSource, IGMDriver, GCodeVector } from '../igm'
 import { ModelTransformer } from './model.transformer'
 
@@ -147,8 +147,8 @@ export abstract class GCodeTransformer<ShapeType, OutputType> extends ModelTrans
     this.state = new State<ShapeType>()
     //TODO parsing should be done outside of this transformer
     //this transformer should Subject<Block> instead of GCodeSource
-    const parser = new GCodeParser()
-    const subcripion = parser.subject.subscribe(
+    const subject = new Subject<Block>()
+    const subcripion = subject.subscribe(
       (block) => {
         this.onBlock(block)
       },
@@ -160,8 +160,8 @@ export abstract class GCodeTransformer<ShapeType, OutputType> extends ModelTrans
         //observer.complete();
 
       })
-
-    parser.parseLines(gcode.lines)
+      
+    GCodeParser.parse(subject, gcode.lines)
     /*
         if (disableWorker) {
           // parse without worker. Application will freeze during parsing
