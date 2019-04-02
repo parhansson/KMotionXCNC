@@ -74,9 +74,12 @@ export class GCodeScreenComponent {
     if (this.machineBackground != null) {
       this.threeComp.removeAuxObject(this.machineBackground)
     }
-    const x = machine.dimX
-    const y = machine.dimY
-    const z = machine.dimZ
+    //In 3d viev everything is mm and not inches
+    //however currently all stored values are in inches
+    const x = +machine.dimX * 25.4
+    const y = +machine.dimY * 25.4
+    const z = +machine.dimZ * 25.4
+
     this.machineBounds = this.createMachineBounds(x, y, z)
     this.machineBackground = this.renderBackground(x, y, z)
     this.machineGrid = this.renderGrid(x, y, z)

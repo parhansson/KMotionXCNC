@@ -1,183 +1,9 @@
-<div class="well" *ngIf="machine">
+
+<div class="well" *ngIf="machine; else stillLoading">
 
   <!--
   <a ng-click="showMachine($event)">Show machine configuration</a>
   -->
-  <tabset>
-    <tab heading="General">
-      <div class="card">
-          <h6 class="card-header text-center">General machine settings</h6>
-          <div class="card-body">
-            <div class="form-group">
-              <label>Name</label>
-              <input class="form-control" [(ngModel)]="machine.name" type="text" placeholder="Name your machine">
-            </div>
-            <div class="form-group">
-              <label>Description</label>
-              <input class="form-control" [(ngModel)]="machine.description" type="text" placeholder="Describe machine">
-            </div>
-            <div class="form-group ">
-              <label>Machine dimensions</label>
-              <div class="row">
-                <div class="col-sm-4">
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                        <div class="input-group-text">X</div>
-                    </div>
-                    <input class="form-control" [(ngModel)]="machine.dimX" type="number" min=0 placeholder="mm" />
-                  </div>
-                </div>
-                <div class="col-sm-4">
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                        <div class="input-group-text">Y</div>
-                    </div>
-                    <input class="form-control" [(ngModel)]='machine.dimY' type="number" min=0 placeholder="mm">
-                  </div>
-                </div>
-                <div class="col-sm-4">
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                        <div class="input-group-text">Z</div>
-                    </div>
-                    <input class="form-control" [(ngModel)]='machine.dimZ' type="number" min=0 placeholder="mm">
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="row">
-              <div class="form-group col-6">
-                  <label>Bootstrap program</label>
-                  <input class="form-control" [(ngModel)]='machine.initProgram' type="text" placeholder="Path to c program">
-              </div>
-              <div class="form-group col-1">
-                  <label>Thread</label>
-                <input class="form-control" [(ngModel)]='machine.initThread' type="number" min=1 max=7 placeholder="Thread number 1-7">
-              </div>
-            </div>
-        </div>
-      </div>
-    </tab>
-    <tab heading="M0-M30">
-      <div class="card">
-          <h6 class="card-header text-center">M-codes</h6>
-          <div class="card-body">
-          <kmx-mcode-value *ngFor="let action of machine.actions" [action]="action"></kmx-mcode-value>
-          <kmx-mcode-value *ngFor="let action of machine.specialActions" [action]="action"></kmx-mcode-value>
-        </div>
-      </div>
-    </tab>
-
-    <tab heading="M100-M119">
-      <div class="card">
-        <h6 class="card-header text-center">Extended M-codes</h6>
-        <div class="card-body">
-          <kmx-mcode-value *ngFor="let action of machine.extendedActions" [action]="action"></kmx-mcode-value>
-        </div>
-      </div>
-    </tab>
-    <tab heading="User buttons">
-      <div class="card">
-        <h6 class="card-header text-center">User defined buttons</h6>
-        <div class="card-body">
-          <kmx-mcode-value *ngFor="let action of machine.userActions" [action]="action" userButton="true"></kmx-mcode-value>
-        </div>
-      </div>
-    </tab>
-
-    <tab heading="Motion Parameters">
-      <div class="form"><!--<form class="form">-->
-        <div class="card">
-          <h6 class="card-header text-center">Trajectory Planner</h6>
-          <div class="card-body row">
-            <div class="form-group col">
-              <label for="breakangleInput">Break Angle</label>
-              <input id="breakangleInput" aria-describedby="breakangleInputHelp" class="form-control" [(ngModel)]="machine.tplanner.breakangle" min="0" type="number" step="any"/>
-              <small id="breakangleInputHelp" class="form-text text-muted">In degreees</small>
-            </div>
-            <div class="form-group col">
-              <label for="lookaheadInput">Look Ahead</label>
-              <input id="lookaheadInput" aria-describedby="lookaheadInputHelp" class="form-control" [(ngModel)]="machine.tplanner.lookahead" min="0" type="number" step="any" />
-              <small id="lookaheadInputHelp" class="form-text text-muted">In seconds</small>
-            </div>
-            <div class="form-group col">
-              <label for="collineartoleranceInput">Collinear Tolerance</label>
-              <input id="collineartoleranceInput" describedby="collineartoleranceInputHelp" class="form-control" [(ngModel)]="machine.tplanner.collineartolerance" min="0" type="number" step="any" />
-              <small id="collineartoleranceInputHelp" class="form-text text-muted">In inches</small>
-            </div>
-            <div class="form-group col">
-              <label for="cornertoleranceInput">Corner Tolerance</label>
-              <input id="cornertoleranceInput" describedby="cornertoleranceInputHelp"class="form-control" [(ngModel)]="machine.tplanner.cornertolerance" min="0" type="number" step="any" />
-              <small id="cornertoleranceInputHelp" class="form-text text-muted">In inches</small>
-            </div>
-            <div class="form-group col">
-              <label for="facetangleInput">Facet Angle</label>
-              <input id="facetangleInput" describedby="facetangleInputHelp" class="form-control" [(ngModel)]="machine.tplanner.facetangle" min="0" type="number" step="any"/>
-              <small id="facetangleInputHelp" class="form-text text-muted">In degrees</small>
-            </div>
-          </div>
-        </div>
-        <div class="card">
-          <h6 class="card-header text-center" >Jog speeds</h6>
-          <div class="form-group">
-            <div class="card-body row">
-              <div class="col" *ngFor="let axis of machine.axes">
-                <div class="input-group mb-2">
-                    <div class="input-group-prepend">
-                      <div class="input-group-text">{{axis.name}}</div>
-                    </div>
-                    <input class="form-control" [(ngModel)]="axis.jogVel" min="0" type="number" step="any" />
-                  </div>
-                <!-- <div class="input-group">
-                  <span class="input-group-addon">{{axis.name}}</span>
-                  <input class="form-control" [(ngModel)]="axis.jogVel" min="0" type="number" step="any" />
-                </div> -->
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="card">
-          <h6 class="card-header text-center" >Axis parameters</h6>
-          <div class="card-body">
-            <div class="form-group row">
-              <div class="col-sm-2">
-                <label>Axis</label>
-              </div>
-              <div class="col-sm-3">
-                <label>Counts Per Inch</label>
-                <small class="form-text text-muted">pulses/in</small>
-              </div>
-              <div class="col-sm-3">
-                <label>Max Velocity</label>
-                <small class="form-text text-muted">in/sec</small>
-              </div>
-              <div class="col-sm-3">
-                <label>Max Accel</label>
-                <small class="form-text text-muted">in/sec2</small>
-              </div>
-            </div>
-            <div class="form-group row" *ngFor="let axis of machine.axes">
-              <div class="col-sm-2">
-                <label>{{axis.name}}</label>
-              </div>
-              <div class="col-sm-3">
-                <input class="form-control" [(ngModel)]="axis.countsPerUnit" min="0" type="number" step="any" />
-              </div>
-              <div class="col-sm-3">
-                <input class="form-control" [(ngModel)]="axis.maxVel" min="0" type="number" step="any" />
-              </div>
-              <div class="col-sm-3">
-                <input class="form-control" [(ngModel)]="axis.maxAccel" min="0" type="number" step="any" />
-              </div>
-            </div>
-          </div>          
-        </div>
-      </div><!--</form>-->
-    </tab>
-    <tab heading="Import settings">
-        <transformer-settings></transformer-settings>
-    </tab>
-  </tabset>
   <div class="row">
     <file-dialog #fd (selectedFile)="onFile($event)" [resource]="resource"></file-dialog>
     <div class="col-sm"></div>
@@ -189,5 +15,37 @@
       <ng-content select="div[buttons]"></ng-content>
     </div>
     <div class="col-sm"></div>
-  </div>
+  </div> 
+  <tabset>
+    <tab heading="General">
+      <div class="col d-flex justify-content-center">
+          <general-settings [machine]=machine></general-settings>
+      </div>
+    </tab>
+    <tab heading="M0-M30">
+      <div class="col justify-content-center">
+          <mcode-settings></mcode-settings>
+      </div>
+    </tab>
+    <tab heading="M100-M119">
+      <div class="col justify-content-center">
+          <mcode-ext-settings></mcode-ext-settings>
+      </div> 
+    </tab>
+    <tab heading="User buttons">
+        <div class="col justify-content-center">
+            <user-buttons-settings></user-buttons-settings>
+        </div> 
+    </tab>
+
+    <tab heading="Motion Parameters">
+        <div class="col justify-content-center">
+            <motion-parameters-settings [machine]=machine></motion-parameters-settings>
+        </div>
+    </tab>
+    <tab heading="Import settings">
+        <transformer-settings></transformer-settings>
+    </tab>
+  </tabset>
 </div>
+<ng-template #stillLoading><p>Loading...</p></ng-template>

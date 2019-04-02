@@ -1,0 +1,7 @@
+<div class="mt-3 card">
+    <h6 class="card-header text-center">M-codes</h6>
+    <div class="card-body">
+      <kmx-mcode-value *ngFor="let action of machine.actions" [action]="action"></kmx-mcode-value>
+      <kmx-mcode-value *ngFor="let action of machine.specialActions" [action]="action"></kmx-mcode-value>
+  </div>
+</div>

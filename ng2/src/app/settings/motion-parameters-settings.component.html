@@ -1,0 +1,82 @@
+<div class="mt-3 card">
+    <h6 class="card-header text-center">Trajectory Planner</h6>
+    <div class="card-body row">
+      <div class="form-group col">
+        <label for="breakangleInput">Break Angle</label>
+        <input id="breakangleInput" aria-describedby="breakangleInputHelp" class="form-control" [(ngModel)]="machine.tplanner.breakangle" min="0" type="number" step="any"/>
+        <small id="breakangleInputHelp" class="form-text text-muted">In degreees</small>
+      </div>
+      <div class="form-group col">
+        <label for="lookaheadInput">Look Ahead</label>
+        <input id="lookaheadInput" aria-describedby="lookaheadInputHelp" class="form-control" [(ngModel)]="machine.tplanner.lookahead" min="0" type="number" step="any" />
+        <small id="lookaheadInputHelp" class="form-text text-muted">In seconds</small>
+      </div>
+      <div class="form-group col">
+        <label for="collineartoleranceInput">Collinear Tolerance</label>
+        <input id="collineartoleranceInput" describedby="collineartoleranceInputHelp" class="form-control" [(ngModel)]="collineartolerance" min="0" type="number" step="any" />
+        <small id="collineartoleranceInputHelp" class="form-text text-muted">In {{machine.defaultUnit}}</small>
+      </div>
+      <div class="form-group col">
+        <label for="cornertoleranceInput">Corner Tolerance</label>
+        <input id="cornertoleranceInput" describedby="cornertoleranceInputHelp"class="form-control" [(ngModel)]="cornertolerance" min="0" type="number" step="any" />
+        <small id="cornertoleranceInputHelp" class="form-text text-muted">In {{machine.defaultUnit}}</small>
+      </div>
+      <div class="form-group col">
+        <label for="facetangleInput">Facet Angle</label>
+        <input id="facetangleInput" describedby="facetangleInputHelp" class="form-control" [(ngModel)]="machine.tplanner.facetangle" min="0" type="number" step="any"/>
+        <small id="facetangleInputHelp" class="form-text text-muted">In degrees</small>
+      </div>
+    </div>
+  </div>
+  <div class="mt-3 card">
+    <h6 class="card-header text-center" >Jog speeds</h6>
+    <div class="form-group">
+      <div class="card-body row">
+        <div class="col" *ngFor="let axis of machine.axes">
+          <div class="input-group mb-2">
+              <div class="input-group-prepend">
+                <div class="input-group-text">{{axis.name}}</div>
+              </div>
+              <input class="form-control" [ngModel]="getJogVel(axis.name)" (ngModelChange)="setJogVel($event, axis.name)" min="0" type="number" step="any" />
+            </div>
+            <small class="form-text text-muted">{{machine.defaultUnit}}/sec</small>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="mt-3 card">
+    <h6 class="card-header text-center" >Axis parameters</h6>
+    <div class="card-body">
+      <div class="form-group row">
+        <div class="col-sm-2">
+          <label>Axis</label>
+        </div>
+        <div class="col-sm-3">
+          <label>Counts Per Inch</label>
+          <small class="form-text text-muted">pulses/{{machine.defaultUnit}}</small>
+        </div>
+        <div class="col-sm-3">
+          <label>Max Velocity</label>
+          <small class="form-text text-muted">{{machine.defaultUnit}}/sec</small>
+        </div>
+        <div class="col-sm-3">
+          <label>Max Accel</label>
+          <small class="form-text text-muted">{{machine.defaultUnit}}/sec&#178;</small>
+        </div>
+      </div>
+      <div class="form-group row" *ngFor="let axis of machine.axes">
+        <div class="col-sm-2">
+          <label>{{axis.name}}</label>
+        </div>
+        <div class="col-sm-3">
+          <input class="form-control" [ngModel]='getCounts(axis.name)' (ngModelChange)="setCounts($event, axis.name)" min="0" type="number" step="any" />
+        </div>
+        <div class="col-sm-3">
+          <input class="form-control" [ngModel]='getMaxVel(axis.name)' (ngModelChange)="setMaxVel($event, axis.name)" min="0" type="number" step="any" />
+        </div>
+        <div class="col-sm-3">
+          <input class="form-control" [ngModel]='getMaxAccel(axis.name)' (ngModelChange)="setMaxAccel($event, axis.name)" min="0" type="number" step="any" />
+        </div>
+      </div>
+    </div>          
+  </div>

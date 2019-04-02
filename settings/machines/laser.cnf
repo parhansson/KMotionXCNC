@@ -1,32 +1,31 @@
 {
   "name": "laser",
   "description": "My cheap laser",
-  "dimX": 300,
-  "dimY": 210,
-  "dimZ": 60,
-  "initProgram": "KMX",
-  "initThread": 1,
+  "dimX": "11.811023622047244",
+  "dimY": "8.2677165354330708661",
+  "dimZ": "2.3622047244094488189",
+  "defaultUnit": "mm",
   "axes": [
     {
       "name": "X",
-      "countsPerUnit": 2540,
-      "maxAccel": 40,
-      "maxVel": 40,
-      "jogVel": 2000
+      "countsPerUnit": "2540",
+      "maxAccel": "40",
+      "maxVel": "40",
+      "jogVel": "39.370078740157480315"
     },
     {
       "name": "Y",
-      "countsPerUnit": 2540,
-      "maxAccel": 40,
-      "maxVel": 40,
-      "jogVel": 2000
+      "countsPerUnit": "2540",
+      "maxAccel": "40",
+      "maxVel": "40",
+      "jogVel": "39.370078740157480315"
     },
     {
       "name": "Z",
-      "countsPerUnit": 81280,
-      "maxAccel": 40,
-      "maxVel": 40,
-      "jogVel": 2000
+      "countsPerUnit": "81280",
+      "maxAccel": "40",
+      "maxVel": "40",
+      "jogVel": "39.370078740157480315"
     },
     {
       "name": "A"
@@ -40,9 +39,9 @@
   ],
   "tplanner": {
     "breakangle": 5,
-    "cornertolerance": 0.003,
+    "cornertolerance": "0.003",
     "lookahead": 3,
-    "collineartolerance": 0.0005,
+    "collineartolerance": "0.0005",
     "facetangle": 0.5
   },
   "actions": [

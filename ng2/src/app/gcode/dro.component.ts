@@ -42,7 +42,7 @@ export class DroComponent {
     }
 
     jogStartPos(axis: number) {
-        this.backendService.jog(axis, this.machine.axes[axis].jogVel)
+        this.backendService.jog(axis, +this.machine.axes[axis].jogVel)
         this.jogging = true
     }
 
