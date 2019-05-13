@@ -4,7 +4,7 @@
   "dimX": 19.68503937007874,
   "dimY": 11.811023622047244,
   "dimZ": 2.362204724409449,
-  "defaultUnit": "in",
+  "defaultUnit": "mm",
   "axes": [
     {
       "name": "X",
