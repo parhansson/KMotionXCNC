@@ -97,26 +97,39 @@ export class IGMDriver {
     console.info('Nr of Shapes: ', shapes.length)
 
     if (settings.removeSingularites) {
+      console.time('Removed single points')
       const removed = this.removeSingularites(shapes)
       console.info('Removed single points: ', removed)
+      console.timeEnd('Removed single points')
     }
 
     console.log('Scaling model', settings.scale)
+    console.time('Scaling')
     IGMDriver.scale(shapes, settings.scale)
+    console.timeEnd('Scaling')
+
 
     //Bounds are needed by removeDuplicates
+    console.time('Update bounds')
     IGMDriver.updateBounds(shapes)
+    console.timeEnd('Update bounds')
     // cut the inside parts first
     if (settings.removeDuplicates) {
       //This function will change the order of the paths
+      console.time('Remove duplcates')
       const removed = this.removeDuplicates(shapes)
       console.info('Removed duplicates: ', removed)
+      console.timeEnd('Remove duplcates')
     }
 
+    console.time('Order nearest')
+    this.orderNearestNeighbour(shapes, true)
+    console.timeEnd('Order nearest')
 
-    this.orderNearestNeighbour(shapes)
+    console.time('Join adjacent')
     const joined = this.joinAdjacent(shapes, settings.fractionalDigits)
     console.info('Joined adjacents: ', joined)
+    console.timeEnd('Join adjacent')
     IGMDriver.updateBounds(shapes)
 
     const maxBounds = this.getMaxBounds(shapes)
@@ -129,7 +142,13 @@ export class IGMDriver {
     if (settings.translateToOrigo) {
       const translateVec = IGMDriver.newGCodeVector(-maxBounds.x, -maxBounds.y, 0)
       IGMDriver.translate(shapes, translateVec)
+
     }
+    //Add support for offsetting models on import
+    //if(settings.offset){
+      //const offesetVec = IGMDriver.newGCodeVector(0, -60, 0)
+      //IGMDriver.translate(shapes, offesetVec)
+    //}
 
     console.info('Nr of Shapes after: ', shapes.length)
 
@@ -275,9 +294,14 @@ export class IGMDriver {
     return maxBounds
   }
 
+  /**
+   * I know I know, This does not work
+   */
   removeDuplicates(paths: IgmObject[]) {
     let removed = 0
     paths.sort(function (a, b) {
+      //TODO sort by number of vectors. should work alot better
+      //Only compare shapes with the same number of vectors
       // sort by area
       const aArea = a.bounds.area() //TODO area needs to count zero with as 1
       const bArea = b.bounds.area()
@@ -325,7 +349,12 @@ export class IGMDriver {
     paths.pop()
   }
 
-
+  /**
+   * Joining adjacent shapes. This implementation depends on orderNearestNeighbour first
+   * However orderNearestNeighbour might check if reverse path is nearest and reverses
+   * @param paths 
+   * @param fractionalDigits 
+   */
   joinAdjacent(paths: IgmObject[], fractionalDigits: number) {
     let joined = 0
     if (paths.length < 2) {
@@ -337,7 +366,9 @@ export class IGMDriver {
       const next = paths[idx]
       const lastEnd = IGMDriver.end(last)
       const nextStart = IGMDriver.start(next)
+    
       //console.info(lastEnd, nextStart);
+      //TODO check reverse path as well and reverse that
       if (this.pointEquals(lastEnd, nextStart, fractionalDigits)) {
         last.vectors.push.apply(last.vectors, next.vectors)
         paths.splice(idx, 1)
@@ -357,8 +388,8 @@ export class IGMDriver {
     )
   }
 
-  orderNearestNeighbour(paths: IgmObject[]) {
-
+  orderNearestNeighbour(paths: IgmObject[], reversePaths: boolean) {
+    
     //These are the steps of the algorithm:
     //
     //  start on an arbitrary vertex as current vertex.
@@ -368,49 +399,62 @@ export class IGMDriver {
     //  if all the vertices in domain are visited, then terminate.
     //  Go to step 2.
     const orderedPaths: IgmObject[] = []
-    let next = this.nearest(IGMDriver.newGCodeVector(0, 0, 0), paths)
+    let next = this.nearest(IGMDriver.newGCodeVector(0, 0, 0), paths, reversePaths)
     if (next) { // next is undefined if paths is an empty array
       orderedPaths.push(next)
       while (paths.length > 0) {
-        next = this.nearest(IGMDriver.end(next), paths)
+        next = this.nearest(IGMDriver.end(next), paths, reversePaths)
         orderedPaths.push(next)
       }
       paths.push.apply(paths, orderedPaths)
     }
   }
-  private nearest(point: GCodeVector, paths: IgmObject[]) : IgmObject {
+  private nearest(point: GCodeVector, paths: IgmObject[], reversePaths: boolean) : IgmObject {
 
     let dist = Infinity
     let index = -1
-    const checkReversePath = true
-
+    let reverseIndex = -1
     for (let pathIdx = 0, pathLength = paths.length; pathIdx < pathLength; pathIdx++) {
-      const path = paths[pathIdx]
-      const pathStartPoint = path.vectors[0]
+      const shape = paths[pathIdx]
+      const pathStartPoint = shape.vectors[0]
       let distanceSquared
       const startDS = IGMDriver.distanceSquared(pathStartPoint, point)
-      if (checkReversePath) {
+      if (reversePaths) {
         //check endpoint as well and reverse path if endpoint is closer
-        const pathEndPoint = IGMDriver.end(path)
+        const pathEndPoint = IGMDriver.end(shape)
         const endDS = IGMDriver.distanceSquared(pathEndPoint, point)
         if (startDS < endDS) {
           distanceSquared = startDS
         } else {
           distanceSquared = endDS
-          path.vectors.reverse()
+          //only reverse if shape actually used
+          reverseIndex = pathIdx
+          //shape.vectors.reverse()
         }
-
       } else {
         distanceSquared = startDS
       }
-      //TODO add tolerance check. If dist < tolerance*tolerance break loop since finding a closer path probably won't matter
       if (distanceSquared < dist) {
         dist = distanceSquared
         index = pathIdx
       }
-
+      
+      //experiment with tolerance check. If dist < tolerance break loop since finding a closer path probably won't matter
+      // if(!shape.node.text){ //some text shapes generates 
+      //   if(dist < 0.1){
+      //     break
+      //   }
+      // } else  {
+      //   console.log(shape.node.text)
+      // }
     }
-    return paths.splice(index, 1)[0]
+    console.log(reverseIndex, paths.length)
+    const nearest = paths.splice(index, 1)[0]
+    //only reverse if shape actually used
+    if(index > -1 && index === reverseIndex){
+      nearest.vectors.reverse()
+    }
+    return nearest
   }
 
 }
