@@ -755,6 +755,32 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
           const x = this.parseUnit(tag.getAttribute('x')) || 0
           const y = this.parseUnit(tag.getAttribute('y')) || 0
           const path = font.getPath(decodedText, x, y, node.fontSize, { kerning: true })
+
+          //Monkey patch for text-anchor and baseline attribute
+          //should be done when parsing attributes and then transform is already made
+          const textAnchorAttr = tag.attributes.getNamedItem('text-anchor')
+          const baselineAttr = tag.attributes.getNamedItem('dominant-baseline')
+          
+          if(textAnchorAttr || baselineAttr){
+            const bounds = path.getBoundingBox() as any
+            let alignX = 0
+            if (textAnchorAttr.nodeValue === 'middle') {
+              alignX = (bounds.x2 - bounds.x1)/2
+            }
+            if (textAnchorAttr.nodeValue === 'end') {
+              alignX = (bounds.x2 - bounds.x1)
+            }
+            let alignY = 0
+            if (baselineAttr.nodeValue === 'middle' || baselineAttr.nodeValue === 'center') {
+              alignY = (bounds.y2 - bounds.y1)/2
+            }
+            if (baselineAttr.nodeValue === 'hanging') {
+              alignY = (bounds.y2 - bounds.y1)
+            }
+            node.xformToWorld = this.matrixMult(node.xformToWorld, [1, 0, 0, 1, -alignX, alignY])
+
+          }
+          
           const dPath = path.toPathData(undefined)
           if (dPath.length > 0) {
             this.addPath(dPath, node)
@@ -762,6 +788,8 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
         }
       }
       node.text = tag.textContent
+    } else {
+      console.log('skiptext', node)
     }
   }
   // recognized svg elements
