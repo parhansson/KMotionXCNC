@@ -12,7 +12,7 @@ export class TextWizardComponent {
   fontName: string
   fontSize: number = 12
   font: opentype.Font
-  //https://www.googleapis.com/webfonts/v1/webfonts?key=AIzaSyD5aEZskxbZY2_ngDMXiAhxXL-xTLQP5vg
+  
   @ViewChild(SvgPreviewComponent)
   private previewContainer: SvgPreviewComponent
 
