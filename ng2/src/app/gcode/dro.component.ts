@@ -35,7 +35,9 @@ export class DroComponent {
         private backendService: BackendService,
         private socketService: SocketService,
         private settingsService: SettingsService) {
-        this.intStatus = socketService.data
+        this.socketService.status.subscribe(status => {
+            this.intStatus = status
+        })
     }
     ngAfterViewInit() {
         this.settingsService.subject.subscribe((machine) => this.machine = machine)

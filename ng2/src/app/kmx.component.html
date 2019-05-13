@@ -27,14 +27,11 @@
           <li><a><slide-switch [state]="intStatus?.simulating" (switched)="onSimulate()"></slide-switch></a></li>
         <!--
           -->
-          <li><span>Uptime:&nbsp;{{intStatus.timeStamp}}</span></li>
+          <li><span>Uptime:&nbsp;{{intStatus?.timeStamp}}</span></li>
         </ul>
         
     </div>      
   <!-- </div> -->
 </nav>
-<!--
-<div>{{intStatus | json}}</div>
--->
 <router-outlet></router-outlet>
 

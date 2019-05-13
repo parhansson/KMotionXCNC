@@ -29,11 +29,21 @@ export class KmxStatus implements Status {
   constructor() { }
 
   copyFrom(from: KmxStatus) {
+    let updated = false
     for (const key in from) {
       if (from.hasOwnProperty(key)) {
         //copy all the fields
-        this[key] = from[key]
+        if(this[key].toString() != from[key].toString()){
+          updated = true
+          //console.log(key)
+          this[key] = from[key]
+          if(key !== 'timestamp'){
+            // maybe here?
+            // updated = true
+          }
+        }
       }
     }
+    return updated
   }
 }

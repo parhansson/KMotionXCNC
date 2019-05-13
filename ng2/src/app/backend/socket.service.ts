@@ -14,7 +14,8 @@ export class SocketService {
   gcodeFileSubject: Subject<FileResource> = new ReplaySubject<FileResource>(1)
   machineSetupFileSubject: Subject<FileResource> = new ReplaySubject<FileResource>(1)
   simulateSubject: Subject<boolean> = new BehaviorSubject<boolean>(true)
-  data: KmxStatus = new KmxStatus()
+  status: Subject<KmxStatus> = new BehaviorSubject<KmxStatus>(new KmxStatus())
+  private data: KmxStatus = new KmxStatus()
 
   private socketWorker: Worker
 
@@ -81,23 +82,25 @@ export class SocketService {
     if (this.data.simulating !== raw.simulating) {
       console.log(raw.simulating)
     }
-    if (this.data.gcodeFileTimestamp !== raw.gcodeFileTimestamp || this.data.gcodeFile !== raw.gcodeFile) {
-      //timestamp in StatusMessage to detect file modifications
-      this.data.gcodeFile = raw.gcodeFile
-      const gcodeResource = new FileResource()
-      gcodeResource.canonical = this.data.gcodeFile
-      this.gcodeFileSubject.next(gcodeResource)
+    //timestamp in StatusMessage to detect file modifications
+    const gcodeFileUpdated = (this.data.gcodeFileTimestamp !== raw.gcodeFileTimestamp || this.data.gcodeFile !== raw.gcodeFile)
+    //   //timestamp in StatusMessage to detect file modifications
+    const machineFileUpdated = (this.data.machineSettingsFileTimestamp !== raw.machineSettingsFileTimestamp || this.data.machineSettingsFile !== raw.machineSettingsFile)
+    
+    if(this.data.copyFrom(raw)){
+      this.status.next(this.data)
     }
-    if (this.data.machineSettingsFileTimestamp !== raw.machineSettingsFileTimestamp || this.data.machineSettingsFile !== raw.machineSettingsFile) {
-      //timestamp in StatusMessage to detect file modifications
-      this.data.machineSettingsFile = raw.machineSettingsFile
+    if(machineFileUpdated){
       const machineSetupResource = new FileResource()
       machineSetupResource.canonical = this.data.machineSettingsFile
       this.machineSetupFileSubject.next(machineSetupResource)
     }
-    
+    if(gcodeFileUpdated){
+      const gcodeResource = new FileResource()
+      gcodeResource.canonical = this.data.gcodeFile
+      this.gcodeFileSubject.next(gcodeResource)
+    }
 
-    this.data.copyFrom(raw)
   }
 
   private onControlMessage(obj: ControlMessage) {

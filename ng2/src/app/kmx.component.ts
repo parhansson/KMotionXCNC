@@ -22,9 +22,12 @@ import { BackendService } from './backend/backend.service'
 export class KmxComponent {
     intStatus: KmxStatus
     constructor(//private router:Router,
-        private socketService: SocketService, private backend: BackendService,
+        socketService: SocketService, private backend: BackendService,
         private route: ActivatedRoute, private router: Router) {
-        this.intStatus = this.socketService.data
+        socketService.status.subscribe(status => {
+            this.intStatus = status
+        })
+        //this.intStatus = this.socketService.data
         //socketService.simluateObservable.subscribe(()=>this.intStatus = this.socketService.data)
     }
     // alternatively also the host parameter in the @Component()` decorator can be used

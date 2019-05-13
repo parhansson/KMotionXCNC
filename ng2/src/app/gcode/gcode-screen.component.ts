@@ -22,8 +22,7 @@ import * as THREE from 'three'
       </div>
       <div class="col-xs-3 col-md-3">
         <control-buttons></control-buttons>
-        <div>Editor line:{{kmxStatus.currentLine +1}}</div>
-        <div>Interpreter line:{{kmxStatus.currentLine}}</div>
+        <div>Current line:{{kmxStatus?.currentLine +1}}</div>
         <gcode-editor></gcode-editor>
         <hr>
         <user-defined-buttons></user-defined-buttons>
@@ -51,8 +50,9 @@ export class GCodeScreenComponent {
   constructor(socketService: SocketService,
     private settingsService: SettingsService,
     private staticTransformer: StaticTransformer) {
-    this.kmxStatus = socketService.data
-
+    socketService.status.subscribe(status => {
+      this.kmxStatus = status
+    })
   }
   ngAfterViewInit() {
     this.staticTransformer.threeSubject.subscribe(data => this.threeComp.model = data)

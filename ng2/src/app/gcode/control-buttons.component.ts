@@ -28,8 +28,11 @@ export class ControlButtonsComponent {
   kmxStatus: KmxStatus
 
   constructor(private backendService: BackendService,
-    private socketService: SocketService) {
-    this.kmxStatus = socketService.data
+    socketService: SocketService) {
+    socketService.status.subscribe(status => {
+      this.kmxStatus = status
+    })
+    // this.kmxStatus = socketService.data
 
   }
 

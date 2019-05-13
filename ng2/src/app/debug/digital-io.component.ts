@@ -99,8 +99,11 @@ export class ConnectorComponent {
   kflop = KFlop.getInstance()
   connector: Connector
 
-  constructor(private socketService: SocketService, @Attribute('name') name: string) {
-    this.intStatus = this.socketService.data
+  constructor(socketService: SocketService, @Attribute('name') name: string) {
+    socketService.status.subscribe(status => {
+      this.intStatus = status
+    })
+    // this.intStatus = this.socketService.data
     this.connector = this.kflop.getConnector(name)
   }
 
