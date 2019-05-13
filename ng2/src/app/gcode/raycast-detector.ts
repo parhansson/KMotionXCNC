@@ -32,14 +32,11 @@ export class RaycastDetector {
       this.currentObject = intersects[0].object
       this.currentObject.material.linewidth = 5
 
-      //ensure intersected object is not marker sphere
-      if (this.markerObject !== this.currentObject) {
-        if (Object.getOwnPropertyNames(this.currentObject.userData).length > 0) {
-          console.log(this.currentObject.userData)
-        }
-        //console.info(intersects[ 0 ].point);
-        this.markerObject.position.copy(intersects[0].point)
+      if (Object.getOwnPropertyNames(this.currentObject.userData).length > 0) {
+        console.log(this.currentObject.userData)
       }
+      //console.info(intersects[ 0 ].point);
+      this.markerObject.position.copy(intersects[0].point)
 
     } else {
       this.markerObject.visible = false

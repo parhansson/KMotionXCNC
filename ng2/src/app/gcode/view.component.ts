@@ -1,5 +1,5 @@
 
-import { Component, ElementRef, HostListener, AfterViewInit } from '@angular/core'
+import { Component, ElementRef, HostListener, AfterViewInit, NgZone } from '@angular/core'
 import { OrientationCube } from './orientation-cube'
 import { RaycastDetector } from './raycast-detector'
 
@@ -29,7 +29,7 @@ export class ThreeViewComponent implements AfterViewInit {
   private auxiliaryGroup = new THREE.Group()
   private currentModelObject: THREE.Object3D = null
 
-  constructor(elRef: ElementRef) {
+  constructor(elRef: ElementRef, private zone: NgZone) {
     this.element = elRef.nativeElement
   }
 
@@ -73,10 +73,15 @@ export class ThreeViewComponent implements AfterViewInit {
     this.orientation = new OrientationCube(this.camera, this.element)
 
     //Logic
-    const cursor = new THREE.Mesh(new THREE.SphereGeometry(1), new THREE.MeshBasicMaterial({ color: 0xff0000 }))
+    //const cursor = new THREE.Mesh(new THREE.SphereGeometry(1), new THREE.MeshBasicMaterial({ color: 0xff0000 }))
+    const cursor = new THREE.Mesh( new THREE.SphereBufferGeometry( 1 ), new THREE.MeshBasicMaterial( { color: 0xff0000 } ) )
+    cursor.visible = false
+
     this.scene.add(cursor)
-    this.modelDetector = new RaycastDetector(cursor, this.camera, this.modelGroup)
-    this.machineDetector = new RaycastDetector(cursor, this.camera, this.auxiliaryGroup);
+    this.modelDetector = new RaycastDetector(cursor, this.camera, this.modelGroup);
+    //this.machineDetector = new RaycastDetector(cursor, this.camera, this.auxiliaryGroup);
+
+
     // Lights...
     [[0, 0, 1, 0xFFFFCC],
     [0, 1, 0, 0xFFCCFF],
@@ -111,10 +116,14 @@ element.on( 'mouseleave', function(){
 
   set model(model: THREE.Object3D) {
     if (this.currentModelObject !== null) {
+      //console.time('remove previous model')
       this.modelGroup.remove(this.currentModelObject)
+      //console.timeEnd('remove previous model')
     }
     this.currentModelObject = model
+    //console.time('set new model')
     this.modelGroup.add(this.currentModelObject)
+    //console.timeEnd('set new model')
     this.requestTick()
   }
 
@@ -135,7 +144,7 @@ element.on( 'mouseleave', function(){
   onMouseMove(event) {
     event.preventDefault()
     const mouseVector = this.getMouseVector(event)
-    const intersectionChanged = this.modelDetector.detect(mouseVector) || this.machineDetector.detect(mouseVector)
+    const intersectionChanged = this.modelDetector.detect(mouseVector) || (this.machineDetector && this.machineDetector.detect(mouseVector))
 
     if (intersectionChanged) {
       //object detected
@@ -179,9 +188,14 @@ element.on( 'mouseleave', function(){
     // reset the tick so we can capture the next event
     this.ticking = false
     this.controls.update()
+    // this.zone.runOutsideAngular(() => {
+    //   this.renderer.render(this.scene, this.camera)
+    //   this.orientation.render(this.controls.target)
+
+    // })
     this.renderer.render(this.scene, this.camera)
     this.orientation.render(this.controls.target)
-    //console.log('animate');
+
   }
 
   onResize(event) {
