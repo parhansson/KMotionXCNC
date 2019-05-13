@@ -37,7 +37,10 @@ export class AceEditorComponent {
       err => console.error(err)
     )
   }
-
+  selectRow(row: number){
+    this.aceEditor.selectRow(row)
+  }
+  
   get textContent() {
     return this.aceEditor.text
   }

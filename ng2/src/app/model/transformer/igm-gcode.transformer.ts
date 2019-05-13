@@ -210,7 +210,7 @@ export class Igm2GcodeTransformer extends ModelTransformer<IGM, GCodeSource>{
     }
   }
 
-  private scaleNoDPI(val) {
+  private scaleNoDPI(val: number) {
     //TODO only used for tool moves. maybe scale should be inverted to avoid z scaling
     return this.format(val * this.settings.scale)
   }

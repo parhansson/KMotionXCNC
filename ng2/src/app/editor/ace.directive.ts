@@ -18,6 +18,11 @@ export class AceDirective {
     private editor: AceAjax.Editor
     public textChanged: EventEmitter<AceAjax.EditorChangeEvent>
 
+    selectRow(row: number){
+        this.editor.selection.moveCursorToPosition({row, column: 0})
+        this.editor.centerSelection()
+    }
+
     set text(s: string) {
         if (s) {
 

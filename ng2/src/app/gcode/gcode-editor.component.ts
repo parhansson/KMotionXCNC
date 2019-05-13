@@ -42,6 +42,13 @@ export class GCodeEditorComponent implements AfterViewInit{
     ngAfterViewInit() {
       this.editorComponent.onFile(new FileResource('./gcode'))
       //this.editorComponent.onContentChange()
+      this.socketService.status.subscribe(status => {
+        // if(status.interpreting){
+          // need a way to turn this on and off
+          //this.editorComponent.selectRow(status.currentLine)
+    
+        // }
+      })
       this.socketService.gcodeFileSubject.subscribe(gcodeFile => {
         this.editorComponent.resource = gcodeFile
         const subscription = this.fileBackend.loadFile(gcodeFile.canonical).subscribe(
