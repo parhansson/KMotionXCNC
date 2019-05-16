@@ -1,6 +1,6 @@
 const webpack = require('webpack');
 const webpackMerge = require('webpack-merge');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const commonConfig = require('./webpack.common.js');
 const helpers = require('./helpers');
 //const UglifyJSPlugin = require('uglifyjs-webpack-plugin')
@@ -49,7 +49,7 @@ module.exports = webpackMerge(commonConfig, {
   plugins: [
     //new UglifyJSPlugin(),
     new BaseHrefWebpackPlugin({ baseHref: baseHref }),
-    new ExtractTextPlugin({
+    new MiniCssExtractPlugin({
       filename: '[name].[chunkhash].css',
       allChunks: true
     }),

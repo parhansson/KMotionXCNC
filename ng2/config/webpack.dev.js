@@ -1,6 +1,6 @@
 const webpack = require('webpack');
 const webpackMerge = require('webpack-merge');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const commonConfig = require('./webpack.common.js');
 const helpers = require('./helpers');
 const { BaseHrefWebpackPlugin } = require('base-href-webpack-plugin');
@@ -20,9 +20,10 @@ module.exports = webpackMerge(commonConfig, {
   },
 
   plugins: [
-    new ExtractTextPlugin({
-      filename: '[name].css',
-      allChunks: true
+     new MiniCssExtractPlugin({
+    //   allChunks: true
+          filename: '[name].css',
+          chunkFilename: '[id].css',
     }),
     new BaseHrefWebpackPlugin({ baseHref: baseHref })
     // ,

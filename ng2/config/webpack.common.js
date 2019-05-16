@@ -1,8 +1,9 @@
 const webpack = require('webpack');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const helpers = require('./helpers');
 const rxPaths = require('rxjs/_esm2015/path-mapping');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const path = require('path');
 
 module.exports = {
 
@@ -30,6 +31,27 @@ module.exports = {
     noEmitOnErrors: false, // NoEmitOnErrorsPlugin
     concatenateModules: true //ModuleConcatenationPlugin
   },
+  plugins: [
+    new webpack.ContextReplacementPlugin(
+      // The (\\|\/) piece accounts for path separators in *nix and Windows
+    
+      // For Angular 5, see also https://github.com/angular/angular/issues/20357#issuecomment-343683491
+      // /\@angular(\\|\/)core(\\|\/)fesm2015/,
+      /\@angular(\\|\/)core(\\|\/)fesm5/,
+      helpers.root('src'), // location of your src
+      {
+        // your Angular Async Route paths relative to this root directory
+      }
+    ),
+    new HtmlWebpackPlugin({
+      template: 'src/index.html'
+    }),
+    /*
+        new webpack.ProvidePlugin({
+          "StringView": "vendor/mozilla/stringview.js"
+        }) 
+        */
+  ],  
   resolve: {
     //added es2015 for use with angular instead of esm5
     //mainFields: ["browser", "es2015", "module", "main"],
@@ -42,7 +64,6 @@ module.exports = {
       '@kmx': helpers.root('src/app')
     }
   },
-
   module: {
     rules: [
       {
@@ -95,51 +116,48 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        exclude: helpers.root('src', 'app'),
-        loader: ExtractTextPlugin.extract({ 
-          fallback: 'style-loader', 
-          use: { 
-            loader: 'css-loader',
+        use: [
+          'to-string-loader',
+          {
+            loader: MiniCssExtractPlugin.loader,
             options: {
-              sourceMap: true
-            }
-          } 
-        })
+              hmr: process.env.NODE_ENV === 'development',
+              // publicPath: (resourcePath, context) => {
+              //   // publicPath is the relative path of the resource to the context
+              //   // e.g. for ./css/admin/main.css the publicPath will be ../../
+              //   // while for ./css/main.css the publicPath will be ../
+              //   return path.relative(path.dirname(resourcePath), context) + '/';
+              // },
+            },
+          },
+          'css-loader',
+        ]
       },
-      {
-        test: /\.css$/,
-        include: helpers.root('src', 'app'),
-        loader: 'raw-loader'
-      }
+      // {
+      //   test: /\.css$/,
+      //   exclude: helpers.root('src', 'app'),
+      //   loader: ExtractTextPlugin.extract({ 
+      //     fallback: 'style-loader', 
+      //     use: { 
+      //       loader: 'css-loader',
+      //       options: {
+      //         sourceMap: true
+      //       }
+      //     } 
+      //   })
+      // },
+      // {
+      //   test: /\.css$/,
+      //   include: helpers.root('src', 'app'),
+      //   loader: 'raw-loader'
+      // }
     ],
     // noParse: [
     //   /pdfjs-dist\/build\/pdf\.js$/,
     //   /pdfjs-dist\/build\/pdf\.min\.js$/,
     //   /pdfjs-dist\/build\/pdf\.worker\.js$/
     // ],
-  },
-
-  plugins: [
-    new webpack.ContextReplacementPlugin(
-      // The (\\|\/) piece accounts for path separators in *nix and Windows
-    
-      // For Angular 5, see also https://github.com/angular/angular/issues/20357#issuecomment-343683491
-      // /\@angular(\\|\/)core(\\|\/)fesm2015/,
-      /\@angular(\\|\/)core(\\|\/)fesm5/,
-      helpers.root('src'), // location of your src
-      {
-        // your Angular Async Route paths relative to this root directory
-      }
-    ),
-    new HtmlWebpackPlugin({
-      template: 'src/index.html'
-    }),
-    /*
-        new webpack.ProvidePlugin({
-          "StringView": "vendor/mozilla/stringview.js"
-        }) 
-        */
-  ]
+  }
 
 };
 
