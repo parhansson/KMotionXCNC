@@ -59,7 +59,6 @@ module.exports = {
     extensions: ['.js', '.ts'],
     alias: {
       ...rxPaths(),
-      'three/three-trackballcontrols': 'three/examples/js/controls/TrackballControls',
       '@workers': helpers.root('src/workers'),
       '@kmx': helpers.root('src/app')
     }
@@ -74,13 +73,6 @@ module.exports = {
           configFile: './tslint.json',
           emitErrors: false,
           failOnHint: false
-        }
-      },
-      {
-        test: /TrackballControls\.js$/,
-        loader: 'imports-loader',
-        options : {
-          THREE :'three'
         }
       },
       {

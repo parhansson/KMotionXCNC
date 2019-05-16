@@ -3,7 +3,6 @@ const webpackMerge = require('webpack-merge');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const commonConfig = require('./webpack.common.js');
 const helpers = require('./helpers');
-//const UglifyJSPlugin = require('uglifyjs-webpack-plugin')
 const TerserPlugin = require('terser-webpack-plugin');
 const { BaseHrefWebpackPlugin } = require('base-href-webpack-plugin');
 
@@ -31,13 +30,6 @@ module.exports = webpackMerge(commonConfig, {
           terserOptions:{
             compress: true //{ inline: false },
           },
-          //uglifyOptions: {
-              /*
-                  inlining is broken sometimes where inlined function uses the same variable name as inlining function.
-                  See https://github.com/mishoo/UglifyJS2/issues/2842, https://github.com/mishoo/UglifyJS2/issues/2843
-               */
-          //    compress: { inline: false },
-          //},
       })
   ],    
   },
@@ -47,7 +39,6 @@ module.exports = webpackMerge(commonConfig, {
     },
   */
   plugins: [
-    //new UglifyJSPlugin(),
     new BaseHrefWebpackPlugin({ baseHref: baseHref }),
     new MiniCssExtractPlugin({
       filename: '[name].[chunkhash].css',

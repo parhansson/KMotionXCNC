@@ -4,7 +4,7 @@ import { OrientationCube } from './orientation-cube'
 import { RaycastDetector } from './raycast-detector'
 
 import * as THREE from 'three'
-import 'three/three-trackballcontrols' //aliased in webpack config and loaded with import-loader
+import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls'
 
 @Component({
   selector: 'three-viewer',
@@ -17,7 +17,7 @@ import 'three/three-trackballcontrols' //aliased in webpack config and loaded wi
 export class ThreeViewComponent implements AfterViewInit {
   private renderer: THREE.WebGLRenderer
   private camera: THREE.PerspectiveCamera
-  private controls: THREE.TrackballControls
+  private controls: TrackballControls
   private scene: THREE.Scene
   private element: HTMLElement
   private mouseDown = false
@@ -35,7 +35,7 @@ export class ThreeViewComponent implements AfterViewInit {
 
   ngAfterViewInit() {
     // Renderer
-    this.renderer = new THREE.WebGLRenderer({ /*canvas: this.element.firstChild,*/ antialias: true, clearColor: 0x000000, alpha: true })
+    this.renderer = new THREE.WebGLRenderer({ /*canvas: this.element.firstChild,*/ antialias: true, alpha: true })
 
     this.element.appendChild(this.renderer.domElement)
 
@@ -62,7 +62,7 @@ export class ThreeViewComponent implements AfterViewInit {
     this.scene.add(this.auxiliaryGroup)
     this.scene.add(this.modelGroup)
 
-    this.controls = new THREE.TrackballControls(this.camera, this.element)
+    this.controls = new TrackballControls(this.camera, this.element)
     //controls.noPan = false;
     this.controls.minDistance = 10
     this.controls.maxDistance = 10000

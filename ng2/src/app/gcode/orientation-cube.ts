@@ -10,7 +10,7 @@ export class OrientationCube {
 
   constructor(private syncCamera: THREE.Camera, private domElement: HTMLElement) {
 
-    this.renderer = new THREE.WebGLRenderer({ antialias: false, clearColor: 0x000000, alpha: true })
+    this.renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true })
     this.scene = new THREE.Scene()
     // camera
     this.camera = new THREE.PerspectiveCamera(50, this.CANVAS_WIDTH / this.CANVAS_HEIGHT, 1, 1000)
@@ -49,7 +49,7 @@ export class OrientationCube {
       })
 
       const size = 50
-      const geometry = new THREE.CubeGeometry(size, size, size, 1, 1, 1)
+      const geometry = new THREE.BoxGeometry(size, size, size, 1, 1, 1)
       geometry.faceVertexUvs[0] = []
       const textPercent = 0.125
       let LU = -textPercent
