@@ -14,19 +14,26 @@ class Selection {
   
   private stroke: string
   private strokeWidth: string
+  private strokeDasharray: string
   constructor(public element: SVGGraphicsElement){
-    this.stroke = element.getAttribute('stroke'),
-    this.strokeWidth= element.getAttribute('stroke-width')
+    this.stroke = element.style.stroke
+    this.strokeWidth= element.style.strokeWidth
+    this.strokeDasharray= element.style.strokeDasharray
   }
   highlight(){
-    this.element.setAttribute('stroke', 'red')
-    this.element.setAttribute('stroke-width', '3px')
+    this.element.style.stroke = 'red'
+    this.element.style.strokeWidth = '2px'
+    this.element.style.strokeDasharray = '2px'
 
   }
   reset(){
-    this.element.setAttribute('stroke', this.stroke)
-    this.element.setAttribute('stroke-width', this.strokeWidth)
+    this.element.style.stroke = this.stroke
+    this.element.style.strokeWidth =  this.strokeWidth
+    this.element.style.strokeDasharray = this.strokeDasharray
 
+  }
+  delete(){
+    this.element.remove()
   }
 }
 
@@ -50,6 +57,11 @@ export class SvgEditor {
 
   }
 
+  delete() {
+    while(this.selection.length > 0){
+      this.selection.splice(0)[0].delete()
+    }
+  }
   rotate() {
 
     for (const selected of this.selection) {
@@ -137,7 +149,7 @@ export class SvgEditor {
       if (evt.target.ownerSVGElement != null) {
         this.dragState.DragTarget = evt.target as SVGGraphicsElement
         //console.log(this.dragState.DragTarget)
-        this.dragState.DragTarget.setAttribute('style', 'cursor:move')
+        this.dragState.DragTarget.style.cursor = 'move'
         //---reference point to its respective viewport--
         const pnt = this.dragState.DragTarget.ownerSVGElement.createSVGPoint()
         pnt.x = evt.clientX
@@ -181,7 +193,7 @@ export class SvgEditor {
     console.log('enddrag')
     this.dragState.Dragging = false
     if (this.dragState.DragTarget) {
-      this.dragState.DragTarget.setAttribute('style', 'cursor:default')
+      this.dragState.DragTarget.style.cursor = 'default'
     }
 
   }

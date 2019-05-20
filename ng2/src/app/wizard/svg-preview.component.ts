@@ -35,6 +35,9 @@ export class SvgPreviewComponent {
     node.appendChild(this.svgDoc)
 
   }
+  delete(){
+    this.svgEditor.delete()
+  }
   rotate(){
     this.svgEditor.rotate()
   }
