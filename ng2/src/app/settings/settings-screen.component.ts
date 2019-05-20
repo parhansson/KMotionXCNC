@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component } from '@angular/core'
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core'
 import { SettingsService, Machine } from './settings.service'
 import { ModelSettingsService } from '../model/model.settings.service'
 import {
@@ -16,22 +16,24 @@ import {
     // Test changedetection behavior
     // https://danielwiehl.github.io/edu-angular-change-detection/
 })
-export class SettingsScreenComponent {
+export class SettingsScreenComponent implements OnInit{
     machine: Machine
     resource: FileResource
     constructor(
         private settingsService: SettingsService, 
         private modelSettingsService: ModelSettingsService,
         private cdr: ChangeDetectorRef) {
-        
         this.resource = new FileResource(settingsService.DefaultPath)
-        settingsService.subject.subscribe(machine => {
-            console.log('machineupdate')
-            this.machine = machine
-            this.cdr.detectChanges()
-        })
     }
 
+    ngOnInit(){
+      this.settingsService.subject.subscribe(machine => {
+          console.log('machineupdate')
+          this.machine = machine
+          this.cdr.detectChanges()
+      })   
+    }
+    
     onSave() {
         this.settingsService.save()
         this.modelSettingsService.save()
