@@ -2,8 +2,8 @@
 
 import { Injectable } from '@angular/core'
 import { Observer, Observable, Subject, AsyncSubject } from 'rxjs'
-import { KMXUtil } from '../util/kmxutil'
-import { ModelTransformer } from './transformer/model.transformer'
+import { KMXUtil, ModelTransformer } from 'camx'
+
 
 
 @Injectable()
@@ -18,7 +18,7 @@ export class TransformerService {
   }
 
   matchType(mimeType: string) {
-    for (const transformer of  this.transformers) {
+    for (const transformer of this.transformers) {
       if (transformer.inputMime.indexOf(mimeType) > -1) {
         return transformer
       }
@@ -26,7 +26,7 @@ export class TransformerService {
     return null
   }
   matchName(name) {
-    for (const transformer of  this.transformers) {
+    for (const transformer of this.transformers) {
       if (transformer.name === name) {
         return transformer
       }

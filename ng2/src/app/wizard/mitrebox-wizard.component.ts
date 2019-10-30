@@ -1,6 +1,5 @@
 import { Component, Inject, Input, Output, ViewChild, ElementRef } from '@angular/core'
-import { IGM, IGMDriver } from '../model/igm'
-import { MitreBox } from '../model/tool/mitre-box'
+import { IGM, IGMDriver, MitreBox } from 'camx'
 import { SvgPreviewComponent } from './svg-preview.component'
 
 @Component({
@@ -10,7 +9,7 @@ import { SvgPreviewComponent } from './svg-preview.component'
 export class MitreBoxWizardComponent {
   box: MitreBox
 
-  @ViewChild(SvgPreviewComponent)
+  @ViewChild(SvgPreviewComponent, { static: false })
   private previewContainer: SvgPreviewComponent
 
   constructor() {
@@ -41,17 +40,17 @@ export class MitreBoxWizardComponent {
     for (const part of driver.allObjectsFlat) {
       //TODO rescaling after calculating bounds???
       IGMDriver.scale(part, dpiScale)
-      
-      const points:string[] = []
+
+      const points: string[] = []
       points.push('M')
       const p0 = part.vectors[0]
 
-      points.push(p0.x+'')
-      points.push(p0.y+'')
+      points.push(p0.x + '')
+      points.push(p0.y + '')
       points.push('L')
       for (const vec of part.vectors) {
-        points.push(vec.x+'')
-        points.push(vec.y+'')
+        points.push(vec.x + '')
+        points.push(vec.y + '')
         //points.push(vec.x + ',' + vec.y)
       }
       //svg += points.join(' ')

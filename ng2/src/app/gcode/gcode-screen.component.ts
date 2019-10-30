@@ -41,9 +41,10 @@ import * as THREE from 'three'
   ]
 })
 export class GCodeScreenComponent {
-  @ViewChild(ThreeViewComponent)
+  @ViewChild(ThreeViewComponent, {static: false})
   threeComp: ThreeViewComponent
-  @ViewChild(GCodeEditorComponent)
+  //not used?
+  @ViewChild(GCodeEditorComponent, {static: false})
   editorComponent: GCodeEditorComponent
   kmxStatus: KmxStatus
 
@@ -102,29 +103,39 @@ export class GCodeScreenComponent {
   }
   
   private renderGrid(x, y, z):THREE.Object3D{
-    const sizeX = x
-    const sizeY = y
-    const step = 10
+    // const sizeX = x
+    // const sizeY = y
+    // const step = 10
 
-    const geometry = new THREE.Geometry()
-    const material = new THREE.LineBasicMaterial( { color: 0x999999, opacity: 0.7, linewidth:1 } )
-
-    for ( let i = -sizeY; i <= sizeY; i += step ) {
-
-        geometry.vertices.push( new THREE.Vector3( - sizeX, i,0 ) )
-        geometry.vertices.push( new THREE.Vector3(   sizeX, i,0 ) )
-
-    }
-    for ( let i = -sizeX; i <= sizeX; i += step ) {
-
-        geometry.vertices.push( new THREE.Vector3( i, -sizeY,0 ) )
-        geometry.vertices.push( new THREE.Vector3( i,   sizeY , 0) )
-
-    }
-
-    geometry.translate(x / 2, y / 2, 0)
-    const line = new THREE.LineSegments( geometry, material)
-    return line
+    
+    
+    // const geometry = new THREE.Geometry()
+    // const material = new THREE.LineBasicMaterial( { color: 0x999999, opacity: 0.7, linewidth:1 } )
+    
+    // for ( let i = -sizeY; i <= sizeY; i += step ) {
+      
+      //     geometry.vertices.push( new THREE.Vector3( - sizeX, i,0 ) )
+      //     geometry.vertices.push( new THREE.Vector3(   sizeX, i,0 ) )
+      
+      // }
+      // for ( let i = -sizeX; i <= sizeX; i += step ) {
+        
+        //     geometry.vertices.push( new THREE.Vector3( i, -sizeY,0 ) )
+        //     geometry.vertices.push( new THREE.Vector3( i,   sizeY , 0) )
+        
+        // }
+        
+    // geometry.translate(x / 2, y / 2, 0)
+    // const line = new THREE.LineSegments( geometry, material)
+    //return line
+    const maxSize = Math.max(x,y)
+    const size = maxSize
+    const divisions = 10
+    const gridHelper = new THREE.GridHelper( size, divisions )
+    gridHelper.position.x = (x/2)
+    gridHelper.position.y = (y/2)
+    gridHelper.setRotationFromAxisAngle(new THREE.Vector3(1,0,0),Math.PI/2 )
+    return gridHelper
   }
 
   private renderBackground(x, y, z) {

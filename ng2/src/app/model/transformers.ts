@@ -7,14 +7,14 @@ import {
   Gcode2IgmTransformer,
   Pdf2SvgTransformer,
   Svg2IgmTransformer,
-  Dxf2IgmTransformer
-} from './transformer'
-import { IGM, GCodeSource } from './igm'
-import { KMXUtil } from '../util/kmxutil'
+  Dxf2IgmTransformer,
+  KMXUtil,
+  IGM,
+  GCodeSource
+} from 'camx'
 import { ModelSettingsService } from './model.settings.service'
 import { LogService } from '../log/log.service'
 import * as THREE from 'three'
-import { Group } from 'three'
 
 export type Payload = ArrayBuffer | SVGElement | IGM | string[] | string
 
@@ -32,7 +32,7 @@ export class StaticTransformer {
   dxf2IgmTransformer: Dxf2IgmTransformer
 
   constructor(private logService: LogService, private modelSettings: ModelSettingsService) {
-    this.pdf2svgTransformer = new Pdf2SvgTransformer(modelSettings)
+    this.pdf2svgTransformer = new Pdf2SvgTransformer(modelSettings.settings)
     this.img2gcodeTransformer = new Igm2GcodeTransformer(modelSettings.settings.igm)
     this.svg2IgmTransformer = new Svg2IgmTransformer(modelSettings.settings.svg)
     this.dxf2IgmTransformer = new Dxf2IgmTransformer()
@@ -50,27 +50,28 @@ export class StaticTransformer {
       gcode => new Gcode2ThreeTransformer(true).execute(gcode, this.threeSubject),
       err => console.error(err))
   }
-  isSVG(payload: Payload): payload is (SVGElement | ArrayBuffer | string) {
-    return true
-  
+  isSVG(payload: Payload, contentType: string): payload is (SVGElement | ArrayBuffer | string) {
+    return contentType === 'image/svg+xml'
+
   }
-  isDXF(payload: Payload): payload is (ArrayBuffer | string) {
-    return true
+  isDXF(payload: Payload, contentType: string): payload is (ArrayBuffer | string) {
+    return contentType.toLowerCase().endsWith('.dxf')
   }
 
-  isPDF(payload: Payload): payload is ArrayBuffer {
-    return payload instanceof ArrayBuffer
+  isPDF(payload: Payload, contentType: string): payload is ArrayBuffer {
+    return ['application/postscript', 'application/pdf'].indexOf(contentType) > -1 && payload instanceof ArrayBuffer
   }
   isGCode(payload: Payload): payload is ArrayBuffer | string[] | string {
     return true // payload instanceof ArrayBuffer
   }
   transform(contentType: string, payload: Payload) {
+    console.log(contentType)
     if (payload instanceof IGM) {
-    
+
       this.igmSubject.next(payload)
-      
-    } else if (contentType === 'image/svg+xml' && this.isSVG(payload)) {
-   
+
+    } else if (this.isSVG(payload, contentType)) {
+
       const svgElement = this.asSVGElement(payload)
       this.svgSubject.next(svgElement)
       /*
@@ -78,15 +79,15 @@ export class StaticTransformer {
           var blob = new Blob([html], { type: 'image/svg+xml' });
           window.open(window.URL.createObjectURL(blob));
       */
-    } else if (contentType.toLowerCase().endsWith('.dxf') && this.isDXF(payload)) {
-    
+    } else if (this.isDXF(payload, contentType)) {
+
       this.dxf2IgmTransformer.execute(payload, this.igmSubject)
-    
-    } else if (contentType === 'application/pdf' && this.isPDF(payload)) {
-   
+
+    } else if (this.isPDF(payload, contentType)) {
+
       this.pdf2svgTransformer.execute(payload, this.svgSubject)
-   
-    } else if(this.isGCode(payload)){
+
+    } else if (this.isGCode(payload)) {
 
       const gcode = this.asGCodeSource(payload)
       const testDoGcodeIGM = false
@@ -98,7 +99,7 @@ export class StaticTransformer {
     } else {
       throw new Error('Unsupported payload')
     }
-    
+
   }
 
   private asSVGElement(source: string | SVGElement | ArrayBuffer): SVGElement {

@@ -28,7 +28,7 @@ import { FileResource, FileStoreToken, FileStore, DefaultFileStore } from '../re
   ]
 })
 export class CCodeEditorComponent {
-  @ViewChild(AceEditorComponent)
+  @ViewChild(AceEditorComponent, {static:false})
   editorComponent: AceEditorComponent
 
   constructor() { }

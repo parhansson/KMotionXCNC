@@ -1,5 +1,4 @@
 export { SerializedObject } from './serialized-object'
 export { BufferReader } from './buffer-reader'
-export { KMXUtil } from './kmxutil'
 export { SocketConnector, SocketMessageHandler } from './socket-connector'
 export { LimitBuffer } from './limit-buffer'

@@ -16,10 +16,11 @@ import {
 
 })
 export class AceEditorComponent {
-  @ViewChild(AceDirective)
+  @ViewChild(AceDirective, {static: false})
   private aceEditor: AceDirective
 
-  @ViewChild(FileDialogComponent)
+  //not used?
+  @ViewChild(FileDialogComponent, {static: false})
   private resourceComponent: FileDialogComponent
 
   @Input() mode: string

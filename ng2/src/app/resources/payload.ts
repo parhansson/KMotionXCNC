@@ -1,5 +1,5 @@
 
-import { KMXUtil } from '../util/kmxutil'
+import { KMXUtil } from 'camx'
 
 export class Payload {
   value: string | ArrayBuffer = null

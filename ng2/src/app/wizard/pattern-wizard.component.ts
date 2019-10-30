@@ -1,5 +1,5 @@
 import { Component, Inject, Input, Output, ViewChild, ElementRef } from '@angular/core'
-import { IGM, IgmObject, IGMDriver } from '../model/igm'
+import { IGM, IgmObject, IGMDriver } from 'camx'
 import { SvgPreviewComponent } from './svg-preview.component'
 
 
@@ -29,7 +29,7 @@ import { SvgPreviewComponent } from './svg-preview.component'
 })
 export class PatternWizardComponent {
 
-  @ViewChild(SvgPreviewComponent)
+  @ViewChild(SvgPreviewComponent, { static: false })
   private previewContainer: SvgPreviewComponent
 
   rows: number = 2
@@ -83,8 +83,8 @@ M2
     // const shape = this.rect(38,53)
     // const shape2 = this.rect(11.5,43.5)
     // shape2.translate(new GCodeVector(13.25,4.75))
-    
-    
+
+
     const igm = new IGM()
     const driver = new IGMDriver(igm)
     IGMDriver.updateBounds([shape, shape2])

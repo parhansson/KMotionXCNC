@@ -28,7 +28,7 @@ import { BackendService } from '../backend/backend.service'
   ]
 })
 export class GCodeEditorComponent implements AfterViewInit{
-  @ViewChild(AceEditorComponent)
+  @ViewChild(AceEditorComponent, {static: false})
   editorComponent: AceEditorComponent
 
   constructor( 

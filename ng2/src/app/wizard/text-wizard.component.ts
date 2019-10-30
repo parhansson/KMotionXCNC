@@ -1,5 +1,4 @@
 import { Component, Inject, Input, Output, ViewChild, ElementRef } from '@angular/core'
-import { IGM } from '../model/igm'
 import { SvgPreviewComponent } from './svg-preview.component'
 import * as opentype from 'opentype.js'
 
@@ -13,7 +12,7 @@ export class TextWizardComponent {
   fontSize: number = 12
   font: opentype.Font
   
-  @ViewChild(SvgPreviewComponent)
+  @ViewChild(SvgPreviewComponent, {static: false})
   private previewContainer: SvgPreviewComponent
 
   constructor() {

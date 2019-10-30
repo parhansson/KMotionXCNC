@@ -35,7 +35,7 @@ export class LogComponent implements OnInit, OnDestroy, AfterViewChecked {
   private loggBuffer: LimitBuffer<LogMessage>
 
   private subscription: Subscription
-  @ViewChild('scrollContainer')
+  @ViewChild('scrollContainer', {static: false})
   private scrollContainer: ElementRef
   
 
