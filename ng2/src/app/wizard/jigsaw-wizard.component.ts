@@ -19,7 +19,7 @@ function toSplinePoints(points: Edge) {
   let p1 = points[0]
   let p2 = points[1]
   let p3 = points[2]
-  const pts:number[][] = [points[0]]
+  const pts: number[][] = [points[0]]
 
   for (let i = 1; i < n; i++) {
     pts.push([
@@ -65,20 +65,14 @@ function slice(points: number[][], start, end) {
 function svgPath(points) {
   let p = ''
 
-  for (let i = 0; i < points.length; i++) {
-    const point = points[i]
-    const n = point.length
-
-    if (!i) {
-      // p += 'M' + (point[n - 2]) + ' ' + (point[n - 1])
-    } else if (n > 4) {
-      p += 'C' + (point[0]) + ', ' + (point[1])
-      p += ', ' + (point[2]) + ', ' + (point[3])
-      p += ', ' + (point[4]) + ', ' + (point[5])
-    } else {
-      p += 'S' + (point[0]) + ', ' + (point[1])
-      p += ', ' + (point[2]) + ', ' + (point[3])
+  let i = 0
+  for (const point of points) {
+    if(i == 1){
+      p += ` C${point[0]}, ${point[1]}, ${point[2]}, ${point[3]}, ${point[4]}, ${point[5]}`
+    } else if( i > 1){
+      p += ` S${point[2]}, ${point[3]}, ${point[4]}, ${point[5]}`
     }
+    i++
   }
 
   return p
@@ -124,10 +118,10 @@ export class JigsawWizardComponent {
   constructor() {
   }
 
-  @ViewChild(SvgPreviewComponent, {static: false})
+  @ViewChild(SvgPreviewComponent, { static: false })
   private previewContainer: SvgPreviewComponent
 
-  showControlPoints = false
+  showControlPoints = true
   rows: number = 3
   columns: number = 3
   width = 500 //450
@@ -141,7 +135,7 @@ export class JigsawWizardComponent {
   // Returns 6 points representing the shape of one edge of a puzzle piece.
   // Point coordinates are expressed as percentage distances across the width
   // and height of the piece.
-  private edgeDistributions() :Point[]{
+  private edgeDistributions(): Point[] {
 
     const randomBetween = (min, max) => {
       return Math.random() * (max - min) + min
@@ -179,17 +173,17 @@ export class JigsawWizardComponent {
     const point6 = [100, 0]
     //Randomly flip edge 
     const sign = Math.random() < 0.5 ? -1 : 1
-    const result:Point[] = [point1, point2, point3, midpoint, point4, point5, point6].map((p) => {
+    const result: Point[] = [point1, point2, point3, midpoint, point4, point5, point6].map((p) => {
       return [p[0] / 100, p[1] * sign / 100] as Point
     })
-    //console.log(result)
+    
     return result
   }
   // Builds an m + 1 x n matrix of edge shapes. The first and last rows
   // are straight edges.
   private buildDistributions(m, n): LineGroup[] {
     const lineGroups: LineGroup[] = []
-    let lines:Point[][] = []
+    let lines: Point[][] = []
     for (let j = 0; j < n; j++) {
       lines.push([[0, 0], [1, 0]])
     }

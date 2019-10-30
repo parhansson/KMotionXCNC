@@ -122,14 +122,22 @@ M2
     for (const part of driver.allObjectsFlat) {
       //TODO rescaling after calculating bounds???
       IGMDriver.scale(part, dpiScale)
-      svg += ('<polyline points="')
-      const points = []
+      const points: Array<string|number> = []
+      let first = true
       for (const vec of part.vectors) {
-        points.push(vec.x + ',' + vec.y)
+        if(first) {
+          first = false
+          points.push('M')
+          points.push(vec.x)
+          points.push(vec.y)
+          points.push('L')
+        } else {
+          points.push(vec.x)
+          points.push(vec.y)
+        }
       }
-      svg += points.join(' ')
 
-      svg += ('" fill="none" stroke="black" stroke-width="0.2" />\r\n')
+      svg += `<path d="${points.join(' ')} Z" fill="steelblue" vector-effect="non-scaling-stroke" stroke="black" stroke-width="0.2" />\r\n`
     }
 
     svg += ('</svg>\r\n')
