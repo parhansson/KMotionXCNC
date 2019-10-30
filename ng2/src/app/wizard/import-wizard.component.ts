@@ -1,7 +1,5 @@
 import { Component, Inject, Input, Output, ViewChild, ElementRef } from '@angular/core'
-import { IGM } from '../model/igm'
 import { SvgPreviewComponent } from './svg-preview.component'
-import { KMXUtil } from '../util/kmxutil'
 import { StaticTransformer } from '../model/transformers'
 import {
   //  DropZoneDirective,
@@ -35,10 +33,11 @@ export class ImportWizardComponent {
   public textContent
   public resource: FileResource
 
-  @ViewChild(SvgPreviewComponent)
+  @ViewChild(SvgPreviewComponent, {static: false})
   private previewContainer: SvgPreviewComponent
 
-  @ViewChild(FileDialogComponent)
+  //not used?
+  @ViewChild(FileDialogComponent, {static: false})
   private resourceComponent: FileDialogComponent
 
   constructor( @Inject(FileStoreToken) private fileStore: FileStore,

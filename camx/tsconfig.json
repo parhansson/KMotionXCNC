@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "allowSyntheticDefaultImports":true,
+    "esModuleInterop": true,
+    "target": "es2015", 
+    "module": "es2015",
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "lib": ["es2017", "dom"],
+    "noImplicitAny": false, //todo true
+    "suppressImplicitAnyIndexErrors": true,
+    "removeComments": false,
+    "rootDir": "src",
+    "outDir": "lib",
+    "declaration": true,
+    "baseUrl": "./",
+    "declarationDir": "./types",
+    "types": [
+      "./types-merge"
+    ]
+  },
+  "exclude": [
+    "types",
+    "lib",
+    "node_modules"
+  ]
+}

@@ -7,7 +7,7 @@ import { SvgEditor } from './svg-editor'
   templateUrl: './svg-preview.component.html'
 })
 export class SvgPreviewComponent {
-  @ViewChild('preview')
+  @ViewChild('preview', {static: false})
   private previewContainer: ElementRef
   private svgEditor: SvgEditor
   private svgDoc: SVGElement

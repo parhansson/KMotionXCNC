@@ -8,7 +8,7 @@ import { SvgPreviewComponent } from './svg-preview.component'
  * @param {Array} points
  * @returns {Array}
  */
-function toSplinePoints(points: number[][]) {
+function toSplinePoints(points: Edge) {
   const n = points.length
 
   // Abort if there are not sufficient points to draw a curve
@@ -19,7 +19,7 @@ function toSplinePoints(points: number[][]) {
   let p1 = points[0]
   let p2 = points[1]
   let p3 = points[2]
-  const pts = [points[0]]
+  const pts:number[][] = [points[0]]
 
   for (let i = 1; i < n; i++) {
     pts.push([
@@ -124,7 +124,7 @@ export class JigsawWizardComponent {
   constructor() {
   }
 
-  @ViewChild(SvgPreviewComponent)
+  @ViewChild(SvgPreviewComponent, {static: false})
   private previewContainer: SvgPreviewComponent
 
   showControlPoints = false

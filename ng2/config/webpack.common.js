@@ -60,7 +60,8 @@ module.exports = {
     alias: {
       ...rxPaths(),
       '@workers': helpers.root('src/workers'),
-      '@kmx': helpers.root('src/app')
+      '@kmx': helpers.root('src/app'),
+      "camx": "camx/lib",
     }
   },
   module: {
