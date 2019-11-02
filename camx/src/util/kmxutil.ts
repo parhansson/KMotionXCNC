@@ -23,7 +23,7 @@ export class KMXUtil {
     return buf
   }
 
-  static injectScript(source, loadedCondition) {
+  static injectScript(source: string, loadedCondition: boolean) {
     return new Promise(function (resolve, reject) {
       if (loadedCondition === true) {
         //TODO check if script tag is present instead of external loaded condition 
@@ -45,8 +45,8 @@ export class KMXUtil {
     })
   }
 
-  static getSingletonWorker(workerScript, messageHandler) {
-    return new Promise<Worker>(function (resolve, reject) {
+  static getSingletonWorker(workerScript: string, messageHandler: (this: Worker, ev: MessageEvent) => any) {
+    return new Promise<Worker>(function (resolve: (value?: Worker | PromiseLike<Worker>) => void, reject: (reason?: any) => void) {
       let worker = KMXUtil.workers[workerScript]
       if (worker === undefined) {
         try {
@@ -63,18 +63,18 @@ export class KMXUtil {
 
   }
 
-  static workers = {}
+  static workers: { [key: string]: Worker } = {}
   // Returns a function, that, as long as it continues to be invoked, will not
   // be triggered. The function will be called after it stops being called for
   // N milliseconds. If `immediate` is passed, trigger the function on the
   // leading edge, instead of the trailing.
-  static debounce(func: (any) => any, wait: number, immediate: boolean) {
-    let timeout
+  static debounce(func: (arg: any) => any, wait: number, immediate: boolean) {
+    let timeout: number
     return function () {
       const context = this, args = arguments
       const later = function () {
         timeout = null
-        if (!immediate){
+        if (!immediate) {
           func.apply(context, args)
         }
       }

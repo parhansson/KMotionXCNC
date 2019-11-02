@@ -139,8 +139,8 @@ export abstract class GCodeTransformer<ShapeType, OutputType> extends ModelTrans
   protected abstract createOutput(): OutputType
   protected abstract startShape(): ShapeType
   protected abstract endShape(): void
-  protected abstract addLinearPoint(newPosition: GCodeVector, shape: ShapeType)
-  protected abstract addCurve(curve: Curve3, shape: ShapeType)
+  protected abstract addLinearPoint(newPosition: GCodeVector, shape: ShapeType): void
+  protected abstract addCurve(curve: Curve3, shape: ShapeType): void
 
   execute(gcode: GCodeSource, observer: Observer<OutputType>) {
     this.output = this.createOutput()
@@ -274,7 +274,7 @@ export abstract class GCodeTransformer<ShapeType, OutputType> extends ModelTrans
     this.state.position = newPosition
   }
 
-  private createCurve(args: MoveArcArguments, position: GCodeVector, newPosition: GCodeVector, clockWise: boolean, currentShape) {
+  private createCurve(args: MoveArcArguments, position: GCodeVector, newPosition: GCodeVector, clockWise: boolean, currentShape: ShapeType) {
     const scale = this.state.scale
     args.I *= scale
     args.J *= scale

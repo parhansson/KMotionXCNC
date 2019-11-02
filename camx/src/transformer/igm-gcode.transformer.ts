@@ -7,7 +7,7 @@ import { Observer } from 'rxjs'
 class GCodeOutput {
   code: string[] = []
 
-  constructor(private spindleOnCommand, private spindleOffCommand, private filter: boolean, ) {
+  constructor(private spindleOnCommand: string, private spindleOffCommand: string, private filter: boolean) {
 
   }
   spindleOn() {
@@ -16,11 +16,11 @@ class GCodeOutput {
   spindleOff() {
     this.push(this.spindleOffCommand)
   }
-  comment(text) {
+  comment(text: string) {
     this.push('(' + text + ')')
   }
   //lägg till 
-  move(type:'G0'|'G1',X?:number){
+  move(type: 'G0' | 'G1', X?: number) {
 
   }
 

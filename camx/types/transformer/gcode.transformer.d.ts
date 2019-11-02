@@ -35,8 +35,8 @@ export declare abstract class GCodeTransformer<ShapeType, OutputType> extends Mo
     protected abstract createOutput(): OutputType;
     protected abstract startShape(): ShapeType;
     protected abstract endShape(): void;
-    protected abstract addLinearPoint(newPosition: GCodeVector, shape: ShapeType): any;
-    protected abstract addCurve(curve: Curve3, shape: ShapeType): any;
+    protected abstract addLinearPoint(newPosition: GCodeVector, shape: ShapeType): void;
+    protected abstract addCurve(curve: Curve3, shape: ShapeType): void;
     execute(gcode: GCodeSource, observer: Observer<OutputType>): void;
     private onBlock;
     private onEndProgram;

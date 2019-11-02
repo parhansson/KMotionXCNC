@@ -1,4 +1,5 @@
 import { IGMModelSettings } from './model.settings';
+import { Vector2 } from './vector';
 export interface GCodeVector {
     x: number;
     y: number;
@@ -60,7 +61,7 @@ export declare class IGMDriver {
      */
     removeDuplicates(paths: IgmObject[]): number;
     removeSingularites(shapes: IgmObject[]): number;
-    removeOutline(paths: IgmObject[], maxBounds: any): void;
+    removeOutline(paths: IgmObject[], maxBounds: BoundRect): void;
     /**
      * Joining adjacent shapes. This implementation depends on orderNearestNeighbour first
      * However orderNearestNeighbour might check if reverse path is nearest and reverses
@@ -83,10 +84,10 @@ export declare class BoundRect {
     x2: number;
     y2: number;
     constructor();
-    scale(ratio: any): this;
+    scale(ratio: number): this;
     vec1(): GCodeVector;
     vec2(): GCodeVector;
-    include(vec: any): void;
+    include(vec: Vector2): void;
     area(): number;
     height(): number;
     width(): number;

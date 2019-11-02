@@ -11,8 +11,8 @@ export declare class MitreBox {
     private MitrePanel;
     protected PolyStart(): void;
     private getLast;
-    protected PolyPoint(x: any, y: any): void;
+    protected PolyPoint(x: number, y: number): void;
     protected PolyEnd(): void;
-    protected StartDoc(w: any, h: any): void;
+    protected StartDoc(w: number, h: number): void;
     protected EndDoc(): void;
 }

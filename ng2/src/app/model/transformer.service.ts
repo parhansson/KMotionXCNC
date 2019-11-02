@@ -47,8 +47,8 @@ export class TransformerService {
     const subject = new AsyncSubject<any>()
     const transformer = this.matchType(mime)
     if (transformer !== null) {
-      transformer.execute(source, subject).subscribe(result => this.transcode(transformer.outputMime, result))
       /*
+      transformer.execute(source, subject).subscribe(result => this.transcode(transformer.outputMime, result))
       var resultPromise = transformer.execute(source,subject);
       if (transformer.outputMime !== "application/x-gcode") {
         return resultPromise.then(

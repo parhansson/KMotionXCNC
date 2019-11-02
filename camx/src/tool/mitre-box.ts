@@ -103,8 +103,8 @@ export class MitreBox {
 
   }
 
-  private MitrePanel(x, y, w, h, corner_size, div_x, div_y, thick, invertX: boolean, invertY: boolean, options: MitreOptions) {
-    let a, b, i, d, half_cut
+  private MitrePanel(x: number, y: number, w: number, h: number, corner_size: number, div_x: number, div_y: number, thick: number, invertX: boolean, invertY: boolean, options: MitreOptions) {
+    let a: number, b: number, i: number, d: number, half_cut: number
     x = x - w / 2 + (invertX ? thick : 0)
     y = y - h / 2 + (invertY ? thick : 0)
     this.PolyStart()
@@ -290,7 +290,7 @@ export class MitreBox {
   private getLast() {
     return this.models[this.models.length - 1]
   }
-  protected PolyPoint(x, y) {
+  protected PolyPoint(x: number, y: number) {
     this.getLast().vectors.push(IGMDriver.newGCodeVector(x, y))
   }
 
@@ -298,7 +298,7 @@ export class MitreBox {
 
   }
 
-  protected StartDoc(w, h) {
+  protected StartDoc(w: number, h: number) {
 
 
   }

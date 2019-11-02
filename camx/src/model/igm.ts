@@ -1,4 +1,5 @@
 import { IGMModelSettings } from './model.settings'
+import { Vector2 } from './vector'
 
 export interface GCodeVector {
   x: number
@@ -18,8 +19,8 @@ export interface IgmObject {
   bounds: BoundRect
   //TODO replace bounds with min and max. this will include all axes
   // bounds: {
-    // min: GCodeVector
-    // max: GCodeVector
+  // min: GCodeVector
+  // max: GCodeVector
   // }
   node: any
 }
@@ -32,8 +33,8 @@ export class IGM {
 
   readonly layers: LayerMap = {} // sort by stroke color
   readonly layerKeys: any[] = [] // layerKey is a mapping to add unnamed layers, layer will get a generated name
-  readonly textLayer = [] // textpaths
-  readonly unsupported = []  // Unsupported nodes
+  readonly textLayer: any[] = [] // textpaths
+  readonly unsupported: any[] = []  // Unsupported nodes
   readonly rawLine: string[] = []
   constructor(public metric: boolean = true) {
 
@@ -45,17 +46,17 @@ export class IGM {
  * All operations on an IGM should be done via IGMDriver operations
  */
 export class IGMDriver {
-  constructor(private igm:IGM) {
+  constructor(private igm: IGM) {
 
   }
 
   public addRaw(raw: string) {
     this.igm.rawLine.push(raw)
   }
-  public addUnsupported(obj) {
+  public addUnsupported(obj: any) {
     this.igm.unsupported.push(obj)
   }
-  public addToLayerObject(layerKey: any, obj: IgmObject | IgmObject[] , layerName?: string) {
+  public addToLayerObject(layerKey: any, obj: IgmObject | IgmObject[], layerName?: string) {
     if (layerName === undefined) {
       layerName = this.igm.layerKeys[layerKey]
       if (layerName === undefined) {
@@ -146,8 +147,8 @@ export class IGMDriver {
     }
     //Add support for offsetting models on import
     //if(settings.offset){
-      //const offesetVec = IGMDriver.newGCodeVector(0, -60, 0)
-      //IGMDriver.translate(shapes, offesetVec)
+    //const offesetVec = IGMDriver.newGCodeVector(0, -60, 0)
+    //IGMDriver.translate(shapes, offesetVec)
     //}
 
     console.info('Nr of Shapes after: ', shapes.length)
@@ -179,7 +180,7 @@ export class IGMDriver {
       c: c || 0
     }
 
-}
+  }
 
   static vectorScale(thisV: GCodeVector, scale: number) {
 
@@ -217,9 +218,9 @@ export class IGMDriver {
   }
 
 
-  static doOperation(shape: IgmObject | IgmObject[], operation:(vec:GCodeVector) => void) {
+  static doOperation(shape: IgmObject | IgmObject[], operation: (vec: GCodeVector) => void) {
     let shapes: IgmObject[]
-    if(shape instanceof Array){
+    if (shape instanceof Array) {
       shapes = shape
     } else {
       shapes = [shape]
@@ -241,10 +242,10 @@ export class IGMDriver {
   }
 
   static scale(shape: IgmObject | IgmObject[], ratio: number): IgmObject | IgmObject[] {
-    if(ratio === 1){
+    if (ratio === 1) {
       return shape
     }
-    return this.doOperation(shape, (vec) => IGMDriver.vectorScale(vec,ratio))
+    return this.doOperation(shape, (vec) => IGMDriver.vectorScale(vec, ratio))
   }
   static clone(shape: IgmObject): IgmObject {
     const copy = IGMDriver.newIgmObject()
@@ -260,10 +261,10 @@ export class IGMDriver {
     return shape.vectors[shape.vectors.length - 1]
   }
 
-  static first<T>(arr: T[]):T {
+  static first<T>(arr: T[]): T {
     return arr[0]
   }
-  static last<T>(arr: T[]):T {
+  static last<T>(arr: T[]): T {
     return arr[arr.length - 1]
   }
 
@@ -346,7 +347,7 @@ export class IGMDriver {
     }
     return removed
   }
-  removeOutline(paths: IgmObject[], maxBounds) {
+  removeOutline(paths: IgmObject[], maxBounds: BoundRect) {
     //TODO Find object with the same size as maxbounds.
     //currently this just asumes the largest object is first
     paths.pop()
@@ -369,7 +370,7 @@ export class IGMDriver {
       const next = paths[idx]
       const lastEnd = IGMDriver.end(last)
       const nextStart = IGMDriver.start(next)
-    
+
       //console.info(lastEnd, nextStart);
       //TODO check reverse path as well and reverse that
       if (this.pointEquals(lastEnd, nextStart, fractionalDigits)) {
@@ -392,7 +393,7 @@ export class IGMDriver {
   }
 
   orderNearestNeighbour(paths: IgmObject[], reversePaths: boolean) {
-    
+
     //These are the steps of the algorithm:
     //
     //  start on an arbitrary vertex as current vertex.
@@ -412,7 +413,7 @@ export class IGMDriver {
       paths.push.apply(paths, orderedPaths)
     }
   }
-  private nearest(point: GCodeVector, paths: IgmObject[], reversePaths: boolean) : IgmObject {
+  private nearest(point: GCodeVector, paths: IgmObject[], reversePaths: boolean): IgmObject {
 
     let dist = Infinity
     let index = -1
@@ -441,7 +442,7 @@ export class IGMDriver {
         dist = distanceSquared
         index = pathIdx
       }
-      
+
       //experiment with tolerance check. If dist < tolerance break loop since finding a closer path probably won't matter
       // if(!shape.node.text){ //some text shapes generates 
       //   if(dist < 0.1){
@@ -454,7 +455,7 @@ export class IGMDriver {
     //console.log(reverseIndex, paths.length)
     const nearest = paths.splice(index, 1)[0]
     //only reverse if shape actually used
-    if(index > -1 && index === reverseIndex){
+    if (index > -1 && index === reverseIndex) {
       nearest.vectors.reverse()
     }
     return nearest
@@ -488,7 +489,7 @@ export class BoundRect {
 
   constructor() { }
 
-  scale(ratio) {
+  scale(ratio: number) {
     this.x = this.x * ratio
     this.y = this.y * ratio
     this.x2 = this.x2 * ratio
@@ -503,7 +504,7 @@ export class BoundRect {
     return IGMDriver.newGCodeVector(this.x2, this.y2, 0)
   }
 
-  include(vec) {
+  include(vec: Vector2) {
     const x = vec.x
     const y = vec.y
 

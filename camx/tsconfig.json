@@ -9,7 +9,7 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "lib": ["es2017", "dom"],
-    "noImplicitAny": false, //todo true
+    "noImplicitAny": true,
     "suppressImplicitAnyIndexErrors": true,
     "removeComments": false,
     "rootDir": "src",

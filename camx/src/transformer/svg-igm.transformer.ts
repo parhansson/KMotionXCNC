@@ -18,7 +18,7 @@ export class Svg2IgmTransformer extends ModelTransformer<SVGElement, IGM>{
 
     // let the fun begin
 
-    const contentFilterDissalowed = [
+    const contentFilterDissalowed: string[] = [
       //'style', 
       //'defs'
     ]
@@ -33,19 +33,19 @@ export class Svg2IgmTransformer extends ModelTransformer<SVGElement, IGM>{
   }
 
   private makeModel(node: SvgNode, driver: IGMDriver) {
-    if(node.defs) { return }
-    if(node.unsupported) { return }
+    if (node.defs) { return }
+    if (node.unsupported) { return }
     //if stroke is undefined we do not generate shape
     //TODO this should be handled in igm.addToLayerObject as invisible layer
     //sometimes an invisible outline is present in pdf files
     //if both fill and stroke is undefined skip since it is invisible
-    const hasFill = node.fill && node.fill !== 'none' 
-    const hasStroke = node.stroke && node.stroke !== 'none' 
+    const hasFill = node.fill && node.fill !== 'none'
+    const hasStroke = node.stroke && node.stroke !== 'none'
     const hasPath = node.path.length > 0
-    if(
+    if (
       hasPath || // this happens in awsometiger.svg
-      hasFill || 
-      hasStroke || 
+      hasFill ||
+      hasStroke ||
       node.text) {
       //console.log('stroke', node.stroke)
       this.makeShape(node, driver)

@@ -97,9 +97,7 @@ function _setStrokeAttributes(element, lineWidthScale = 1) {
     const current = this.current;
     let dashArray = current.dashArray;
     if (lineWidthScale !== 1 && dashArray.length > 0) {
-        dashArray = dashArray.map(function (value) {
-            return lineWidthScale * value;
-        });
+        dashArray = dashArray.map(value => lineWidthScale * value);
     }
     element.setAttributeNS(null, 'stroke', current.strokeColor);
     element.setAttributeNS(null, 'stroke-opacity', current.strokeAlpha);

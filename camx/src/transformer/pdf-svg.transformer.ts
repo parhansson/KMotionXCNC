@@ -3,10 +3,10 @@ import { ModelSettings } from '../model/model.settings'
 import { ModelTransformer } from './model.transformer'
 import * as pdfjs from 'pdfjs-dist/webpack'
 //These types comes from types-merge
-import { PDFJSStatic, getDocument, SVGGraphics} from 'pdfjs-dist/webpack'
+import { PDFJSStatic, getDocument, SVGGraphics } from 'pdfjs-dist/webpack'
 
 export class Pdf2SvgTransformer extends ModelTransformer<ArrayBuffer, SVGElement> {
-  
+
 
   constructor(private transformerSettings: ModelSettings) {
     super()
@@ -20,7 +20,7 @@ export class Pdf2SvgTransformer extends ModelTransformer<ArrayBuffer, SVGElement
     //
     PDFJS.disableFontFace = false
     PDFJS.disableWorker = false
-    
+
     //currently does not work. fake worker is used
     //PDFJS.GlobalWorkerOptions.workerSrc = 'pdf.worker.js'
     //Another option is to set workerPort instead of workerSrc althogh workerSrc is promoted
@@ -35,7 +35,7 @@ export class Pdf2SvgTransformer extends ModelTransformer<ArrayBuffer, SVGElement
 
     //PDFJS.getDocument(source).promise.then((pdf) => {
     getDocument(source).promise.then((pdf) => {
-      
+
       const numPages = pdf.numPages
       // Using promise to fetch the page
 
@@ -48,13 +48,13 @@ export class Pdf2SvgTransformer extends ModelTransformer<ArrayBuffer, SVGElement
       for (let i = 1; i <= ii; i++) {
         if (page != i) { continue }
         //when anchor is not null svg will be rendered on screen for debugging
-        const anchor = null// this.createAnchor(i)
+        const anchor: HTMLAnchorElement = null// this.createAnchor(i)
         // Using promise to fetch and render the next page
-        promise = promise.then(function (pageNum:number, anchor: HTMLElement) {
+        promise = promise.then(function (pageNum: number, anchor: HTMLElement) {
           return pdf.getPage(pageNum).then(page => {
-            const viewport = page.getViewport({scale,rotation})
+            const viewport = page.getViewport({ scale, rotation })
 
-            const container = this.createContainer(pageNum,viewport.width,viewport.height, anchor)
+            const container = this.createContainer(pageNum, viewport.width, viewport.height, anchor)
 
             return page.getOperatorList().then(opList => {
               const svgGfx: SVGGraphics = new SVGGraphics(page.commonObjs, page.objs)
@@ -63,7 +63,7 @@ export class Pdf2SvgTransformer extends ModelTransformer<ArrayBuffer, SVGElement
               svgGfx.embedFonts = true
               return svgGfx.getSVG(opList, viewport).then(svg => {
                 transformer.logSvg(svg)
-                if(container){
+                if (container) {
                   container.appendChild(svg)
                 }
                 targetObserver.next(svg)
@@ -76,14 +76,14 @@ export class Pdf2SvgTransformer extends ModelTransformer<ArrayBuffer, SVGElement
       promise.then(result => pdf.destroy())
     })
   }
-  private logSvg(svg: SVGElement){
-    if(true == true) { return }
+  private logSvg(svg: SVGElement) {
+    if (true == true) { return }
     const container = document.createElement('div')
     container.appendChild(svg)
     console.log('PDF-SVG', container.innerHTML)
   }
-  createContainer(pageNum, width, height, parentElement: HTMLElement): HTMLDivElement {
-    if(parentElement){
+  createContainer(pageNum: number, width: number, height: number, parentElement: HTMLElement): HTMLDivElement {
+    if (parentElement) {
       const container = document.createElement('div')
       container.id = 'pageContainer' + pageNum
       container.className = 'pageContainer'
@@ -93,7 +93,7 @@ export class Pdf2SvgTransformer extends ModelTransformer<ArrayBuffer, SVGElement
       return container
     }
   }
-  createAnchor(pageNum): HTMLAnchorElement {
+  createAnchor(pageNum: number): HTMLAnchorElement {
     const anchor = document.createElement('a')
     anchor.setAttribute('name', 'page=' + pageNum)
     anchor.setAttribute('title', 'Page ' + pageNum)
@@ -104,11 +104,9 @@ export class Pdf2SvgTransformer extends ModelTransformer<ArrayBuffer, SVGElement
 }
 function _setStrokeAttributes(element: SVGGraphicsElement, lineWidthScale = 1) {
   const current = this.current
-  let dashArray = current.dashArray
+  let dashArray: number[] = current.dashArray
   if (lineWidthScale !== 1 && dashArray.length > 0) {
-    dashArray = dashArray.map(function(value) {
-      return lineWidthScale * value
-    })
+    dashArray = dashArray.map(value => lineWidthScale * value)
   }
   element.setAttributeNS(null, 'stroke', current.strokeColor)
   element.setAttributeNS(null, 'stroke-opacity', current.strokeAlpha)
@@ -116,17 +114,17 @@ function _setStrokeAttributes(element: SVGGraphicsElement, lineWidthScale = 1) {
   element.setAttributeNS(null, 'stroke-linecap', current.lineCap)
   element.setAttributeNS(null, 'stroke-linejoin', current.lineJoin)
   //monkey patch
-  if(current.lineWidth == 0){
-    element.setAttributeNS(null, 'stroke-width',pf(lineWidthScale * 1) + 'px')
+  if (current.lineWidth == 0) {
+    element.setAttributeNS(null, 'stroke-width', pf(lineWidthScale * 1) + 'px')
     element.setAttributeNS(null, 'vector-effect', 'non-scaling-stroke')
   } else {
     element.setAttributeNS(null, 'stroke-width',
-                           pf(lineWidthScale * current.lineWidth) + 'px')
+      pf(lineWidthScale * current.lineWidth) + 'px')
   }
   element.setAttributeNS(null, 'stroke-dasharray',
-                         dashArray.map(pf).join(' '))
+    dashArray.map(pf).join(' '))
   element.setAttributeNS(null, 'stroke-dashoffset',
-                         pf(lineWidthScale * current.dashPhase) + 'px')
+    pf(lineWidthScale * current.dashPhase) + 'px')
 }
 /**
  * Format a float number as a string.
@@ -135,7 +133,7 @@ function _setStrokeAttributes(element: SVGGraphicsElement, lineWidthScale = 1) {
  * @returns {string}
  */
 // eslint-disable-next-line no-inner-declarations
-function pf(value) {
+function pf(value: number): string {
   if (Number.isInteger(value)) {
     return value.toString()
   }

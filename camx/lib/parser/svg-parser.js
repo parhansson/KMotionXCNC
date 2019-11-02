@@ -325,40 +325,40 @@ export class SvgParser extends SVGElementWalker {
                         val = val.replace(/([^#])/g, '$1$1');
                     }
                     const a = val.slice(1).match(/../g).map(function (i) { return parseInt(i, 16); });
-                    return a;
+                    return a.join('');
                 }
                 else if (val.search(/^rgb\(/) != -1) {
                     const a = val.slice(4, -1).split(',');
                     for (let i = 0; i < a.length; i++) {
                         const c = this.strip(a[i]);
                         if (c.charAt(c.length - 1) == '%') {
-                            a[i] = Math.round(parseFloat(c.slice(0, -1)) * 2.55);
+                            a[i] = '' + Math.round(parseFloat(c.slice(0, -1)) * 2.55);
                         }
                         else {
-                            a[i] = parseInt(c, 10);
+                            a[i] = '' + parseInt(c, 10);
                         }
                     }
-                    return a;
+                    return a.join('');
                 }
                 else if (val.search(/^rgba\(/) != -1) {
                     const a = val.slice(5, -1).split(',');
                     for (let i = 0; i < 3; i++) {
                         const c = this.strip(a[i]);
                         if (c.charAt(c.length - 1) == '%') {
-                            a[i] = Math.round(parseFloat(c.slice(0, -1)) * 2.55);
+                            a[i] = '' + Math.round(parseFloat(c.slice(0, -1)) * 2.55);
                         }
                         else {
-                            a[i] = parseInt(c, 10);
+                            a[i] = '' + parseInt(c, 10);
                         }
                     }
                     const c = this.strip(a[3]);
                     if (c.charAt(c.length - 1) == '%') {
-                        a[3] = Math.round(parseFloat(c.slice(0, -1)) * 0.01);
+                        a[3] = '' + Math.round(parseFloat(c.slice(0, -1)) * 0.01);
                     }
                     else {
-                        a[3] = Math.max(0, Math.min(1, parseFloat(c)));
+                        a[3] = '' + Math.max(0, Math.min(1, parseFloat(c)));
                     }
-                    return a;
+                    return a.join('');
                 }
                 else if (val.search(/^url\(/) != -1) {
                     console.error('error', 'defs are not supported at the moment');

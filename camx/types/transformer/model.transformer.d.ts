@@ -3,5 +3,5 @@ export declare abstract class ModelTransformer<Source, Target> {
     inputMime: string[];
     outputMime: string;
     name: string;
-    abstract execute(source: Source, targetObserver: Observer<Target>): any;
+    abstract execute(source: Source, targetObserver: Observer<Target>): void;
 }

@@ -6,6 +6,6 @@ export declare class Pdf2SvgTransformer extends ModelTransformer<ArrayBuffer, SV
     constructor(transformerSettings: ModelSettings);
     execute(source: ArrayBuffer, targetObserver: Observer<SVGElement>): void;
     private logSvg;
-    createContainer(pageNum: any, width: any, height: any, parentElement: HTMLElement): HTMLDivElement;
-    createAnchor(pageNum: any): HTMLAnchorElement;
+    createContainer(pageNum: number, width: number, height: number, parentElement: HTMLElement): HTMLDivElement;
+    createAnchor(pageNum: number): HTMLAnchorElement;
 }

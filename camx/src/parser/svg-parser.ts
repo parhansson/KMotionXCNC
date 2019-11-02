@@ -21,10 +21,10 @@ export class SvgNode {
   fillOpacity: number
   strokeOpacity: number
   unsupported: boolean
-  defs:boolean = false
+  defs: boolean = false
   href: string
   text: string = null
-  fontSize :number = 1
+  fontSize: number = 1
   fontFamily: string
   fontStyle: string
   children: SvgNode[]
@@ -67,29 +67,29 @@ abstract class SVGElementWalker<T> {
 
   }
 
-  async accept(parentElement: SVGElement,parentData:T) {
+  async accept(parentElement: SVGElement, parentData: T) {
     //domNode.childNodes will not return text node
     for (let i = 0; i < parentElement.children.length; i++) {
-     const element = parentElement.children.item(i) as SVGElement
+      const element = parentElement.children.item(i) as SVGElement
 
       if (!this.elementFilter(element)) {
         continue
       }
-      const resultData = await this.onElement(element,parentData)
+      const resultData = await this.onElement(element, parentData)
       // recursive call
-      await this.accept(element,resultData)
+      await this.accept(element, resultData)
     }
   }
-  protected abstract async onElement(element: SVGElement, parentData:T):Promise<T>
+  protected abstract async onElement(element: SVGElement, parentData: T): Promise<T>
 }
 
 
 class FontService {
-  private fontMap:{[key:string]: opentype.Font} = {}
-  
-  hasFont(fontName: string):boolean{
+  private fontMap: { [key: string]: opentype.Font } = {}
+
+  hasFont(fontName: string): boolean {
     const hasFont = this.fontMap[fontName] !== undefined
-    if(!hasFont){
+    if (!hasFont) {
       console.log('Unable to load font ' + fontName)
     }
     return hasFont
@@ -98,25 +98,25 @@ class FontService {
   async getFont(fontName: string) {
     //console.log('Get font ' + fontName)
     const cachedFont = this.fontMap[fontName]
-    if(cachedFont){
+    if (cachedFont) {
       return cachedFont
-    } 
+    }
     console.log(`Loading font ${fontName}`)
     return this.loadFont(fontName).then(loadedFont => this.fontMap[fontName] = loadedFont)
   }
-  async preloadFont(fontUrl: string, fontName: string): Promise<opentype.Font>{
+  async preloadFont(fontUrl: string, fontName: string): Promise<opentype.Font> {
     return this.loadFont(fontUrl).then(loadedFont => this.fontMap[fontName] = loadedFont)
   }
-  private async loadFont(fontUrl: string): Promise<opentype.Font>{
+  private async loadFont(fontUrl: string): Promise<opentype.Font> {
     return new Promise<opentype.Font>((resolve, reject) => {
-        opentype.load(fontUrl, (err, font) => {
-          if (err) {
-            console.log(`Failed to load font ${fontUrl}`)
-            reject('Could not load font: ' + err)
-          } else {
-            resolve(font)
-          }
-        })
+      opentype.load(fontUrl, (err, font) => {
+        if (err) {
+          console.log(`Failed to load font ${fontUrl}`)
+          reject('Could not load font: ' + err)
+        } else {
+          resolve(font)
+        }
+      })
     })
   }
 }
@@ -162,7 +162,7 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
 
   private DEG_TO_RAD = Math.PI / 180
   private RAD_TO_DEG = 180 / Math.PI
-  private globalNodes: SvgNodeMap = { }
+  private globalNodes: SvgNodeMap = {}
   // output path flattened (world coords)
   // hash of path by color
   // each path is a list of subpaths
@@ -177,24 +177,24 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
     super(elementFilter)
     this.tolerance_squared = Math.pow(this.tolerance, 2)
   }
-  async parse(rootElement: SVGElement){
+  async parse(rootElement: SVGElement) {
     const result = new SvgNode()
     //result.stroke = [255, 0, 0];
     result.xformToWorld = [1, 0, 0, 1, 0, 0]
-    await this.accept(rootElement,result)
+    await this.accept(rootElement, result)
     return result
   }
-  protected async onElement(element: SVGElement, parentNode: SvgNode){
+  protected async onElement(element: SVGElement, parentNode: SvgNode) {
 
     //let node: SvgNode
     // exclude textnodes, might check for tag.nodeName ===  "#text" or tag.nodeType === 3 instead
     // but that would include to check several types
     //if (element.localName) {
-      
+
     // we are looping here through
     // all nodes with child nodes
     // others are irrelevant
-    if(element.nodeName ===  '#text'){
+    if (element.nodeName === '#text') {
       console.log(element)
     }
     // 1.) setup a new node
@@ -234,7 +234,7 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
       }
     }
 
-    
+
     // 3.) accumulate transformations
     currentNode.xformToWorld = this.matrixMult(parentNode.xformToWorld, currentNode.xform)
 
@@ -268,7 +268,7 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
       //console.log(node.href.length, node.href);
     }
     return currentNode
-   }
+  }
 
 
   /////////////////////////////
@@ -277,9 +277,9 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
 
   SVGAttributeMapping = {
 
-    'id': (node: SvgNode, val: string, element?:SVGElement) => {
+    'id': (node: SvgNode, val: string, element?: SVGElement) => {
       node.id = val
-      this.globalNodes['#'+val] = node
+      this.globalNodes['#' + val] = node
     },
 
     'transform': (node: SvgNode, val: string) => {
@@ -292,7 +292,7 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
         const paramsTemp = this.strip(kv[1]).slice(0, -1)
         const params = paramsTemp.split(/[\s,]+/).map(parseFloat)
         // double check params
-        for(const param of params) {
+        for (const param of params) {
           if (isNaN(param)) {
             console.warn('warning', 'transform skipped; contains non-numbers')
             continue  // skip this transform
@@ -424,8 +424,8 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
       node.fontSize = this.parseUnit(val) || 1
     },
     'font-family': (node: SvgNode, val: string) => {
-      if(val === 'undefined'){
-        node.fontFamily = undefined  
+      if (val === 'undefined') {
+        node.fontFamily = undefined
       } else {
         node.fontFamily = val
       }
@@ -437,7 +437,7 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
     // Presentations Attributes
     ///////////////////////////
 
-    '__parseColor': (val, currentColor) => {
+    '__parseColor': (val: string, currentColor: string) => {
 
       if (val.charAt(0) == '#') {
         if (val.length == 4) {
@@ -445,40 +445,40 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
         }
         const a = val.slice(1).match(/../g).map(
           function (i) { return parseInt(i, 16) })
-        return a
+        return a.join('')
 
       } else if (val.search(/^rgb\(/) != -1) {
         const a = val.slice(4, -1).split(',')
         for (let i = 0; i < a.length; i++) {
           const c = this.strip(a[i])
           if (c.charAt(c.length - 1) == '%') {
-            a[i] = Math.round(parseFloat(c.slice(0, -1)) * 2.55)
+            a[i] = '' + Math.round(parseFloat(c.slice(0, -1)) * 2.55)
           }
           else {
-            a[i] = parseInt(c,10)
+            a[i] = '' + parseInt(c, 10)
           }
         }
-        return a
+        return a.join('')
 
       } else if (val.search(/^rgba\(/) != -1) {
         const a = val.slice(5, -1).split(',')
         for (let i = 0; i < 3; i++) {
           const c = this.strip(a[i])
           if (c.charAt(c.length - 1) == '%') {
-            a[i] = Math.round(parseFloat(c.slice(0, -1)) * 2.55)
+            a[i] = '' + Math.round(parseFloat(c.slice(0, -1)) * 2.55)
           }
           else {
-            a[i] = parseInt(c,10)
+            a[i] = '' + parseInt(c, 10)
           }
         }
         const c = this.strip(a[3])
         if (c.charAt(c.length - 1) == '%') {
-          a[3] = Math.round(parseFloat(c.slice(0, -1)) * 0.01)
+          a[3] = '' + Math.round(parseFloat(c.slice(0, -1)) * 0.01)
         }
         else {
-          a[3] = Math.max(0, Math.min(1, parseFloat(c)))
+          a[3] = '' + Math.max(0, Math.min(1, parseFloat(c)))
         }
-        return a
+        return a.join('')
 
       } else if (val.search(/^url\(/) != -1) {
         console.error('error', 'defs are not supported at the moment')
@@ -593,7 +593,7 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
           'v', -h + ry,
           'c', '0.0', '0.0', '0.0', -ry, rx, -ry,
           'z']
-          this.addPath(d, node)
+        this.addPath(d, node)
       }
     },
 
@@ -624,7 +624,7 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
           'A', r, r, 0, 0, 0, cx, cy - r,
           'A', r, r, 0, 0, 0, cx - r, cy,
           'Z']
-          this.addPath(d, node)
+        this.addPath(d, node)
       }
     },
 
@@ -643,7 +643,7 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
           'A', rx, ry, 0, 0, 0, cx, cy - ry,
           'A', rx, ry, 0, 0, 0, cx - rx, cy,
           'Z']
-          this.addPath(d, node)
+        this.addPath(d, node)
       }
     },
 
@@ -680,10 +680,10 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
       const ns = 'http://www.w3.org/1999/xlink'
       const href = tag.getAttributeNS(ns, 'href')
       node.href = href
-      const v  = this.globalNodes[node.href]
+      const v = this.globalNodes[node.href]
 
       //node.unsupported = true;
-      console.log(node,v)
+      console.log(node, v)
       // not supported
       // has transform and style attributes
     },
@@ -692,7 +692,7 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
       //node.unsupported = true;
       const container = document.createElement('div')
       document.body.appendChild(container)
-      const shadow = container.attachShadow({mode: 'closed'})
+      const shadow = container.attachShadow({ mode: 'closed' })
       //const doc = document.implementation.createHTMLDocument(''),
       const styleElement = document.createElement('style')
 
@@ -703,14 +703,14 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
       console.log('Shadow styles', shadow.styleSheets)
       const styleSheet = shadow.styleSheets.item(0) as CSSStyleSheet
       //tslint:disable-next-line:prefer-for-of
-      for(let ruleIndex = 0; ruleIndex < styleSheet.cssRules.length; ruleIndex++){
-      //for(const ruleIndex in styleSheet.cssRules){
+      for (let ruleIndex = 0; ruleIndex < styleSheet.cssRules.length; ruleIndex++) {
+        //for(const ruleIndex in styleSheet.cssRules){
         const rule = styleSheet.cssRules.item(ruleIndex) as CSSFontFaceRule
         const style = rule.style
         const fontFamily = style.fontFamily
         //tslint:disable-next-line:no-string-literal
         const src = style['src'] as string
-        const fontBlob = src.substring(5,src.length -2)
+        const fontBlob = src.substring(5, src.length - 2)
         await this.fontService.preloadFont(fontBlob, fontFamily)
       }
       document.body.removeChild(container)
@@ -731,40 +731,40 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
       //   }
       // }
     },
-    text: async (tag: SVGTextElement, node: SvgNode)=>{
-      await this._textContent(tag,node)
+    text: async (tag: SVGTextElement, node: SvgNode) => {
+      await this._textContent(tag, node)
       // working on support
       // http://www.w3.org/TR/SVG11/struct.html#Head
       // has transform and style attributes
-      
+
     },
-    textPath: async (tag: SVGTextPathElement, node: SvgNode)=>{
-      await this._textContent(tag,node)
+    textPath: async (tag: SVGTextPathElement, node: SvgNode) => {
+      await this._textContent(tag, node)
       // working on support
       // http://www.w3.org/TR/SVG11/struct.html#Head
       // has transform and style attributes
-      
+
     },
     tspan: async (tag: SVGTSpanElement, node: SvgNode) => {
-      await this._textContent(tag,node)
+      await this._textContent(tag, node)
       // working on support
       // http://www.w3.org/TR/SVG11/struct.html#Head
       // has transform and style attributes
     }
 
   }
-  
 
-  async _textContent(tag: SVGTextContentElement, node: SvgNode){
-    if (this.renderText && node.fontFamily) {      
-      let font:opentype.Font
-      if(this.fontService.hasFont(node.fontFamily)){
+
+  async _textContent(tag: SVGTextContentElement, node: SvgNode) {
+    if (this.renderText && node.fontFamily) {
+      let font: opentype.Font
+      if (this.fontService.hasFont(node.fontFamily)) {
         font = await this.fontService.getFont(node.fontFamily)
       } else {
         console.log('Fallback to Arial')
         font = await this.fontService.getFont('/settings/arialuni.ttf')
       }
-      if(font){
+      if (font) {
         if (tag.textContent !== null) {
           const decodedText = tag.textContent
           const x = this.parseUnit(tag.getAttribute('x')) || 0
@@ -775,19 +775,19 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
           //should be done when parsing attributes and then transform is already made
           const textAnchorAttr = tag.attributes.getNamedItem('text-anchor')
           const baselineAttr = tag.attributes.getNamedItem('dominant-baseline')
-          
-          if(textAnchorAttr || baselineAttr){
+
+          if (textAnchorAttr || baselineAttr) {
             const bounds = path.getBoundingBox() as any
             let alignX = 0
             if (textAnchorAttr.nodeValue === 'middle') {
-              alignX = (bounds.x2 - bounds.x1)/2
+              alignX = (bounds.x2 - bounds.x1) / 2
             }
             if (textAnchorAttr.nodeValue === 'end') {
               alignX = (bounds.x2 - bounds.x1)
             }
             let alignY = 0
             if (baselineAttr.nodeValue === 'middle' || baselineAttr.nodeValue === 'center') {
-              alignY = (bounds.y2 - bounds.y1)/2
+              alignY = (bounds.y2 - bounds.y1) / 2
             }
             if (baselineAttr.nodeValue === 'hanging') {
               alignY = (bounds.y2 - bounds.y1)
@@ -795,7 +795,7 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
             node.xformToWorld = this.matrixMult(node.xformToWorld, [1, 0, 0, 1, -alignX, alignY])
 
           }
-          
+
           const dPath = path.toPathData(undefined)
           if (dPath.length > 0) {
             this.addPath(dPath, node)
@@ -808,7 +808,7 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
       //Logging just seems to put out unnecessary logs
       //text elements might not have text but children that do, so don't log
       //if(tag.textContent !== 'text' && tag.textContent !== null){
-        //console.log('skiptext', node, tag)
+      //console.log('skiptext', node, tag)
       //}
     }
   }
@@ -831,7 +831,7 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
       tolerance2 /= Math.pow(totalMaxScale, 2)
       // console.info('notice', "tolerance2: " + tolerance2.toString());
     }
-    
+
     let d: PathDValue[] = []
     //let d: DPath
     if (typeof dObject === 'string') {
@@ -842,7 +842,7 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
         if (isNaN(num)) {
           d.push(val)
         } else {
-          d.push(num)          
+          d.push(num)
         }
       }
     } else {
@@ -866,8 +866,8 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
     let x = 0
     let y = 0
     let cmdPrev = ''
-    let xPrevCp
-    let yPrevCp
+    let xPrevCp: number
+    let yPrevCp: number
     let subpath: Subpath = []
 
     while (d.length > 0) {
@@ -1151,7 +1151,7 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
   }
 
 
-  addCubicBezier(subpath: Point[], x1, y1, x2, y2, x3, y3, x4, y4, level, tolerance2) {
+  addCubicBezier(subpath: Point[], x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, x4: number, y4: number, level: number, tolerance2: number) {
     // for details see:
     // http://www.antigrain.com/research/adaptive_bezier/index.html
     // based on DeCasteljau Algorithm
@@ -1199,7 +1199,7 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
   }
 
 
-  addQuadraticBezier(subpath: Point[], x1, y1, x2, y2, x3, y3, level, tolerance2) {
+  addQuadraticBezier(subpath: Point[], x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, level: number, tolerance2: number) {
     if (level > 18) {
       // protect from deep recursion cases
       // max 2**18 = 262144 segments
@@ -1230,7 +1230,7 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
   }
 
 
-  addArc(subpath: Point[], x1: number, y1: number, rx: number, ry: number, phi: number, large_arc, sweep, x2: number, y2: number, tolerance2: number) {
+  addArc(subpath: Point[], x1: number, y1: number, rx: number, ry: number, phi: number, large_arc: number, sweep: number, x2: number, y2: number, tolerance2: number) {
     // Implemented based on the SVG implementation notes
     // plus some recursive sugar for incrementally refining the
     // arc resolution until the requested tolerance is met.
@@ -1274,7 +1274,7 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
 
     // let the recursive fun begin
     //
-    function recursiveArc(parser:SvgParser, t1: number, t2: number, c1: Point, c5: Point, level: number, tolerance2: number) {
+    function recursiveArc(parser: SvgParser, t1: number, t2: number, c1: Point, c5: Point, level: number, tolerance2: number) {
       if (level > 18) {
         // protect from deep recursion cases
         // max 2**18 = 262144 segments
@@ -1357,11 +1357,11 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
   }
 
 
-  vertexDistanceSquared(v1:Point, v2:Point) {
+  vertexDistanceSquared(v1: Point, v2: Point) {
     return Math.pow(v2[0] - v1[0], 2) + Math.pow(v2[1] - v1[1], 2)
   }
 
-  vertexMiddle(v1:Point, v2:Point):Point {
+  vertexMiddle(v1: Point, v2: Point): Point {
     return [(v2[0] + v1[0]) / 2.0, (v2[1] + v1[1]) / 2.0]
   }
 
