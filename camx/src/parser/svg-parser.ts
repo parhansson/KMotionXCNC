@@ -1,4 +1,5 @@
 import * as opentype from 'opentype.js'
+import { FontLoaderService } from '../util'
 
 type ElementFilter = (element: SVGElement) => boolean
 type Matrix = [number, number, number, number, number, number]
@@ -83,43 +84,6 @@ abstract class SVGElementWalker<T> {
   protected abstract async onElement(element: SVGElement, parentData: T): Promise<T>
 }
 
-
-class FontService {
-  private fontMap: { [key: string]: opentype.Font } = {}
-
-  hasFont(fontName: string): boolean {
-    const hasFont = this.fontMap[fontName] !== undefined
-    if (!hasFont) {
-      console.log('Unable to load font ' + fontName)
-    }
-    return hasFont
-  }
-
-  async getFont(fontName: string) {
-    //console.log('Get font ' + fontName)
-    const cachedFont = this.fontMap[fontName]
-    if (cachedFont) {
-      return cachedFont
-    }
-    console.log(`Loading font ${fontName}`)
-    return this.loadFont(fontName).then(loadedFont => this.fontMap[fontName] = loadedFont)
-  }
-  async preloadFont(fontUrl: string, fontName: string): Promise<opentype.Font> {
-    return this.loadFont(fontUrl).then(loadedFont => this.fontMap[fontName] = loadedFont)
-  }
-  private async loadFont(fontUrl: string): Promise<opentype.Font> {
-    return new Promise<opentype.Font>((resolve, reject) => {
-      opentype.load(fontUrl, (err, font) => {
-        if (err) {
-          console.log(`Failed to load font ${fontUrl}`)
-          reject('Could not load font: ' + err)
-        } else {
-          resolve(font)
-        }
-      })
-    })
-  }
-}
 /**
  * SVG parser for the Lasersaur.
  * Converts SVG DOM to a flat collection of paths.
@@ -158,7 +122,7 @@ class FontService {
  */
 export class SvgParser extends SVGElementWalker<SvgNode> {
 
-  private fontService = new FontService()
+  private fontService = new FontLoaderService()
 
   private DEG_TO_RAD = Math.PI / 180
   private RAD_TO_DEG = 180 / Math.PI
@@ -778,7 +742,7 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
           const baselineAttr = tag.attributes.getNamedItem('dominant-baseline')
 
           if (textAnchorAttr || baselineAttr) {
-            const bounds = path.getBoundingBox() as any
+            const bounds = path.getBoundingBox()
             let alignX = 0
             if (textAnchorAttr.nodeValue === 'middle') {
               alignX = (bounds.x2 - bounds.x1) / 2
@@ -787,6 +751,7 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
               alignX = (bounds.x2 - bounds.x1)
             }
             let alignY = 0
+            //TODO middle or center?? need to check this
             if (baselineAttr.nodeValue === 'middle' || baselineAttr.nodeValue === 'center') {
               alignY = (bounds.y2 - bounds.y1) / 2
             }

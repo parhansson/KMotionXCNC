@@ -7,7 +7,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import * as opentype from 'opentype.js';
+import { FontLoaderService } from '../util';
 export class SvgNode {
     constructor() {
         this.xformToWorld = [1, 0, 0, 1, 0, 0]; //2d Transformation vector
@@ -63,49 +63,6 @@ class SVGElementWalker {
         });
     }
 }
-class FontService {
-    constructor() {
-        this.fontMap = {};
-    }
-    hasFont(fontName) {
-        const hasFont = this.fontMap[fontName] !== undefined;
-        if (!hasFont) {
-            console.log('Unable to load font ' + fontName);
-        }
-        return hasFont;
-    }
-    getFont(fontName) {
-        return __awaiter(this, void 0, void 0, function* () {
-            //console.log('Get font ' + fontName)
-            const cachedFont = this.fontMap[fontName];
-            if (cachedFont) {
-                return cachedFont;
-            }
-            console.log(`Loading font ${fontName}`);
-            return this.loadFont(fontName).then(loadedFont => this.fontMap[fontName] = loadedFont);
-        });
-    }
-    preloadFont(fontUrl, fontName) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return this.loadFont(fontUrl).then(loadedFont => this.fontMap[fontName] = loadedFont);
-        });
-    }
-    loadFont(fontUrl) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return new Promise((resolve, reject) => {
-                opentype.load(fontUrl, (err, font) => {
-                    if (err) {
-                        console.log(`Failed to load font ${fontUrl}`);
-                        reject('Could not load font: ' + err);
-                    }
-                    else {
-                        resolve(font);
-                    }
-                });
-            });
-        });
-    }
-}
 /**
  * SVG parser for the Lasersaur.
  * Converts SVG DOM to a flat collection of paths.
@@ -146,7 +103,7 @@ export class SvgParser extends SVGElementWalker {
     constructor(elementFilter, renderText) {
         super(elementFilter);
         this.renderText = renderText;
-        this.fontService = new FontService();
+        this.fontService = new FontLoaderService();
         this.DEG_TO_RAD = Math.PI / 180;
         this.RAD_TO_DEG = 180 / Math.PI;
         this.globalNodes = {};
@@ -732,6 +689,7 @@ export class SvgParser extends SVGElementWalker {
                                 alignX = (bounds.x2 - bounds.x1);
                             }
                             let alignY = 0;
+                            //TODO middle or center?? need to check this
                             if (baselineAttr.nodeValue === 'middle' || baselineAttr.nodeValue === 'center') {
                                 alignY = (bounds.y2 - bounds.y1) / 2;
                             }

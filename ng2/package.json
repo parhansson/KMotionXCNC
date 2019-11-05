@@ -34,7 +34,6 @@
     "font-awesome": "^4.7.0",
     "intl": "^1.2.5",
     "ngx-bootstrap": "^5.2.0",
-    "opentype.js": "^1.1.0",
     "rxjs": "^6.3.3",
     "three": "^0.109.0",
     "zone.js": "0.9.1"
@@ -43,7 +42,6 @@
     "@angular/cli": "^8.3.13",
     "@angular/compiler-cli": "^8.2.11",
     "@angular/language-service": "^8.2.11",
-    "@types/opentype.js": "^0.7.2",
     "angular2-template-loader": "^0.6.2",
     "base-href-webpack-plugin": "^2.0.0",
     "codelyzer": "^5.2.0",
