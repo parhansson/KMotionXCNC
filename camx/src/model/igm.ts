@@ -384,7 +384,7 @@ export class IGMDriver {
     }
     return joined
   }
-  pointEquals(v1: GCodeVector, v2: GCodeVector, fractionalDigits: number) {
+  pointEquals(v1: Vector2, v2: Vector2, fractionalDigits: number) {
     //TODO use distanceSquared and compare with toleranceSquared instead
     return (
       v1.x.toFixed(fractionalDigits) === v2.x.toFixed(fractionalDigits) &&

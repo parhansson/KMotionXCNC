@@ -69,7 +69,7 @@ export declare class IGMDriver {
      * @param fractionalDigits
      */
     joinAdjacent(paths: IgmObject[], fractionalDigits: number): number;
-    pointEquals(v1: GCodeVector, v2: GCodeVector, fractionalDigits: number): boolean;
+    pointEquals(v1: Vector2, v2: Vector2, fractionalDigits: number): boolean;
     orderNearestNeighbour(paths: IgmObject[], reversePaths: boolean): void;
     private nearest;
 }

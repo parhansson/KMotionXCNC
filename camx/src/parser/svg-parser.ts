@@ -769,10 +769,11 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
           const decodedText = tag.textContent
           const x = this.parseUnit(tag.getAttribute('x')) || 0
           const y = this.parseUnit(tag.getAttribute('y')) || 0
-          const path = font.getPath(decodedText, x, y, node.fontSize, { kerning: true })
+          const path = font.getPath(decodedText, x, y, node.fontSize)
 
           //Monkey patch for text-anchor and baseline attribute
           //should be done when parsing attributes and then transform is already made
+          //check Font.getAdvanceWidth as complement to boundingbox
           const textAnchorAttr = tag.attributes.getNamedItem('text-anchor')
           const baselineAttr = tag.attributes.getNamedItem('dominant-baseline')
 

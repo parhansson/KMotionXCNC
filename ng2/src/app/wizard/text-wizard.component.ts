@@ -28,14 +28,14 @@ export class TextWizardComponent {
   }
 
   render() {
-
-    const path = this.font.getPath(this.text, 0, 0, this.fontSize, { kerning: true })
+    const path = this.font.getPath(this.text, 0, 0, this.fontSize)
     const dPath = path.toPathData(undefined)
 
     const svg = this.toSVG(path.toSVG(undefined))
 
     this.previewContainer.render(svg)
   }
+  
 
   toSVG(path: string) {
     
