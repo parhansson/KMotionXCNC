@@ -1,6 +1,59 @@
 
 import { FontLoaderService } from '../util'
+import { ModelGenerator } from './model-generator'
+import { GeneratorInput } from './generator-input'
 
+export interface TextPathGeneratorInput {
+  fontName: string
+  fontSize: number
+  text: string
+
+}
+
+export class TextPathGenerator implements ModelGenerator<TextPathGeneratorInput> {
+  requiredInput() {
+    const inputs: Array<GeneratorInput<TextPathGeneratorInput>> = [
+      {
+        controlType: 'selection',
+        type: 'text',
+        name: 'fontName',
+        label: 'Font',
+        options: [
+          { key: '/settings/arial.ttf', value: 'Arial' },
+          { key: 'unknown', value: 'Unknown' },
+        ],
+        value: '/settings/arial.ttf',
+        required: true,
+        order: 3
+      }, {
+        controlType: 'text',
+        type: 'number',
+        name: 'fontSize',
+        label: 'Font size',
+        append: 'pt',
+        value: 12,
+        required: true,
+        order: 1
+      }, {
+        controlType: 'text',
+        type: 'text',
+        name: 'text',
+        label: 'Text to render',
+        placeholder: 'Enter text',
+        required: true,
+        order: 1
+      }
+
+    ]
+    return inputs
+  }
+  generate(values: TextPathGeneratorInput) {
+    return Promise.reject(new Error('Method not implemented.'))
+  }
+  generateSVG(values: TextPathGeneratorInput) {
+    return getTextSVG(values.text, values.fontName, values.fontSize)
+  }
+}
 export async function getTextSVG(text: string,
   fontName: string,
   fontSize: number = 12): Promise<string> {

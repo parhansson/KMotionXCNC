@@ -8,6 +8,49 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { FontLoaderService } from '../util';
+export class TextPathGenerator {
+    requiredInput() {
+        const inputs = [
+            {
+                controlType: 'selection',
+                type: 'text',
+                name: 'fontName',
+                label: 'Font',
+                options: [
+                    { key: '/settings/arial.ttf', value: 'Arial' },
+                    { key: 'unknown', value: 'Unknown' },
+                ],
+                value: '/settings/arial.ttf',
+                required: true,
+                order: 3
+            }, {
+                controlType: 'text',
+                type: 'number',
+                name: 'fontSize',
+                label: 'Font size',
+                append: 'pt',
+                value: 12,
+                required: true,
+                order: 1
+            }, {
+                controlType: 'text',
+                type: 'text',
+                name: 'text',
+                label: 'Text to render',
+                placeholder: 'Enter text',
+                required: true,
+                order: 1
+            }
+        ];
+        return inputs;
+    }
+    generate(values) {
+        return Promise.reject(new Error('Method not implemented.'));
+    }
+    generateSVG(values) {
+        return getTextSVG(values.text, values.fontName, values.fontSize);
+    }
+}
 export function getTextSVG(text, fontName, fontSize = 12) {
     return __awaiter(this, void 0, void 0, function* () {
         const fontLoader = new FontLoaderService();

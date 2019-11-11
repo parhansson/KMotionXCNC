@@ -1,18 +1,121 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 import { IGM, IGMDriver } from '../model/igm';
 export class MitreBox {
-    constructor(width, height, depth, materialThickness) {
-        this.width = width;
-        this.height = height;
-        this.depth = depth;
-        this.materialThickness = materialThickness;
+    constructor() {
     }
-    generate() {
+    requiredInput() {
+        const inputs = [
+            {
+                type: 'number',
+                controlType: 'text',
+                name: 'materialThickness',
+                label: 'Material thickness',
+                placeholder: 'Material thickness',
+                append: 'mm',
+                value: 4,
+                required: true,
+                min: 1,
+                order: 4
+            },
+            {
+                type: 'number',
+                controlType: 'text',
+                name: 'depth',
+                label: 'Box depth',
+                append: 'mm',
+                value: 50,
+                required: true,
+                min: 1,
+                order: 3
+            }, {
+                type: 'number',
+                controlType: 'text',
+                name: 'width',
+                label: 'Width',
+                append: 'mm',
+                value: 70,
+                required: true,
+                min: 1,
+                order: 1
+            }, {
+                type: 'number',
+                controlType: 'text',
+                name: 'height',
+                label: 'Height',
+                append: 'mm',
+                value: 60,
+                required: true,
+                min: 1,
+                order: 2
+            }, {
+                type: 'checkbox',
+                controlType: 'bool',
+                name: 'lid',
+                label: 'Create lid',
+                value: true,
+                order: 4
+            },
+        ];
+        return inputs;
+    }
+    generateSVG(values) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return Promise.resolve(this.toSVG(yield this.generate(values)));
+        });
+    }
+    toSVG(model) {
+        let svg = '';
+        const res = 1;
+        const driver = new IGMDriver(model);
+        const paths = driver.allObjectsFlat;
+        IGMDriver.updateBounds(paths);
+        const bounds = driver.getMaxBounds(paths);
+        const w = bounds.x2;
+        const h = bounds.y2;
+        const dpi = 72; //output DPI
+        const dpiScale = dpi / 25.4; // assuming input model in mm not in inches
+        svg += '<?xml version="1.0" standalone="no"?>\r\n';
+        svg += '<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">\r\n';
+        svg += '<svg width="' + w / res + 'mm" height="' + h / res + 'mm" viewBox="0 0 ' + w * dpiScale + ' ' + h * dpiScale + '" xmlns="http://www.w3.org/2000/svg" version="1.1">\r\n';
+        for (const part of driver.allObjectsFlat) {
+            //TODO rescaling after calculating bounds???
+            IGMDriver.scale(part, dpiScale);
+            const points = [];
+            let first = true;
+            for (const vec of part.vectors) {
+                if (first) {
+                    first = false;
+                    points.push('M');
+                    points.push(vec.x);
+                    points.push(vec.y);
+                    points.push('L');
+                }
+                else {
+                    points.push(vec.x);
+                    points.push(vec.y);
+                }
+            }
+            svg += `<path d="${points.join(' ')} Z" fill="steelblue" vector-effect="non-scaling-stroke" stroke="black" stroke-width="0.2" />\r\n`;
+        }
+        svg += ('</svg>\r\n');
+        return svg;
+    }
+    generate(values) {
         /* Box dimensions (int 1 of a mm, and how many mitres to have, divided by two */
-        const w = this.width;
-        const h = this.height;
-        const d = this.depth;
+        const w = values.width;
+        const h = values.height;
+        const d = values.depth;
+        const lid = values.lid;
         /* Thickness for the material (depth of the mitres) in 1 of a mm */
-        const thick = this.materialThickness;
+        const thick = values.materialThickness;
         /* How big the corner mitres are, in 1 of a mm
           default is thickness of material times 4
         */
@@ -36,7 +139,6 @@ export class MitreBox {
         //this.MitrePanel(frame + w + frame + d / 2, frame + h / 2, d, h, corner, div_d, div_h, thick, 1, 0);
         //this.MitrePanel(frame + w / 2, frame + h + frame + d / 2, w, d, corner, div_w, div_d, thick, 1, 1);
         this.StartDoc(frame + w + d, frame + h + d);
-        const lid = false;
         if (lid) {
             const options = { mitreTop: true, mitreRight: true, mitreBottom: true, mitreLeft: true };
             this.MitrePanel(w / 2, h / 2, w, h, corner, div_w, div_h, thick, false, false, options);
@@ -56,7 +158,7 @@ export class MitreBox {
         const igm = new IGM();
         const driver = new IGMDriver(igm);
         driver.addToLayerObject('', this.models);
-        return igm;
+        return Promise.resolve(igm);
     }
     MitrePanel(x, y, w, h, corner_size, div_x, div_y, thick, invertX, invertY, options) {
         let a, b, i, d, half_cut;

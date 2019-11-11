@@ -25,6 +25,7 @@ import { SettingsModule, SettingsService } from './settings'
 import { DebugModule } from './debug'
 import { LaserModule } from './laser'
 import { CustomReuseStrategy1 as CustomReuseStrategy } from './route-reuse.strategy'
+import { DynamicFormModule } from './form/dynamic-form.module'
 @NgModule({
   imports: [
     BrowserModule,
@@ -32,7 +33,7 @@ import { CustomReuseStrategy1 as CustomReuseStrategy } from './route-reuse.strat
     TabsModule.forRoot(),
     BsDropdownModule.forRoot(),
     FormsModule,
-
+    DynamicFormModule,
     SharedModule,
     DebugModule,
     ResourceModule,

@@ -4,20 +4,20 @@
       <laser-ppi-calculator></laser-ppi-calculator>
     </tab>
     <tab heading="Mitre box wizard">
-      <mitre-box-wizard></mitre-box-wizard>
+      <generator-wizard [generator]="mitreBoxGenerator" [header]="'Mitre box parameters'"></generator-wizard>
     </tab>
     <tab heading="Text wizard">
-      <text-wizard></text-wizard>
-    </tab>   
+      <generator-wizard [generator]="textPathGenerator" [header]="'Generate text path'"></generator-wizard>
+    </tab>
     <tab heading="Jigsaw wizard">
-      <jigsaw-wizard></jigsaw-wizard>
-    </tab>    
+      <generator-wizard [generator]="jigsawGenerator" [header]="'Puzzle parameters'"></generator-wizard>
+    </tab>
     <tab heading="Pattern wizard">
-        <pattern-wizard></pattern-wizard>
+      <generator-wizard [generator]="patternGenerator" [header]="'Pattern parameters'"></generator-wizard>
     </tab>
     <tab heading="Cipher wheel wizard">
-      <cipher-wheel-wizard></cipher-wheel-wizard>
-    </tab>               
+      <generator-wizard [generator]="chipherWheelGenerator" [header]="'Chipher parameters'"></generator-wizard>
+    </tab>
     <tab heading="Material settings">
       <material-settings></material-settings>
     </tab>

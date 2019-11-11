@@ -1,0 +1,55 @@
+<div [ngSwitch]="input.controlType">
+
+  <div *ngSwitchCase="'text'">
+    <div [formGroup]="form" class="form-group">
+      <label [attr.for]="input.name">{{input.label}}</label>
+      <div [ngClass]="{ 'input-group': input.prepend || input.append }">
+        <div *ngIf="input.prepend" class="input-group-prepend">
+          <span class="input-group-text">{{input.prepend}}</span>
+        </div>
+        <input [id]="input.name" class="form-control" [type]="input.type" [min]="input.min" [max]="input.max"
+          [placeholder]="input.placeholder" [formControlName]="input.name"
+          [ngClass]="{ 'is-invalid': submitted && c.errors }" />
+
+        <div *ngIf="input.append" class="input-group-append">
+          <span class="input-group-text">{{input.append}}</span>
+        </div>
+        <div *ngIf="submitted && c.errors" class="invalid-feedback">
+          <div *ngIf="c.errors.required">{{input.label}} is required</div>
+          <div *ngIf="c.errors.minlength">{{input.label}} must be at least {{input.minlength}} characters</div>
+          <div *ngIf="c.errors.maxlength">{{input.label}} can be at most {{input.maxlength}} characters</div>
+          <div *ngIf="c.errors.email">{{input.label}} must be a valid email address</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngSwitchCase="'selection'">
+    <div [formGroup]="form" class="form-group">
+      <label [attr.for]="input.name">{{input.label}}</label>
+      <div class="input-group">
+        <div *ngIf="input.prepend" class="input-group-prepend">
+          <span class="input-group-text">{{input.prepend}}</span>
+        </div>
+        <select [id]="input.name" class="form-control" [formControlName]="input.name"
+          [ngClass]="{ 'is-invalid': submitted && c.errors }">
+          <option *ngFor="let opt of input.options" [value]="opt.key">{{opt.value}}</option>
+        </select>
+        <div *ngIf="input.append" class="input-group-append">
+          <span class="input-group-text">{{input.append}}</span>
+        </div>
+        <div *ngIf="submitted && c.errors" class="invalid-feedback">
+          <div *ngIf="c.errors.required">{{input.label}} is required</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div *ngSwitchCase="'bool'">
+    <div [formGroup]="form" class="form-group form-check">
+      <input type="checkbox" [formControlName]="input.name" [id]="input.name" class="form-check-input"
+        [ngClass]="{ 'is-invalid': submitted && c.errors }" />
+      <label [attr.for]="input.name">{{input.label}}</label>
+      <div *ngIf="submitted && c.errors" class="invalid-feedback">{{input.label}} is required</div>
+    </div>
+  </div>
+</div>

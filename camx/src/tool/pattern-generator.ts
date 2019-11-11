@@ -1,44 +1,66 @@
-import { Component, Inject, Input, Output, ViewChild, ElementRef } from '@angular/core'
-import { IGM, IgmObject, IGMDriver } from 'camx'
-import { SvgPreviewComponent } from './svg-preview.component'
+import { ModelGenerator } from './model-generator'
 
+import { GeneratorInput } from './generator-input'
 
-@Component({
-  selector: 'pattern-wizard',
-  template: `
-<div>
-  <div class="form-group">
-      <label>Size</label>
-      <div class="input-group">
-        <input class="form-control" [(ngModel)]="rows" type="number" min=1 max=1000 placeholder="Box depth Z">
-        <span class="input-group-addon">pt</span>
-      </div>
+import { IGMDriver, IGM } from '../model'
 
-  </div>
-  <div class="form-group">
-      <label>Size</label>
-      <div class="input-group">
-        <input class="form-control" [(ngModel)]="columns" type="number" min=1 max=1000 placeholder="Box depth Z">
-        <span class="input-group-addon">pt</span>
-      </div>
-  </div>
-  <button (click)="render()">Create</button>
-    <svg-preview></svg-preview>
-</div>
-  `
-})
-export class PatternWizardComponent {
+export interface PatternGeneratorInput {
+  rows: number
+  columns: number
+  rowSpacing: number
+  colSpacing: number
 
-  @ViewChild(SvgPreviewComponent, { static: false })
-  private previewContainer: SvgPreviewComponent
+}
 
-  rows: number = 2
-  columns: number = 4
-  rowSpacing: number = 2
-  colSpacing: number = 2
-
+export class PatternGenerator implements ModelGenerator<PatternGeneratorInput> {
   constructor() {
 
+  }
+
+  requiredInput() {
+    const inputs: Array<GeneratorInput<PatternGeneratorInput>> = [
+      {
+        controlType: 'text',
+        type: 'number',
+        name: 'rows',
+        label: 'Rows',
+        value: 2,
+        required: true,
+        min: 1,
+        order: 4
+      },
+      {
+        controlType: 'text',
+        type: 'number',
+        name: 'columns',
+        label: 'Columns',
+        value: 4,
+        required: true,
+        min: 1,
+        order: 3
+      },
+      {
+        controlType: 'text',
+        type: 'number',
+        name: 'rowSpacing',
+        label: 'Row spacing',
+        value: 2,
+        required: true,
+        min: 1,
+        order: 1
+      },
+      {
+        controlType: 'text',
+        type: 'number',
+        name: 'colSpacing',
+        label: 'Column spacing',
+        value: 2,
+        required: true,
+        min: 1,
+        order: 2
+      }
+    ]
+    return inputs
   }
   private rect(width, height) {
     const shape = IGMDriver.newIgmObject()
@@ -50,7 +72,13 @@ export class PatternWizardComponent {
     return shape
   }
 
-  render() {
+
+  async generateSVG(values:PatternGeneratorInput) {
+    return this.toSVG(await this.generate(values))
+  }
+
+
+  async generate(values:PatternGeneratorInput) {
     /*
 G90
 G21
@@ -91,15 +119,14 @@ M2
     const width = shape.bounds.width()
     const height = shape.bounds.height()
 
-    for (let row = 0; row < this.rows; row++) {
-      for (let col = 0; col < this.columns; col++) {
-        const translate = IGMDriver.newGCodeVector(col * (width + this.colSpacing), row * (height + this.rowSpacing))
+    for (let row = 0; row < values.rows; row++) {
+      for (let col = 0; col < values.columns; col++) {
+        const translate = IGMDriver.newGCodeVector(col * (width + values.colSpacing), row * (height + values.rowSpacing))
         driver.addToLayerObject('one', IGMDriver.translate(IGMDriver.clone(shape), translate))
         driver.addToLayerObject('one', IGMDriver.translate(IGMDriver.clone(shape2), translate))
       }
     }
-    const svg = this.toSVG(igm)
-    this.previewContainer.render(svg)
+    return igm
   }
 
   toSVG(model: IGM) {
@@ -122,10 +149,10 @@ M2
     for (const part of driver.allObjectsFlat) {
       //TODO rescaling after calculating bounds???
       IGMDriver.scale(part, dpiScale)
-      const points: Array<string|number> = []
+      const points: Array<string | number> = []
       let first = true
       for (const vec of part.vectors) {
-        if(first) {
+        if (first) {
           first = false
           points.push('M')
           points.push(vec.x)
@@ -141,6 +168,6 @@ M2
     }
 
     svg += ('</svg>\r\n')
-    return svg
+    return Promise.resolve(svg)
   }
 }

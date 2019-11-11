@@ -1,7 +1,8 @@
-import { Component, Inject, Input, Output, ViewChild, ElementRef } from '@angular/core'
-//import { toPath, toPoints } from 'svg-catmull-rom-spline'
-import { SvgPreviewComponent } from './svg-preview.component'
+import { ModelGenerator } from './model-generator'
+import { GeneratorInput } from './generator-input'
+import { IGM } from '../model/igm'
 
+//import { toPath, toPoints } from 'svg-catmull-rom-spline'
 
 /**
  * Convert 'points' to catmull rom bezier spline
@@ -47,7 +48,7 @@ function toSplinePoints(points: Edge) {
  * @param {Number} end
  * @returns {Array}
  */
-function slice(points: number[][], start, end) {
+function slice(points: number[][], start: number, end: number) {
   const pts = points.slice(start, end)
 
   // Remove control points for 'M'
@@ -62,14 +63,14 @@ function slice(points: number[][], start, end) {
  * @param {Array} points
  * @returns {String}
  */
-function svgPath(points) {
+function svgPath(points: number[][]) {
   let p = ''
 
   let i = 0
   for (const point of points) {
-    if(i == 1){
+    if (i == 1) {
       p += ` C${point[0]}, ${point[1]}, ${point[2]}, ${point[3]}, ${point[4]}, ${point[5]}`
-    } else if( i > 1){
+    } else if (i > 1) {
       p += ` S${point[2]}, ${point[3]}, ${point[4]}, ${point[5]}`
     }
     i++
@@ -104,40 +105,149 @@ const templateOffsets: EdgeShapeOffsets[] = [
       yMin: 16,
       yMax: 30
     }
+  }, {
+    name: 'extreme',
+    baselineOffsets: {
+      xMin: 30,
+      xMax: 48,
+      yMin: -10,
+      yMax: 10
+    },
+    upperOffsets: {
+      xMin: 25,
+      xMax: 45,
+      yMin: 11,
+      yMax: 35
+    }
   }
 ]
 type Point = [number, number]
 type Edge = Point[]
 type Piece = Edge[]
 type LineGroup = Point[][]
-@Component({
-  selector: 'jigsaw-wizard',
-  templateUrl: './jigsaw-wizard.component.html'
-})
-export class JigsawWizardComponent {
-  constructor() {
+export interface JigsawGeneratorInput {
+  rows: number
+  columns: number
+  showControlPoints: boolean
+  width: number
+  height: number
+  shapeOffsetName: string
+}
+export class JigsawGenerator implements ModelGenerator<JigsawGeneratorInput> {
+
+  private rows: number = 3
+  private columns: number = 3
+  private showControlPoints = false
+  private width = 500 //450
+  private height = 500 //450
+  private shapeOffsetName = 'default'
+
+  constructor(
+  ) {
   }
 
-  @ViewChild(SvgPreviewComponent, { static: false })
-  private previewContainer: SvgPreviewComponent
+  private setValues(values: any) {
 
-  showControlPoints = true
-  rows: number = 3
-  columns: number = 3
-  width = 500 //450
-  height = 500 //450
-  shapeOffsetName = 'default'
-
-  render() {
-    const svg = this.generate()
-    this.previewContainer.render(svg)
+    this.rows = values.rows
+    this.columns = values.columns
+    this.showControlPoints = values.showControlPoints
+    this.width = values.width
+    this.height = values.height
+    this.shapeOffsetName = values.shapeOffsetName
   }
+  requiredInput() {
+    const inputs: Array<GeneratorInput<JigsawGeneratorInput>> = [
+      {
+        type: 'text',
+        controlType: 'selection',
+        name: 'shapeOffsetName',
+        label: 'Shape',
+        options: [
+          { key: 'default', value: 'Standard' },
+          { key: 'extreme', value: 'Extreme' },
+        ],
+        value: 'default',
+        required: true,
+        order: 3
+      }, {
+        type: 'number',
+        controlType: 'text',
+        name: 'rows',
+        label: 'Rows',
+        value: 6,
+        required: true,
+        order: 1
+      }, {
+        type: 'number',
+        controlType: 'text',
+        name: 'columns',
+        label: 'Columns',
+        value: 6,
+        required: true,
+        order: 1
+      }, {
+        type: 'number',
+        controlType: 'text',
+        name: 'width',
+        label: 'Width',
+        value: 500,
+        required: true,
+        order: 1
+      }, {
+        type: 'number',
+        controlType: 'text',
+        name: 'height',
+        label: 'Height',
+        value: 500,
+        required: true,
+        order: 1
+      }, {
+        type: 'checkbox',
+        controlType: 'bool',
+        name: 'showControlPoints',
+        label: 'Show control points',
+        order: 2
+      }
+    ]
+    return inputs
+  }
+  generate(values: any) {
+    this.setValues(values)
+    return Promise.reject(new Error('Method not implemented.'))
+  }
+
+
+  generateSVG(values: any) {
+    this.setValues(values)
+    const rowCount = this.rows
+    const columnCount = this.columns
+    const pieces = this.buildPieces(rowCount, columnCount)
+
+    const piecePaths = this.buildPiecePaths(pieces).join('\n')
+    let controlPoints
+    if (this.showControlPoints) {
+      controlPoints = this.buildpoints(pieces).join('\n')
+    } else {
+      controlPoints = []
+    }
+    const svgNode = [
+      this.svg.openTag,
+      this.svg.styletag,
+      piecePaths,
+      controlPoints,
+      this.svg.closeTag
+    ].join('')
+
+    return Promise.resolve(svgNode)
+
+  }
+
   // Returns 6 points representing the shape of one edge of a puzzle piece.
   // Point coordinates are expressed as percentage distances across the width
   // and height of the piece.
   private edgeDistributions(): Point[] {
 
-    const randomBetween = (min, max) => {
+    const randomBetween = (min: number, max: number) => {
       return Math.random() * (max - min) + min
     }
     const offset = templateOffsets.find(o => o.name === this.shapeOffsetName)
@@ -176,12 +286,12 @@ export class JigsawWizardComponent {
     const result: Point[] = [point1, point2, point3, midpoint, point4, point5, point6].map((p) => {
       return [p[0] / 100, p[1] * sign / 100] as Point
     })
-    
+
     return result
   }
   // Builds an m + 1 x n matrix of edge shapes. The first and last rows
   // are straight edges.
-  private buildDistributions(m, n): LineGroup[] {
+  private buildDistributions(m: number, n: number): LineGroup[] {
     const lineGroups: LineGroup[] = []
     let lines: Point[][] = []
     for (let j = 0; j < n; j++) {
@@ -208,7 +318,7 @@ export class JigsawWizardComponent {
   }
 
   private offsetPoint(point: Point, columnIndex: number, rowIndex: number, columnWidth: number, rowHeight: number): Point {
-    const offsetPosition = (percent, length, index) => {
+    const offsetPosition = (percent: number, length: number, index: number) => {
       const offset = length * index
       return percent * length + offset
     }
@@ -226,7 +336,7 @@ export class JigsawWizardComponent {
       }
     }
   }
-  private buildPieces(rowCount, columnCount): Piece[] {
+  private buildPieces(rowCount: number, columnCount: number): Piece[] {
     const rowHeight = this.height / rowCount
     const columnWidth = this.width / columnCount
     const pieces = []
@@ -330,33 +440,11 @@ export class JigsawWizardComponent {
 
       </style>`,
     closeTag: '</svg>',
-    path: (pathData) => `<path stroke="black" vector-effect="non-scaling-stroke" d="${pathData}"/>`,
+    path: (pathData: string) => `<path stroke="black" vector-effect="non-scaling-stroke" d="${pathData}"/>`,
     circle: (point: Point) => `<circle class="EndPoint" cx="${point[0]}" cy="${point[1]}" r="5" />`
   }
 
-  private generate() {
-    const rowCount = this.rows
-    const columnCount = this.columns
-    const pieces = this.buildPieces(rowCount, columnCount)
 
-    const piecePaths = this.buildPiecePaths(pieces).join('\n')
-    let controlPoints
-    if (this.showControlPoints) {
-      controlPoints = this.buildpoints(pieces).join('\n')
-    } else {
-      controlPoints = []
-    }
-    const svgNode = [
-      this.svg.openTag,
-      this.svg.styletag,
-      piecePaths,
-      controlPoints,
-      this.svg.closeTag
-    ].join('')
-
-    return svgNode
-
-  }
 
 
 
