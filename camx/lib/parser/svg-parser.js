@@ -522,12 +522,15 @@ export class SvgParser extends SVGElementWalker {
                 for (let ruleIndex = 0; ruleIndex < styleSheet.cssRules.length; ruleIndex++) {
                     //for(const ruleIndex in styleSheet.cssRules){
                     const rule = styleSheet.cssRules.item(ruleIndex);
-                    const style = rule.style;
-                    const fontFamily = style.fontFamily;
-                    //tslint:disable-next-line:no-string-literal
-                    const src = style['src'];
-                    const fontBlob = src.substring(5, src.length - 2);
-                    yield this.fontService.preloadFont(fontBlob, fontFamily);
+                    if (rule.type == CSSRule.FONT_FACE_RULE) {
+                        const fontFaceRule = styleSheet.cssRules.item(ruleIndex);
+                        const style = fontFaceRule.style;
+                        const fontFamily = style.fontFamily;
+                        //tslint:disable-next-line:no-string-literal
+                        const src = style['src'];
+                        const fontBlob = src.substring(5, src.length - 2);
+                        yield this.fontService.preloadFont(fontBlob, fontFamily);
+                    }
                 }
                 document.body.removeChild(container);
                 //blob:

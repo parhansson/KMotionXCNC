@@ -1,8 +1,7 @@
 
-import { Curve3, EllipseCurve, Vector3, MoveArcArguments, MoveAngularArguments, MoveArguments } from '../model/vector'
+import { Curve3, EllipseCurve, Vector3, MoveArcArguments, MoveAngularArguments, MoveArguments, ArcCurve } from '../model/vector'
 import { GCodeParser } from '../parser/gcode-parser'
 import { Block, Word, WordParameters, ControlWord } from '../gcode'
-import { Observable, Observer, Subject } from 'rxjs'
 import { GCodeSource, IGMDriver, GCodeVector } from '../model/igm'
 import { ModelTransformer } from './model.transformer'
 
@@ -126,13 +125,12 @@ export class State<ShapeType> extends GCodeState {
   }
 }
 
-export abstract class GCodeTransformer<ShapeType, OutputType> extends ModelTransformer<GCodeSource, OutputType>{
+export abstract class GCodeTransformer<ShapeType, OutputType> implements ModelTransformer<GCodeSource, OutputType>{
   // Create the final Object3d to add to the scene
   output: OutputType
   protected state: State<ShapeType>
 
   constructor(protected disableWorker?: boolean) {
-    super()
 
   }
 
@@ -142,27 +140,24 @@ export abstract class GCodeTransformer<ShapeType, OutputType> extends ModelTrans
   protected abstract addLinearPoint(newPosition: GCodeVector, shape: ShapeType): void
   protected abstract addCurve(curve: Curve3, shape: ShapeType): void
 
-  execute(gcode: GCodeSource, observer: Observer<OutputType>) {
+
+  async transform(gcode: GCodeSource): Promise<OutputType> {
     this.output = this.createOutput()
     //this.group.name = 'GCODE';
     this.state = new State<ShapeType>()
-    //TODO parsing should be done outside of this transformer
     //this transformer should Subject<Block> instead of GCodeSource
-    const subject = new Subject<Block>()
-    const subcripion = subject.subscribe(
-      (block) => {
-        this.onBlock(block)
-      },
-      (error) => { observer.error(error) },
-      () => {
-        this.onEndProgram()
-        subcripion.unsubscribe()
-        observer.next(this.output)
-        //observer.complete();
+    return new Promise((resolve, reject) => {
+      GCodeParser.parse(
+        (block) => {
+          this.onBlock(block)
+        }, gcode.lines)
+        .then(() => {
+          this.onEndProgram()
+          resolve(this.output)
+        }, err => reject(err))
+    })
 
-      })
 
-    GCodeParser.parse(subject, gcode.lines)
     /*
         if (disableWorker) {
           // parse without worker. Application will freeze during parsing
@@ -388,12 +383,13 @@ export class GCodeCurve3 extends Curve3 {
     }
     //console.info("Curve ax, ay, radius, startangle, endangle",aX, aY, radius,aStartAngle,  aEndAngle);
 
-    this.delegate = new EllipseCurve(
-      centerX, centerY,                  // ax, aY
-      radius, radius,           // xRadius, yRadius
-      startAngle, endAngle,  // aStartAngle, aEndAngle
-      clockWise,                     // aClockwise,
-      0                               //rotation
+    this.delegate = new ArcCurve(
+      centerX,
+      centerY,
+      radius,
+      startAngle,
+      endAngle,
+      clockWise
     )
     //store deltaZ for later
     this.deltaZ = endPoint.z - startPoint.z

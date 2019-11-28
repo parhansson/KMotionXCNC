@@ -1,10 +1,9 @@
 import { IGM } from '../model/igm';
 import { ModelTransformer } from './model.transformer';
 import { SVGModelSettings } from '../model/model.settings';
-export declare class Svg2IgmTransformer implements ModelTransformer<SVGElement, IGM> {
+export declare class Igm2SvgTransformer implements ModelTransformer<IGM, string> {
     private settings;
     constructor(settings: SVGModelSettings);
-    transform(svgRootElement: SVGElement): Promise<IGM>;
-    private makeModel;
-    private makeShape;
+    transform(input: IGM): Promise<string>;
 }
+export declare function igm2SVG(model: IGM): string;

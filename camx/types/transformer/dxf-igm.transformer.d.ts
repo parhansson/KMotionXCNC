@@ -1,9 +1,11 @@
-import { Observer } from 'rxjs';
 import { ModelTransformer } from './model.transformer';
 import { IGM } from '../model/igm';
-export declare class Dxf2IgmTransformer extends ModelTransformer<ArrayBuffer | string, IGM> {
-    constructor();
-    execute(source: ArrayBuffer | string, targetObserver: Observer<IGM>): void;
+import { DXFModelSettings } from '../model';
+export declare class Dxf2IgmTransformer implements ModelTransformer<ArrayBuffer | string, IGM> {
+    private settings;
+    private driver;
+    constructor(settings: DXFModelSettings);
+    transform(source: ArrayBuffer | string): Promise<IGM>;
     private isArc;
     private isLine;
     private isDimension;

@@ -11,7 +11,7 @@ export declare class SvgNode {
     display: string;
     visibility: string;
     fill: string;
-    stroke: any;
+    stroke: string;
     color: string;
     opacity: number;
     fillOpacity: number;

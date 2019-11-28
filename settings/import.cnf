@@ -19,14 +19,21 @@
     "cutZ": 0,
     "safeZ": 0,
     "fractionalDigits": 3,
-    "translateToOrigo": true,
+    "translateToOrigo": false,
     "removeOutline": false,
-    "removeDuplicates": true,
-    "removeSingularites": true,
+    "removeSingularites": false,
+    "joinAdjacent": false,
+    "calculateShortestPath": true,
     "initCode": "M100 P200 Q100",
     "feedRate": 250,
-    "passes": 1,
-    "materialWidth": 10
+    "materialThickness": 10,
+    "passes": 2,
+    "materialWidth": 10,
+    "removeDuplicates": false,
+    "multipass": true
+  },
+  "dxf": {
+    "includeDimension": false
   },
   "materials": [
     {

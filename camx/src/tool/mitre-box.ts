@@ -1,6 +1,7 @@
-import { IGM, IGMDriver, IgmObject } from '../model/igm'
+import { IGM, IGMDriver, IgmObject, LineObject } from '../model/igm'
 import { ModelGenerator } from './model-generator'
 import { GeneratorInput } from './generator-input'
+import { igm2SVG } from '../transformer/igm-svg.transformer'
 
 interface MitreOptions {
   mitreTop: boolean
@@ -19,7 +20,7 @@ export interface MitreBoxInput {
 }
 export class MitreBox implements ModelGenerator<MitreBoxInput> {
 
-  private models: IgmObject[]
+  private models: LineObject[]
 
   private cut_width: number
 
@@ -84,49 +85,7 @@ export class MitreBox implements ModelGenerator<MitreBoxInput> {
   }
 
   async generateSVG(values: MitreBoxInput) {
-    return Promise.resolve(this.toSVG(await this.generate(values)))
-  }
-
-
-  private toSVG(model: IGM) {
-    let svg = ''
-    const res = 1
-    const driver = new IGMDriver(model)
-    const paths = driver.allObjectsFlat
-    IGMDriver.updateBounds(paths)
-    const bounds = driver.getMaxBounds(paths)
-    const w = bounds.x2
-    const h = bounds.y2
-    const dpi = 72 //output DPI
-    const dpiScale = dpi / 25.4 // assuming input model in mm not in inches
-    svg += '<?xml version="1.0" standalone="no"?>\r\n'
-    svg += '<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">\r\n'
-    svg += '<svg width="' + w / res + 'mm" height="' + h / res + 'mm" viewBox="0 0 ' + w * dpiScale + ' ' + h * dpiScale + '" xmlns="http://www.w3.org/2000/svg" version="1.1">\r\n'
-
-    for (const part of driver.allObjectsFlat) {
-      //TODO rescaling after calculating bounds???
-      IGMDriver.scale(part, dpiScale)
-
-      const points: Array<string | number> = []
-      let first = true
-      for (const vec of part.vectors) {
-        if (first) {
-          first = false
-          points.push('M')
-          points.push(vec.x)
-          points.push(vec.y)
-          points.push('L')
-        } else {
-          points.push(vec.x)
-          points.push(vec.y)
-        }
-      }
-
-      svg += `<path d="${points.join(' ')} Z" fill="steelblue" vector-effect="non-scaling-stroke" stroke="black" stroke-width="0.2" />\r\n`
-    }
-
-    svg += ('</svg>\r\n')
-    return svg
+    return Promise.resolve(igm2SVG(await this.generate(values)))
   }
 
   generate(values: MitreBoxInput) {
@@ -397,13 +356,13 @@ export class MitreBox implements ModelGenerator<MitreBoxInput> {
   }
 
   protected PolyStart() {
-    this.models.push(IGMDriver.newIgmObject())
+    this.models.push(IGMDriver.newLine())
   }
   private getLast() {
     return this.models[this.models.length - 1]
   }
   protected PolyPoint(x: number, y: number) {
-    this.getLast().vectors.push(IGMDriver.newGCodeVector(x, y))
+    this.getLast().geometry.vectors.push(IGMDriver.newGCodeVector(x, y))
   }
 
   protected PolyEnd() {

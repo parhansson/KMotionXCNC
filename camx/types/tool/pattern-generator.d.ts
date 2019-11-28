@@ -13,5 +13,4 @@ export declare class PatternGenerator implements ModelGenerator<PatternGenerator
     private rect;
     generateSVG(values: PatternGeneratorInput): Promise<string>;
     generate(values: PatternGeneratorInput): Promise<IGM>;
-    toSVG(model: IGM): Promise<string>;
 }

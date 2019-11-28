@@ -2,8 +2,8 @@ import { ModelGenerator } from './model-generator'
 
 import { GeneratorInput } from './generator-input'
 
-import { IGMDriver, IGM } from '../model'
-
+import { IGMDriver, IGM, GCodeVector } from '../model'
+import { igm2SVG } from '../transformer/igm-svg.transformer'
 export interface PatternGeneratorInput {
   rows: number
   columns: number
@@ -63,22 +63,22 @@ export class PatternGenerator implements ModelGenerator<PatternGeneratorInput> {
     return inputs
   }
   private rect(width, height) {
-    const shape = IGMDriver.newIgmObject()
-    shape.vectors.push(IGMDriver.newGCodeVector(0, 0))
-    shape.vectors.push(IGMDriver.newGCodeVector(width, 0))
-    shape.vectors.push(IGMDriver.newGCodeVector(width, height))
-    shape.vectors.push(IGMDriver.newGCodeVector(0, height))
-    shape.vectors.push(IGMDriver.newGCodeVector(0, 0))
-    return shape
+    const vectors: GCodeVector[] = []
+    vectors.push(IGMDriver.newGCodeVector(0, 0))
+    vectors.push(IGMDriver.newGCodeVector(width, 0))
+    vectors.push(IGMDriver.newGCodeVector(width, height))
+    vectors.push(IGMDriver.newGCodeVector(0, height))
+    vectors.push(IGMDriver.newGCodeVector(0, 0))
+    return IGMDriver.newLine(vectors)
   }
 
 
-  async generateSVG(values:PatternGeneratorInput) {
-    return this.toSVG(await this.generate(values))
+  async generateSVG(values: PatternGeneratorInput) {
+    return igm2SVG(await this.generate(values))
   }
 
 
-  async generate(values:PatternGeneratorInput) {
+  async generate(values: PatternGeneratorInput) {
     /*
 G90
 G21
@@ -104,70 +104,30 @@ M5 (laser off)
 G0 X0 Y0 Z0
 M2
     // */
+
+    const igm = new IGM()
+    const driver = new IGMDriver(igm)
     const shape = this.rect(53, 38)
     const shape2 = this.rect(43.5, 11.5)
-    IGMDriver.translate(shape2, IGMDriver.newGCodeVector(4.75, 13.25))
+    driver.translate(shape2, IGMDriver.newGCodeVector(4.75, 13.25))
 
     // const shape = this.rect(38,53)
     // const shape2 = this.rect(11.5,43.5)
     // shape2.translate(new GCodeVector(13.25,4.75))
 
 
-    const igm = new IGM()
-    const driver = new IGMDriver(igm)
-    IGMDriver.updateBounds([shape, shape2])
+    driver.updateBounds([shape, shape2])
     const width = shape.bounds.width()
     const height = shape.bounds.height()
 
     for (let row = 0; row < values.rows; row++) {
       for (let col = 0; col < values.columns; col++) {
         const translate = IGMDriver.newGCodeVector(col * (width + values.colSpacing), row * (height + values.rowSpacing))
-        driver.addToLayerObject('one', IGMDriver.translate(IGMDriver.clone(shape), translate))
-        driver.addToLayerObject('one', IGMDriver.translate(IGMDriver.clone(shape2), translate))
+        driver.addToLayerObject('one', driver.translate(driver.clone(shape), translate))
+        driver.addToLayerObject('one', driver.translate(driver.clone(shape2), translate))
       }
     }
     return igm
   }
 
-  toSVG(model: IGM) {
-    let svg = ''
-
-    const res = 1
-    const driver = new IGMDriver(model)
-    const paths = driver.allObjectsFlat
-    IGMDriver.updateBounds(paths)
-    const bounds = driver.getMaxBounds(paths)
-    const w = bounds.x2
-    const h = bounds.y2
-    const dpi = 72 //output DPI
-    const dpiScale = dpi / 25.4 // assuming input model in mm not in inches
-    svg += '<?xml version="1.0" standalone="no"?>\r\n'
-    svg += '<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">\r\n'
-    svg += '<svg width="' + w / res + 'mm" height="' + h / res + 'mm" viewBox="0 0 ' + w * dpiScale + ' ' + h * dpiScale + '" xmlns="http://www.w3.org/2000/svg" version="1.1">\r\n'
-
-
-    for (const part of driver.allObjectsFlat) {
-      //TODO rescaling after calculating bounds???
-      IGMDriver.scale(part, dpiScale)
-      const points: Array<string | number> = []
-      let first = true
-      for (const vec of part.vectors) {
-        if (first) {
-          first = false
-          points.push('M')
-          points.push(vec.x)
-          points.push(vec.y)
-          points.push('L')
-        } else {
-          points.push(vec.x)
-          points.push(vec.y)
-        }
-      }
-
-      svg += `<path d="${points.join(' ')} Z" fill="steelblue" vector-effect="non-scaling-stroke" stroke="black" stroke-width="0.2" />\r\n`
-    }
-
-    svg += ('</svg>\r\n')
-    return Promise.resolve(svg)
-  }
 }

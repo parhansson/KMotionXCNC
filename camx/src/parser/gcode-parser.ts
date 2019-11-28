@@ -3,7 +3,6 @@
  * Parses a string of gcode instructions, and invokes codeHandlers for each type of
  * command or values.
  */
-import { Observer } from 'rxjs'
 import {
   Word,
   BlockPart,
@@ -129,27 +128,30 @@ export class GCodeParser {
     return block
   }
 
-  static parse(observer: Observer<Block>, gcodeLines: string[], maxErrors :number = 100) {
+  static parse(onBlock:(block:Block)=>void, gcodeLines: string[], maxErrors :number = 100):Promise<void> {
     console.time('parsing')
-    let i = 0
-    let totalErrors = 0
-    for (const line of gcodeLines) {
-      const block = GCodeParser.parseBlock(line)
-      totalErrors += block.errors.length
-      if(totalErrors > maxErrors){
-        const errorMsg = `Max total errors ${maxErrors} reached giving up`
-        console.log(errorMsg)
-        observer.error(errorMsg)
-        console.timeEnd('parsing')
-        return
+    return new Promise<void>((resolve,reject) =>{
+
+      let i = 0
+      let totalErrors = 0
+      for (const line of gcodeLines) {
+        const block = GCodeParser.parseBlock(line)
+        totalErrors += block.errors.length
+        if(totalErrors > maxErrors){
+          const errorMsg = `Max total errors ${maxErrors} reached giving up`
+          console.log(errorMsg)
+          reject(errorMsg)
+          console.timeEnd('parsing')
+          return
+        }
+        block.line = i++
+        if(block.errors.length === 0){
+          onBlock(block)
+        }
       }
-      block.line = i++
-      if(block.errors.length === 0){
-        observer.next(block)
-      }
-    }
-    console.timeEnd('parsing')
-    observer.complete()
+      console.timeEnd('parsing')
+      resolve()
+    })
 
   }
 

@@ -4,5 +4,5 @@ export { Igm2GcodeTransformer } from './igm-gcode.transformer';
 export { Pdf2SvgTransformer } from './pdf-svg.transformer';
 export { Svg2IgmTransformer } from './svg-igm.transformer';
 export { Dxf2IgmTransformer } from './dxf-igm.transformer';
-export { ModelTransformer } from './model.transformer';
+export { Igm2SvgTransformer, igm2SVG } from './igm-svg.transformer';
 //# sourceMappingURL=index.js.map

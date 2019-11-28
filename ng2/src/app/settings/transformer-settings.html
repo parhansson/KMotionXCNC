@@ -2,6 +2,7 @@
     <div class="col d-flex justify-content-center">
       <kmx-dynamic-form [inputs]="pdfSettings" [headerLabel]="'PDF transformer'" [hideSubmit]="true" (update)="pdfChange($event)" ></kmx-dynamic-form>
       <kmx-dynamic-form [inputs]="svgSettings" [headerLabel]="'SVG transformer'" [hideSubmit]="true" (update)="svgChange($event)"></kmx-dynamic-form>
+      <kmx-dynamic-form [inputs]="dxfSettings" [headerLabel]="'DXF transformer'" [hideSubmit]="true" (update)="dxfChange($event)"></kmx-dynamic-form>
       <kmx-dynamic-form [inputs]="igmSettings" [headerLabel]="'IGM transformer'" [hideSubmit]="true" (update)="igmChange($event)"></kmx-dynamic-form>
     </div>
 </div>

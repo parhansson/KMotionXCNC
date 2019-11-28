@@ -1,18 +1,17 @@
-import { Observer } from 'rxjs'
 import { ModelSettings } from '../model/model.settings'
 import { ModelTransformer } from './model.transformer'
 import * as pdfjs from 'pdfjs-dist/webpack'
 //These types comes from types-merge
 import { PDFJSStatic, getDocument, SVGGraphics } from 'pdfjs-dist/webpack'
 
-export class Pdf2SvgTransformer extends ModelTransformer<ArrayBuffer, SVGElement> {
+export class Pdf2SvgTransformer implements ModelTransformer<ArrayBuffer, SVGElement> {
 
 
   constructor(private transformerSettings: ModelSettings) {
-    super()
+
   }
 
-  execute(source: ArrayBuffer, targetObserver: Observer<SVGElement>) {
+  async transform(source: ArrayBuffer): Promise<SVGElement> {
     //let s  = new SVGGraphics(null,null,null)
     const PDFJS: PDFJSStatic = pdfjs as any
     //this will use base64 encoded instead of bloburls for images
@@ -33,48 +32,54 @@ export class Pdf2SvgTransformer extends ModelTransformer<ArrayBuffer, SVGElement
     const page = transformer.transformerSettings.pdf.page
     const rotation = transformer.transformerSettings.pdf.rotate
 
-    //PDFJS.getDocument(source).promise.then((pdf) => {
-    getDocument(source).promise.then((pdf) => {
+    const resultPromise: Promise<SVGElement> = new Promise<SVGElement>((resolve, reject) => {
+      //PDFJS.getDocument(source).promise.then((pdf) => {
+      getDocument(source).promise.then((pdf) => {
 
-      const numPages = pdf.numPages
-      // Using promise to fetch the page
+        const numPages = pdf.numPages
+        // Using promise to fetch the page
 
-      // For testing only.
-      const MAX_NUM_PAGES = 50
-      const ii = Math.min(MAX_NUM_PAGES, numPages)
-      const svgPages = []
-      //let promise: Promise<SVGElement> = Promise.resolve<SVGElement>(undefined)
-      let promise: Promise<any> = Promise.resolve()
-      for (let i = 1; i <= ii; i++) {
-        if (page != i) { continue }
-        //when anchor is not null svg will be rendered on screen for debugging
-        const anchor: HTMLAnchorElement = null// this.createAnchor(i)
-        // Using promise to fetch and render the next page
-        promise = promise.then(function (pageNum: number, anchor: HTMLElement) {
-          return pdf.getPage(pageNum).then(page => {
-            const viewport = page.getViewport({ scale, rotation })
+        // For testing only.
+        const MAX_NUM_PAGES = 50
+        const ii = Math.min(MAX_NUM_PAGES, numPages)
+        const svgPages = []
 
-            const container = this.createContainer(pageNum, viewport.width, viewport.height, anchor)
 
-            return page.getOperatorList().then(opList => {
-              const svgGfx: SVGGraphics = new SVGGraphics(page.commonObjs, page.objs)
-              //apply monkey patch for zero width strokes
-              svgGfx._setStrokeAttributes = _setStrokeAttributes.bind(svgGfx)
-              svgGfx.embedFonts = true
-              return svgGfx.getSVG(opList, viewport).then(svg => {
-                transformer.logSvg(svg)
-                if (container) {
-                  container.appendChild(svg)
-                }
-                targetObserver.next(svg)
+        let promise = Promise.resolve()
+        for (let i = 1; i <= ii; i++) {
+          if (page != i) { continue }
+          //when anchor is not null svg will be rendered on screen for debugging
+          const anchor: HTMLAnchorElement = null// this.createAnchor(i)
+          // Using promise to fetch and render the next page
+          promise = promise.then(function (pageNum: number, anchor: HTMLElement) {
+            return pdf.getPage(pageNum).then(page => {
+              const viewport = page.getViewport({ scale, rotation })
+
+              const container = this.createContainer(pageNum, viewport.width, viewport.height, anchor)
+
+              return page.getOperatorList().then(opList => {
+                const svgGfx: SVGGraphics = new SVGGraphics(page.commonObjs, page.objs)
+                //apply monkey patch for zero width strokes
+                svgGfx._setStrokeAttributes = _setStrokeAttributes.bind(svgGfx)
+                svgGfx.embedFonts = true
+                return svgGfx.getSVG(opList, viewport).then(svg => {
+                  transformer.logSvg(svg)
+                  if (container) {
+                    container.appendChild(svg)
+                  }
+                  //targetObserver.next(svg)
+                  resolve(svg)
+                  return svg
+                })
               })
             })
-          })
-        }.bind(this, i, anchor))
-      }
-      //Destroy worker
-      promise.then(result => pdf.destroy())
+          }.bind(this, i, anchor))
+        }
+        //Destroy worker
+        promise.then(result => pdf.destroy())
+      })
     })
+    return resultPromise
   }
   private logSvg(svg: SVGElement) {
     if (true == true) { return }

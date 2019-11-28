@@ -16,7 +16,7 @@ export class SvgNode {
   display: string
   visibility: string
   fill: string
-  stroke: any
+  stroke: string
   color: string
   opacity: number
   fillOpacity: number
@@ -669,13 +669,16 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
       //tslint:disable-next-line:prefer-for-of
       for (let ruleIndex = 0; ruleIndex < styleSheet.cssRules.length; ruleIndex++) {
         //for(const ruleIndex in styleSheet.cssRules){
-        const rule = styleSheet.cssRules.item(ruleIndex) as CSSFontFaceRule
-        const style = rule.style
-        const fontFamily = style.fontFamily
-        //tslint:disable-next-line:no-string-literal
-        const src = style['src'] as string
-        const fontBlob = src.substring(5, src.length - 2)
-        await this.fontService.preloadFont(fontBlob, fontFamily)
+        const rule =styleSheet.cssRules.item(ruleIndex)
+        if(rule.type == CSSRule.FONT_FACE_RULE){
+          const fontFaceRule = styleSheet.cssRules.item(ruleIndex) as CSSFontFaceRule
+          const style = fontFaceRule.style
+          const fontFamily = style.fontFamily
+          //tslint:disable-next-line:no-string-literal
+          const src = style['src'] as string
+          const fontBlob = src.substring(5, src.length - 2)
+          await this.fontService.preloadFont(fontBlob, fontFamily)
+        }
       }
       document.body.removeChild(container)
       //blob:

@@ -8,6 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { IGM, IGMDriver } from '../model/igm';
+import { igm2SVG } from '../transformer/igm-svg.transformer';
 export class MitreBox {
     constructor() {
     }
@@ -68,45 +69,8 @@ export class MitreBox {
     }
     generateSVG(values) {
         return __awaiter(this, void 0, void 0, function* () {
-            return Promise.resolve(this.toSVG(yield this.generate(values)));
+            return Promise.resolve(igm2SVG(yield this.generate(values)));
         });
-    }
-    toSVG(model) {
-        let svg = '';
-        const res = 1;
-        const driver = new IGMDriver(model);
-        const paths = driver.allObjectsFlat;
-        IGMDriver.updateBounds(paths);
-        const bounds = driver.getMaxBounds(paths);
-        const w = bounds.x2;
-        const h = bounds.y2;
-        const dpi = 72; //output DPI
-        const dpiScale = dpi / 25.4; // assuming input model in mm not in inches
-        svg += '<?xml version="1.0" standalone="no"?>\r\n';
-        svg += '<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">\r\n';
-        svg += '<svg width="' + w / res + 'mm" height="' + h / res + 'mm" viewBox="0 0 ' + w * dpiScale + ' ' + h * dpiScale + '" xmlns="http://www.w3.org/2000/svg" version="1.1">\r\n';
-        for (const part of driver.allObjectsFlat) {
-            //TODO rescaling after calculating bounds???
-            IGMDriver.scale(part, dpiScale);
-            const points = [];
-            let first = true;
-            for (const vec of part.vectors) {
-                if (first) {
-                    first = false;
-                    points.push('M');
-                    points.push(vec.x);
-                    points.push(vec.y);
-                    points.push('L');
-                }
-                else {
-                    points.push(vec.x);
-                    points.push(vec.y);
-                }
-            }
-            svg += `<path d="${points.join(' ')} Z" fill="steelblue" vector-effect="non-scaling-stroke" stroke="black" stroke-width="0.2" />\r\n`;
-        }
-        svg += ('</svg>\r\n');
-        return svg;
     }
     generate(values) {
         /* Box dimensions (int 1 of a mm, and how many mitres to have, divided by two */
@@ -353,13 +317,13 @@ export class MitreBox {
         this.PolyEnd();
     }
     PolyStart() {
-        this.models.push(IGMDriver.newIgmObject());
+        this.models.push(IGMDriver.newLine());
     }
     getLast() {
         return this.models[this.models.length - 1];
     }
     PolyPoint(x, y) {
-        this.getLast().vectors.push(IGMDriver.newGCodeVector(x, y));
+        this.getLast().geometry.vectors.push(IGMDriver.newGCodeVector(x, y));
     }
     PolyEnd() {
     }

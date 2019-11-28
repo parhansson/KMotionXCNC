@@ -2,7 +2,6 @@
  * Parses a string of gcode instructions, and invokes codeHandlers for each type of
  * command or values.
  */
-import { Observer } from 'rxjs';
 import { Block } from '../gcode';
 export declare class GCodeParser {
     static skipCodes: {
@@ -35,5 +34,5 @@ export declare class GCodeParser {
     private static blockCommentDepth;
     private static blockCommentEnd;
     static parseBlock(rawText: string): Block;
-    static parse(observer: Observer<Block>, gcodeLines: string[], maxErrors?: number): void;
+    static parse(onBlock: (block: Block) => void, gcodeLines: string[], maxErrors?: number): Promise<void>;
 }

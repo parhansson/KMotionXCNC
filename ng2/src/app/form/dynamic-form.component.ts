@@ -3,15 +3,16 @@ import { FormGroup } from '@angular/forms'
 
 import { InputBase } from './input-base'
 import { InputControlService } from './input-control.service'
+import { Subscription } from 'rxjs'
 
 @Component({
   selector: 'kmx-dynamic-form',
   templateUrl: './dynamic-form.component.html',
   providers: [InputControlService]
 })
-export class DynamicFormComponent implements OnInit {
+export class DynamicFormComponent {
 
-  @Input() inputs: Array<InputBase<any>> = []
+  
   @Input() headerLabel: string = ''
   @Input() hideSubmit: boolean = false
   @Output() apply = new EventEmitter<any>()
@@ -19,11 +20,27 @@ export class DynamicFormComponent implements OnInit {
   form: FormGroup
   submitted = false
 
+  private _inputs: Array<InputBase<any>> = []
+  private valueChangesSubscription:Subscription
+  
   constructor(private qcs: InputControlService) { }
 
-  ngOnInit() {
+  @Input() 
+  set inputs(value: Array<InputBase<any>> ){
+    this._inputs = value
+    this.createForm()
+  }
+
+  get inputs(){
+    return this._inputs
+  }
+
+  private createForm() {
+    if(this.valueChangesSubscription){
+      this.valueChangesSubscription.unsubscribe()
+    }
     this.form = this.qcs.toFormGroup(this.inputs)
-    this.form.valueChanges.subscribe(formValues => this.update.emit(this.fixTypes(formValues)))
+    this.valueChangesSubscription = this.form.valueChanges.subscribe(formValues => this.update.emit(this.fixTypes(formValues)))
   }
 
   onSubmit() {

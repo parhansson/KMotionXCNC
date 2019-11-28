@@ -14,7 +14,6 @@ export declare class MitreBox implements ModelGenerator<MitreBoxInput> {
     constructor();
     requiredInput(): GeneratorInput<MitreBoxInput>[];
     generateSVG(values: MitreBoxInput): Promise<string>;
-    private toSVG;
     generate(values: MitreBoxInput): Promise<IGM>;
     private MitrePanel;
     protected PolyStart(): void;

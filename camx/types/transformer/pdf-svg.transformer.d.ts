@@ -1,10 +1,9 @@
-import { Observer } from 'rxjs';
 import { ModelSettings } from '../model/model.settings';
 import { ModelTransformer } from './model.transformer';
-export declare class Pdf2SvgTransformer extends ModelTransformer<ArrayBuffer, SVGElement> {
+export declare class Pdf2SvgTransformer implements ModelTransformer<ArrayBuffer, SVGElement> {
     private transformerSettings;
     constructor(transformerSettings: ModelSettings);
-    execute(source: ArrayBuffer, targetObserver: Observer<SVGElement>): void;
+    transform(source: ArrayBuffer): Promise<SVGElement>;
     private logSvg;
     createContainer(pageNum: number, width: number, height: number, parentElement: HTMLElement): HTMLDivElement;
     createAnchor(pageNum: number): HTMLAnchorElement;

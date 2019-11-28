@@ -11,7 +11,7 @@ export class Gcode2IgmTransformer extends GCodeTransformer {
         return model;
     }
     startShape() {
-        const shape = IGMDriver.newIgmObject();
+        const shape = IGMDriver.newLine();
         //shape.userData = { lineNo: this.state.lineNo }
         this.driver.addToLayerObject('layer1', shape);
         return shape;
@@ -21,12 +21,12 @@ export class Gcode2IgmTransformer extends GCodeTransformer {
         //setBounds on shape since it is modified without knowledge by driver
     }
     addLinearPoint(newPosition, shape) {
-        shape.vectors.push(newPosition);
+        shape.geometry.vectors.push(newPosition);
     }
     addCurve(curve, shape) {
         const vectors = curve.getPoints(50);
         for (const point of vectors) {
-            shape.vectors.push(IGMDriver.newGCodeVector(point.x, point.y, point.z));
+            shape.geometry.vectors.push(IGMDriver.newGCodeVector(point.x, point.y, point.z));
         }
     }
 }

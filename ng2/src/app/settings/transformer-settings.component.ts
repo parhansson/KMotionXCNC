@@ -1,5 +1,5 @@
 import { Component, Inject } from '@angular/core'
-import { ModelSettings, PDFModelSettings, SVGModelSettings, IGMModelSettings } from 'camx'
+import { ModelSettings, PDFModelSettings, SVGModelSettings, IGMModelSettings, DXFModelSettings } from 'camx'
 import { ModelSettingsService } from '../model/model.settings.service'
 import { InputBase } from '@kmx/form/input-base'
 
@@ -12,6 +12,7 @@ export class TransformerSettingsComponent {
   pdfSettings: Array<InputBase<PDFModelSettings>>
   svgSettings: Array<InputBase<SVGModelSettings>>
   igmSettings: Array<InputBase<IGMModelSettings>>
+  dxfSettings: Array<InputBase<DXFModelSettings>>
   constructor(private modelSettingsService: ModelSettingsService) {
     this.transformerSettings = modelSettingsService.settings
     this.pdfSettings = [
@@ -59,6 +60,15 @@ export class TransformerSettingsComponent {
         name: 'renderText',
         label: 'Vectorize text',
         value: this.transformerSettings.svg.renderText,
+        order: 2
+      })
+    ],
+    this.dxfSettings = [
+      new InputBase('bool', {
+        type: 'checkbox',
+        name: 'includeDimension',
+        label: 'Include dimensions from drawing',
+        value: this.transformerSettings.dxf.includeDimension,
         order: 2
       })
     ]
@@ -111,13 +121,6 @@ export class TransformerSettingsComponent {
       }),      
       new InputBase('bool', {
         type: 'checkbox',
-        name: 'removeDuplicates',
-        label: 'Remove duplicates (not complete, might remove too much)',
-        value: this.transformerSettings.igm.removeDuplicates,
-        order: 11
-      }),      
-      new InputBase('bool', {
-        type: 'checkbox',
         name: 'removeSingularites',
         label: 'Remove single points',
         value: this.transformerSettings.igm.removeSingularites,
@@ -129,13 +132,53 @@ export class TransformerSettingsComponent {
         label: 'Move to origin',
         value: this.transformerSettings.igm.translateToOrigo,
         order: 13
-      })
+      }),      
+      new InputBase('bool', {
+        type: 'checkbox',
+        name: 'calculateShortestPath',
+        label: 'Calculate shortest path',
+        value: this.transformerSettings.igm.calculateShortestPath,
+        order: 14
+      }),
+      new InputBase('bool', {
+        type: 'checkbox',
+        name: 'joinAdjacent',
+        label: 'Join adjacent lines',
+        value: this.transformerSettings.igm.joinAdjacent,
+        order: 14
+      }),
+      new InputBase('bool', {
+        type: 'checkbox',
+        name: 'multipass',
+        label: 'Multipass',
+        value: this.transformerSettings.igm.multipass,
+        order: 16
+      }),
+      new InputBase('text', {
+        type: 'number',
+        name: 'materialThickness',
+        label: 'Multipass material thickness',
+        value: this.transformerSettings.igm.materialThickness,
+        required: false,
+        min: 0,
+        order: 17
+      }),       
+      new InputBase('text', {
+        type: 'number',
+        name: 'passes',
+        label: 'Multipass number of passes',
+        value: this.transformerSettings.igm.passes,
+        required: false,
+        min: 1,
+        order: 18
+      }),   
     ]
   }
+  dxfChange(values){
+    Object.assign(this.transformerSettings.dxf, values)
+  }
   pdfChange(values){
-    console.log(this.transformerSettings.pdf)
     Object.assign(this.transformerSettings.pdf, values)
-    console.log(this.transformerSettings.pdf)
   }
   svgChange(values){
     Object.assign(this.transformerSettings.svg, values)

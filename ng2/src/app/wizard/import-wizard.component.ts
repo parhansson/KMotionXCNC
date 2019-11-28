@@ -12,6 +12,9 @@ import {
   FileStoreToken, FileStore, DefaultFileStore
 } from '../resources'
 import { TransformingFileStore } from '../model/transforming-file-store.service'
+import { IGM, LayerStatus, IGMDriver, igm2SVG, Pdf2SvgTransformer, Igm2GcodeTransformer, Svg2IgmTransformer, Dxf2IgmTransformer, Gcode2IgmTransformer } from 'camx'
+import { InputBase } from '@kmx/form/input-base'
+import { ModelSettingsService } from '@kmx/model/model.settings.service'
 
 @Component({
   selector: 'import-wizard',
@@ -33,16 +36,19 @@ export class ImportWizardComponent {
   public textContent
   public resource: FileResource
 
-  @ViewChild(SvgPreviewComponent, {static: false})
+  @ViewChild(SvgPreviewComponent, { static: false })
   private previewContainer: SvgPreviewComponent
 
   //not used?
-  @ViewChild(FileDialogComponent, {static: false})
+  @ViewChild(FileDialogComponent, { static: false })
   private resourceComponent: FileDialogComponent
 
-  constructor( @Inject(FileStoreToken) private fileStore: FileStore,
+  private igm: IGM = null
+
+  constructor(@Inject(FileStoreToken) private fileStore: FileStore,
     private transformingFileStore: TransformingFileStore,
-    private staticTransformer: StaticTransformer) {
+    private staticTransformer: StaticTransformer,
+    private modelSettings: ModelSettingsService) {
     this.resource = new FileResource('')
 
     this.subscribe(this.fileStore)
@@ -51,7 +57,50 @@ export class ImportWizardComponent {
       data => this.renderSvg(data),
       err => console.error(err))
 
+    staticTransformer.igmSubject.subscribe(
+      data => this.showLayers(data),
+      err => console.error(err))
   }
+
+  layerInputs: Array<InputBase<any>> = []
+
+  private showLayers(igm: IGM) {
+    this.igm = igm
+    this.layerInputs = []
+    console.log(igm.layers)
+    const layerStatus: LayerStatus =  {}
+    for (const layerName in this.igm.layers) {
+      // important check that this is objects own property 
+      // not from prototype prop inherited
+      if (this.igm.layers.hasOwnProperty(layerName)) {
+        layerStatus[layerName] = true
+        const layer = this.igm.layers[layerName]
+        this.layerInputs.push(new InputBase('bool', {
+          type: 'checkbox',
+          name: layerName,
+          label: 'Include layer "' + layerName+ '"',
+          value: layer.visible
+        }))
+      }
+    }
+    this.selectLayers(layerStatus)
+    console.log(this.layerInputs)
+  }
+
+  selectLayers(layers:LayerStatus) {
+    new IGMDriver(this.igm).setLayerStatus(layers)
+    console.log(layers)
+    //preview as svg
+    this.previewContainer.render(igm2SVG(this.igm))
+  }
+
+  transformGCode() {
+    //TODO only content of currently loaded gcode file is changed not the file name
+    this.staticTransformer.transform('igm/model', this.igm)
+    
+  }
+
+
   private subscribe(store: FileStore) {
     store.textSubject.subscribe((text) => {
       this.textContent = text

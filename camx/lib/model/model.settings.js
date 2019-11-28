@@ -29,12 +29,13 @@ export class IGMModelSettings {
         this.fractionalDigits = 3;
         this.translateToOrigo = true;
         this.removeOutline = false;
-        this.removeDuplicates = true;
         this.removeSingularites = true;
+        this.joinAdjacent = true;
+        this.calculateShortestPath = true;
         this.initCode = 'M100 P200 Q100';
         this.feedRate = 250;
+        this.materialThickness = 10;
         this.passes = 1;
-        this.materialWidth = 10;
     }
 }
 export class PDFModelSettings {
@@ -44,6 +45,8 @@ export class PDFModelSettings {
         this.scale = 1.0;
     }
 }
+export class DXFModelSettings {
+}
 export class Material {
 }
 export class ModelSettings {
@@ -51,13 +54,16 @@ export class ModelSettings {
         this.svg = new SVGModelSettings();
         this.pdf = new PDFModelSettings();
         this.igm = new IGMModelSettings();
+        this.dxf = new DXFModelSettings();
         this.materials = []; //ex { name: 'Cut 2mm polysterene', ppi: 'M100 P900 Q100', speed: 'F250', passes: 1, thickness: 2 },
     }
     update(from) {
-        this.svg = from.svg;
-        this.pdf = from.pdf;
-        this.igm = from.igm;
-        this.materials = from.materials;
+        //update existing object instead of setting a new
+        Object.assign(this.svg, from.svg);
+        Object.assign(this.pdf, from.pdf);
+        Object.assign(this.igm, from.igm);
+        Object.assign(this.materials, from.materials);
+        Object.assign(this.dxf, from.dxf);
         //Object.assign(new Foo, { a: 1 })
         //Reattach prototype of svg since there are functions in that class
         //setPrototype of is said to be slow. This does not happen often though

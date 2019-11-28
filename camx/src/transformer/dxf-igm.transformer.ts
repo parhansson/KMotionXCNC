@@ -1,10 +1,9 @@
-import { Observer } from 'rxjs'
 import { ModelTransformer } from './model.transformer'
 import { IGM, IGMDriver, IgmObject } from '../model/igm'
 import DxfParser from 'dxf-parser'
 
 import { KMXUtil } from '../util/kmxutil'
-import { GCodeVector } from '../model'
+import { GCodeVector, DXFModelSettings } from '../model'
 import { Vector2, Vector3, EllipseCurve, ArcCurve, SplineCurve, QuadraticBezierCurve } from '../model/vector'
 
 const INSUNITS = {
@@ -33,12 +32,13 @@ const INSUNITS = {
 
 }
 
-export class Dxf2IgmTransformer extends ModelTransformer<ArrayBuffer | string, IGM> {
-  constructor() {
-    super()
+export class Dxf2IgmTransformer implements ModelTransformer<ArrayBuffer | string, IGM> {
+  private driver: IGMDriver
+  constructor(private settings: DXFModelSettings) {
 
   }
-  execute(source: ArrayBuffer | string, targetObserver: Observer<IGM>) {
+
+  async transform(source: ArrayBuffer | string): Promise<IGM> {
     let fileText
     if (source instanceof ArrayBuffer) {
       fileText = KMXUtil.ab2str(source)
@@ -46,20 +46,21 @@ export class Dxf2IgmTransformer extends ModelTransformer<ArrayBuffer | string, I
       fileText = source
     }
     const model = new IGM()
-    const driver = new IGMDriver(model)
+    this.driver = new IGMDriver(model)
     const parser = new DxfParser()
     try {
       const dxf = parser.parseSync(fileText)
       for (const entity of dxf.entities) {
         const shapes = this.doEntity(entity, dxf)
         for (const shape of shapes) {
-          driver.addToLayerObject(entity.layer, this.scale(shape, dxf))
+          this.driver.addToLayerObject(entity.layer, this.scale(shape, dxf))
         }
       }
       console.log(dxf)
-      targetObserver.next(model)
+      return Promise.resolve(model)
     } catch (err) {
-      return console.error(err.stack)
+      console.error(err.stack)
+      return Promise.reject(err)
     }
   }
   private isArc(entity: DxfParser.Entity): entity is DxfParser.EntityARC | DxfParser.EntityCIRCLE {
@@ -97,7 +98,7 @@ export class Dxf2IgmTransformer extends ModelTransformer<ArrayBuffer | string, I
       //mesh = this.doMtext(entity, data);
     } else if (this.isEllipse(entity)) {
       shapes.push(this.doEllipse(entity, data))
-    } else if (this.isDimension(entity)) {
+    } else if (this.isDimension(entity) && this.settings.includeDimension) {
       /* tslint:disable:no-bitwise */
       const dimTypeEnum = entity.dimensionType & 7
       if (dimTypeEnum === 0) {
@@ -121,7 +122,7 @@ export class Dxf2IgmTransformer extends ModelTransformer<ArrayBuffer | string, I
       //unit = 1 // autocad defaults to Inches(1) if INSUNITS is missing    
       unit = 0 //but we use unitless here
     }
-    IGMDriver.scale(shape, INSUNITS[unit])
+    this.driver.scale(shape, INSUNITS[unit])
     return shape
   }
 
@@ -134,22 +135,16 @@ export class Dxf2IgmTransformer extends ModelTransformer<ArrayBuffer | string, I
       startAngle = entity.startAngle
       endAngle = entity.endAngle
     }
-    //ArcCurve is the same as EllipseCurve but radius is the same in both axes
-    const curve = new ArcCurve(
-      0, 0,
+    const center: Vector2 = entity.center ? entity.center : { x: 0, y: 0 }
+    const object = IGMDriver.newArc(
+      center.x,
+      center.y,
       entity.radius,
       startAngle,
       endAngle,
       false)
+    object.comment = `DXF Entity ${entity.type}`
 
-    const points = curve.getPoints(32)
-    const object = IGMDriver.newIgmObject()
-    for (const v of points) {
-      object.vectors.push(IGMDriver.newGCodeVector(v.x, v.y, 0/*v.z*/))
-    }
-    if (entity.center) {
-      IGMDriver.translate(object, IGMDriver.newGCodeVector(entity.center.x, entity.center.y, entity.center.z))
-    }
     return object
   }
 
@@ -167,37 +162,46 @@ export class Dxf2IgmTransformer extends ModelTransformer<ArrayBuffer | string, I
       false, // Always counterclockwise
       rotation
     )
-    const object = IGMDriver.newIgmObject()
+    const vectors: GCodeVector[] = []
     for (const v of curve.getPoints(50)) {
-      object.vectors.push(IGMDriver.newGCodeVector(v.x, v.y, entity.center.z))
+      vectors.push(IGMDriver.newGCodeVector(v.x, v.y, entity.center.z))
     }
+    const object = IGMDriver.newLine(vectors)
+    object.comment = `DXF Entity ${entity.type} `
     return object
   }
 
   private doLine(entity: DxfParser.EntityLINE | DxfParser.EntityLWPOLYLINE | DxfParser.EntityPOLYLINE, dxf: DxfParser.DXFDocument): IgmObject {
-    const object = IGMDriver.newIgmObject()
+
+    const vectors: GCodeVector[] = []
     let i = 0
+    let hasBulgeLines = false
     for (const v of entity.vertices) {
       //const v = entity.vertices[i]
       if (v.bulge) {
+        hasBulgeLines = true
         const bulge: number = v.bulge
         const startPoint: Vector2 = v
-        const endPoint: Vector2 = i + 1 < entity.vertices.length ? entity.vertices[i + 1] : object.vectors[0]
+        const endPoint: Vector2 = i + 1 < entity.vertices.length ? entity.vertices[i + 1] : vectors[0]
         //https://github.com/leandromundim/LaserWeb3/blob/4e883d5e305e0ffd3ce59fea953aa76ed9c6d730/public/lib/dxf/three-dxf.js
 
         const bulgeGeometry = new BulgeGeometry(startPoint, endPoint, bulge)
-        object.vectors.push.apply(object.vectors, bulgeGeometry.vertices)
+        vectors.push.apply(vectors, bulgeGeometry.vertices)
 
       } else {
-        object.vectors.push(IGMDriver.newGCodeVector(v.x, v.y, v.z))
+        vectors.push(IGMDriver.newGCodeVector(v.x, v.y, v.z))
       }
       i++
     }
+
     //Close shapes
     if (entity.type != 'LINE' && entity.shape) {
-      const startPoint = object.vectors[0]
-      object.vectors.push(IGMDriver.newGCodeVector(startPoint.x, startPoint.y, startPoint.z))
+      const startPoint = vectors[0]
+      vectors.push(IGMDriver.newGCodeVector(startPoint.x, startPoint.y, startPoint.z))
     }
+
+    const object = IGMDriver.newLine(vectors)
+    object.comment = `DXF Entity ${entity.type} ${hasBulgeLines ? 'Bulges' : ''}`
     return object
   }
 
@@ -217,8 +221,8 @@ export class Dxf2IgmTransformer extends ModelTransformer<ArrayBuffer | string, I
       interpolatedPoints = curve.getPoints(100)
     }
 
-    const splineObject = IGMDriver.newIgmObject()
-    splineObject.vectors = interpolatedPoints.map(v => IGMDriver.newGCodeVector(v.x, v.y, 0))
+    const splineObject = IGMDriver.newLine(interpolatedPoints.map(v => IGMDriver.newGCodeVector(v.x, v.y, 0)))
+    splineObject.comment = `DXF Entity ${entity.type} `
     return splineObject
   }
 

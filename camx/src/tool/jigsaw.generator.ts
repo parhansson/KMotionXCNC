@@ -421,7 +421,9 @@ export class JigsawGenerator implements ModelGenerator<JigsawGeneratorInput> {
     styletag: `
       <style>
         body {
+          /*
           font: 13px sans-serif
+          */
         }
 
         circle{
