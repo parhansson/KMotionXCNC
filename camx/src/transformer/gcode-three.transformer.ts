@@ -7,8 +7,8 @@ import { Group, Geometry } from 'three'
 
 //Copyright (c) 2014 par.hansson@gmail.com
 interface ExtendedGCodeVector extends GCodeVector {
-  e:number// 0
-  extruding:boolean// = false
+  e: number// 0
+  extruding: boolean// = false
 }
 class ThreeShapeData {
   material: THREE.LineBasicMaterial
@@ -42,13 +42,13 @@ export class Gcode2ThreeTransformer extends GCodeTransformer<THREE.Geometry, THR
     //   linewidth: 1,
     //   color: 0xAAAAFF
     // })
-    material: new THREE.LineDashedMaterial({ 
-      gapSize: 1, 
+    material: new THREE.LineDashedMaterial({
+      gapSize: 1,
       dashSize: 2,
       opacity: 0.6,
       transparent: true,
       linewidth: 1,
-      color: 0xAA0000, 
+      color: 0xAA0000,
     })
 
   }
@@ -119,7 +119,7 @@ export class Gcode2ThreeTransformer extends GCodeTransformer<THREE.Geometry, THR
 
   //use for 3dprinter files
   //Need a way to rename axis to use E axis as extrude parameter
-  private createLinePrinter(args, position: ExtendedGCodeVector, newPosition: ExtendedGCodeVector, geometry: THREE.Geometry) {
+  private createLinePrinter(args: { E: number }, position: ExtendedGCodeVector, newPosition: ExtendedGCodeVector, geometry: THREE.Geometry) {
 
     newPosition.e = args.E !== undefined ? args.E : position.e,
       //TODO doesn't work as expected due to changing feedrate in the middle of line.

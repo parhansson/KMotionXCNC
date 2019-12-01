@@ -27,17 +27,22 @@ export class IGMModelSettings {
   fractionalDigits: number = 3
   translateToOrigo: boolean = true
   removeOutline: boolean = false
-  removeDuplicates: boolean = true
   removeSingularites: boolean = true
+  joinAdjacent: boolean = true
+  calculateShortestPath:boolean = true
   initCode: string = 'M100 P200 Q100'
   feedRate: number = 250
+  multipass:false
+  materialThickness: number = 10
   passes: number = 1
-  materialWidth: number = 10
 }
 export class PDFModelSettings {
   page: number = 1
   rotate: number = 90 // rotate 90 degrees to fit machine area
   scale: number = 1.0
+}
+export class DXFModelSettings {
+  includeDimension:true
 }
 export class Material {
   name: string
@@ -51,13 +56,16 @@ export class ModelSettings {
   svg = new SVGModelSettings()
   pdf = new PDFModelSettings()
   igm = new IGMModelSettings()
+  dxf = new DXFModelSettings()
+
   materials: Material[] = [] //ex { name: 'Cut 2mm polysterene', ppi: 'M100 P900 Q100', speed: 'F250', passes: 1, thickness: 2 },
   update(from: ModelSettings) {
-
-    this.svg = from.svg
-    this.pdf = from.pdf
-    this.igm = from.igm
-    this.materials = from.materials
+    //update existing object instead of setting a new
+    Object.assign(this.svg, from.svg)
+    Object.assign(this.pdf, from.pdf)
+    Object.assign(this.igm, from.igm)
+    Object.assign(this.materials, from.materials)
+    Object.assign(this.dxf, from.dxf)
 
     //Object.assign(new Foo, { a: 1 })
     //Reattach prototype of svg since there are functions in that class

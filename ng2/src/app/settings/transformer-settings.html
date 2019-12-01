@@ -1,78 +1,8 @@
 <div class="mt-3">
     <div class="col d-flex justify-content-center">
-
-      <div class="card mx-auto">
-        <h6 class="card-header text-center">PDF transformer</h6>
-        <div class="card-body">
-          <div class="form-group">
-            <label>Pdf import page number</label>
-            <input class="form-control" [(ngModel)]="transformerSettings.pdf.page" min="1" type="number" step="any" />
-          </div>
-          <div class="form-group">
-              <label>Rotation degrees</label>
-              <input class="form-control" [(ngModel)]="transformerSettings.pdf.rotate" min="0" max="360" type="number" step="any" />
-          </div>
-          <div class="form-group">
-              <label>Scale</label>
-              <input class="form-control" [(ngModel)]="transformerSettings.pdf.scale" min="0" type="number" step="any" />
-          </div>          
-        </div>
-      </div>
-      <div class="card mx-auto">
-        <h6 class="card-header text-center">SVG transformer</h6>
-        <div class="card-body">
-          <div class="form-group">
-            <label>SVG DPI</label>
-            <input class="form-control" [(ngModel)]="transformerSettings.svg.dpi" min="1" type="number" step="any" />
-          </div>
-          <div class="form-group">
-            <label>
-              <input type="checkbox" [(ngModel)]="transformerSettings.svg.renderText" /> Vectorize text
-            </label>
-          </div>
-        </div>
-      </div> 
-      <div class="card mx-auto">
-        <h6 class="card-header text-center">IGM transformer</h6>
-        <div class="card-body">
-
-          <div class="form-group">
-            <label>Fractional digits (resolution)</label>
-            <input class="form-control" [(ngModel)]="transformerSettings.igm.fractionalDigits" min="0" type="number" step="any" />
-          </div>
-          <div class="form-group">
-            <label>Init code</label>
-            <input class="form-control" [(ngModel)]="transformerSettings.igm.initCode" type="text" />
-          </div>
-          <div class="form-group">
-            <label>Feed rate</label>
-            <input class="form-control" [(ngModel)]="transformerSettings.igm.feedRate" min="1" type="number" step="any" />
-          </div>
-          <div class="form-group">
-            <label>Scale on import</label>
-            <input class="form-control" [(ngModel)]="transformerSettings.igm.scale" min="0" type="number" step="any" />
-          </div>      
-          <div class="checkbox">
-            <label>
-              <input type="checkbox" [(ngModel)]="transformerSettings.igm.removeOutline" /> Remove outline (not complete)
-            </label>
-          </div>
-          <div class="checkbox">
-            <label>
-              <input type="checkbox" [(ngModel)]="transformerSettings.igm.removeDuplicates" /> Remove duplicates (not complete, might remove too much)
-            </label>
-          </div>
-          <div class="checkbox">
-            <label>
-              <input type="checkbox" [(ngModel)]="transformerSettings.igm.removeSingularites" /> Remove single points
-            </label>
-          </div>
-          <div class="checkbox">
-            <label>
-              <input type="checkbox" [(ngModel)]="transformerSettings.igm.translateToOrigo" /> Move to origin
-            </label>
-          </div>
-        </div>
-      </div>
+      <kmx-dynamic-form [inputs]="pdfSettings" [headerLabel]="'PDF transformer'" [hideSubmit]="true" (update)="pdfChange($event)" ></kmx-dynamic-form>
+      <kmx-dynamic-form [inputs]="svgSettings" [headerLabel]="'SVG transformer'" [hideSubmit]="true" (update)="svgChange($event)"></kmx-dynamic-form>
+      <kmx-dynamic-form [inputs]="dxfSettings" [headerLabel]="'DXF transformer'" [hideSubmit]="true" (update)="dxfChange($event)"></kmx-dynamic-form>
+      <kmx-dynamic-form [inputs]="igmSettings" [headerLabel]="'IGM transformer'" [hideSubmit]="true" (update)="igmChange($event)"></kmx-dynamic-form>
     </div>
 </div>

@@ -1,7 +1,3 @@
 export { WizardModule } from './wizard.module' 
-export { MitreBoxWizardComponent } from './mitrebox-wizard.component'
-export { JigsawWizardComponent } from './jigsaw-wizard.component'
-export { TextWizardComponent } from './text-wizard.component'
 export { SvgPreviewComponent } from './svg-preview.component'
 export { ImportWizardComponent } from './import-wizard.component'
-export { ChipherWheelWizardComponent } from './cipher-wheel-wizard.component'

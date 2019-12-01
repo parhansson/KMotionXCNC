@@ -1,4 +1,7 @@
-import { IGM, IGMDriver, IgmObject } from '../model/igm'
+import { IGM, IGMDriver, IgmObject, LineObject } from '../model/igm'
+import { ModelGenerator } from './model-generator'
+import { GeneratorInput } from './generator-input'
+import { igm2SVG } from '../transformer/igm-svg.transformer'
 
 interface MitreOptions {
   mitreTop: boolean
@@ -7,23 +10,92 @@ interface MitreOptions {
   mitreLeft: boolean
 
 }
-export class MitreBox {
+export interface MitreBoxInput {
+  materialThickness: number
+  depth: number
+  width: number
+  height: number
+  lid: boolean
 
-  private models: IgmObject[]
+}
+export class MitreBox implements ModelGenerator<MitreBoxInput> {
+
+  private models: LineObject[]
 
   private cut_width: number
 
-  constructor(public width: number, public height: number, public depth: number, public materialThickness: number) {
+  constructor() {
   }
 
-  generate() {
-    /* Box dimensions (int 1 of a mm, and how many mitres to have, divided by two */
-    const w = this.width
-    const h = this.height
-    const d = this.depth
+  requiredInput() {
+    const inputs: Array<GeneratorInput<MitreBoxInput>> = [
+      {
+        type: 'number',
+        controlType: 'text',
+        name: 'materialThickness',
+        label: 'Material thickness',
+        placeholder: 'Material thickness',
+        append: 'mm',
+        value: 4,
+        required: true,
+        min: 1,
+        order: 4
+      },
+      {
+        type: 'number',
+        controlType: 'text',
+        name: 'depth',
+        label: 'Box depth',
+        append: 'mm',
+        value: 50,
+        required: true,
+        min: 1,
+        order: 3
+      }, {
+        type: 'number',
+        controlType: 'text',
+        name: 'width',
+        label: 'Width',
+        append: 'mm',
+        value: 70,
+        required: true,
+        min: 1,
+        order: 1
+      }, {
+        type: 'number',
+        controlType: 'text',
+        name: 'height',
+        label: 'Height',
+        append: 'mm',
+        value: 60,
+        required: true,
+        min: 1,
+        order: 2
+      }, {
+        type: 'checkbox',
+        controlType: 'bool',
+        name: 'lid',
+        label: 'Create lid',
+        value: true,
+        order: 4
+      },
+    ]
+    return inputs
 
+  }
+
+  async generateSVG(values: MitreBoxInput) {
+    return Promise.resolve(igm2SVG(await this.generate(values)))
+  }
+
+  generate(values: MitreBoxInput) {
+    /* Box dimensions (int 1 of a mm, and how many mitres to have, divided by two */
+    const w = values.width
+    const h = values.height
+    const d = values.depth
+    const lid = values.lid
     /* Thickness for the material (depth of the mitres) in 1 of a mm */
-    const thick = this.materialThickness
+    const thick = values.materialThickness
 
     /* How big the corner mitres are, in 1 of a mm 
       default is thickness of material times 4
@@ -57,7 +129,6 @@ export class MitreBox {
     //this.MitrePanel(frame + w / 2, frame + h + frame + d / 2, w, d, corner, div_w, div_d, thick, 1, 1);
 
     this.StartDoc(frame + w + d, frame + h + d)
-    const lid = false
     if (lid) {
       const options: MitreOptions = { mitreTop: true, mitreRight: true, mitreBottom: true, mitreLeft: true }
       this.MitrePanel(
@@ -99,12 +170,12 @@ export class MitreBox {
     const driver = new IGMDriver(igm)
     driver.addToLayerObject('', this.models)
 
-    return igm
+    return Promise.resolve(igm)
 
   }
 
-  private MitrePanel(x, y, w, h, corner_size, div_x, div_y, thick, invertX: boolean, invertY: boolean, options: MitreOptions) {
-    let a, b, i, d, half_cut
+  private MitrePanel(x: number, y: number, w: number, h: number, corner_size: number, div_x: number, div_y: number, thick: number, invertX: boolean, invertY: boolean, options: MitreOptions) {
+    let a: number, b: number, i: number, d: number, half_cut: number
     x = x - w / 2 + (invertX ? thick : 0)
     y = y - h / 2 + (invertY ? thick : 0)
     this.PolyStart()
@@ -285,20 +356,20 @@ export class MitreBox {
   }
 
   protected PolyStart() {
-    this.models.push(IGMDriver.newIgmObject())
+    this.models.push(IGMDriver.newLine())
   }
   private getLast() {
     return this.models[this.models.length - 1]
   }
-  protected PolyPoint(x, y) {
-    this.getLast().vectors.push(IGMDriver.newGCodeVector(x, y))
+  protected PolyPoint(x: number, y: number) {
+    this.getLast().geometry.vectors.push(IGMDriver.newGCodeVector(x, y))
   }
 
   protected PolyEnd() {
 
   }
 
-  protected StartDoc(w, h) {
+  protected StartDoc(w: number, h: number) {
 
 
   }

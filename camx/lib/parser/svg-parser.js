@@ -7,7 +7,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import * as opentype from 'opentype.js';
+import { FontLoaderService } from '../util';
 export class SvgNode {
     constructor() {
         this.xformToWorld = [1, 0, 0, 1, 0, 0]; //2d Transformation vector
@@ -63,49 +63,6 @@ class SVGElementWalker {
         });
     }
 }
-class FontService {
-    constructor() {
-        this.fontMap = {};
-    }
-    hasFont(fontName) {
-        const hasFont = this.fontMap[fontName] !== undefined;
-        if (!hasFont) {
-            console.log('Unable to load font ' + fontName);
-        }
-        return hasFont;
-    }
-    getFont(fontName) {
-        return __awaiter(this, void 0, void 0, function* () {
-            //console.log('Get font ' + fontName)
-            const cachedFont = this.fontMap[fontName];
-            if (cachedFont) {
-                return cachedFont;
-            }
-            console.log(`Loading font ${fontName}`);
-            return this.loadFont(fontName).then(loadedFont => this.fontMap[fontName] = loadedFont);
-        });
-    }
-    preloadFont(fontUrl, fontName) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return this.loadFont(fontUrl).then(loadedFont => this.fontMap[fontName] = loadedFont);
-        });
-    }
-    loadFont(fontUrl) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return new Promise((resolve, reject) => {
-                opentype.load(fontUrl, (err, font) => {
-                    if (err) {
-                        console.log(`Failed to load font ${fontUrl}`);
-                        reject('Could not load font: ' + err);
-                    }
-                    else {
-                        resolve(font);
-                    }
-                });
-            });
-        });
-    }
-}
 /**
  * SVG parser for the Lasersaur.
  * Converts SVG DOM to a flat collection of paths.
@@ -146,7 +103,7 @@ export class SvgParser extends SVGElementWalker {
     constructor(elementFilter, renderText) {
         super(elementFilter);
         this.renderText = renderText;
-        this.fontService = new FontService();
+        this.fontService = new FontLoaderService();
         this.DEG_TO_RAD = Math.PI / 180;
         this.RAD_TO_DEG = 180 / Math.PI;
         this.globalNodes = {};
@@ -325,40 +282,40 @@ export class SvgParser extends SVGElementWalker {
                         val = val.replace(/([^#])/g, '$1$1');
                     }
                     const a = val.slice(1).match(/../g).map(function (i) { return parseInt(i, 16); });
-                    return a;
+                    return a.join('');
                 }
                 else if (val.search(/^rgb\(/) != -1) {
                     const a = val.slice(4, -1).split(',');
                     for (let i = 0; i < a.length; i++) {
                         const c = this.strip(a[i]);
                         if (c.charAt(c.length - 1) == '%') {
-                            a[i] = Math.round(parseFloat(c.slice(0, -1)) * 2.55);
+                            a[i] = '' + Math.round(parseFloat(c.slice(0, -1)) * 2.55);
                         }
                         else {
-                            a[i] = parseInt(c, 10);
+                            a[i] = '' + parseInt(c, 10);
                         }
                     }
-                    return a;
+                    return a.join('');
                 }
                 else if (val.search(/^rgba\(/) != -1) {
                     const a = val.slice(5, -1).split(',');
                     for (let i = 0; i < 3; i++) {
                         const c = this.strip(a[i]);
                         if (c.charAt(c.length - 1) == '%') {
-                            a[i] = Math.round(parseFloat(c.slice(0, -1)) * 2.55);
+                            a[i] = '' + Math.round(parseFloat(c.slice(0, -1)) * 2.55);
                         }
                         else {
-                            a[i] = parseInt(c, 10);
+                            a[i] = '' + parseInt(c, 10);
                         }
                     }
                     const c = this.strip(a[3]);
                     if (c.charAt(c.length - 1) == '%') {
-                        a[3] = Math.round(parseFloat(c.slice(0, -1)) * 0.01);
+                        a[3] = '' + Math.round(parseFloat(c.slice(0, -1)) * 0.01);
                     }
                     else {
-                        a[3] = Math.max(0, Math.min(1, parseFloat(c)));
+                        a[3] = '' + Math.max(0, Math.min(1, parseFloat(c)));
                     }
-                    return a;
+                    return a.join('');
                 }
                 else if (val.search(/^url\(/) != -1) {
                     console.error('error', 'defs are not supported at the moment');
@@ -565,12 +522,15 @@ export class SvgParser extends SVGElementWalker {
                 for (let ruleIndex = 0; ruleIndex < styleSheet.cssRules.length; ruleIndex++) {
                     //for(const ruleIndex in styleSheet.cssRules){
                     const rule = styleSheet.cssRules.item(ruleIndex);
-                    const style = rule.style;
-                    const fontFamily = style.fontFamily;
-                    //tslint:disable-next-line:no-string-literal
-                    const src = style['src'];
-                    const fontBlob = src.substring(5, src.length - 2);
-                    yield this.fontService.preloadFont(fontBlob, fontFamily);
+                    if (rule.type == CSSRule.FONT_FACE_RULE) {
+                        const fontFaceRule = styleSheet.cssRules.item(ruleIndex);
+                        const style = fontFaceRule.style;
+                        const fontFamily = style.fontFamily;
+                        //tslint:disable-next-line:no-string-literal
+                        const src = style['src'];
+                        const fontBlob = src.substring(5, src.length - 2);
+                        yield this.fontService.preloadFont(fontBlob, fontFamily);
+                    }
                 }
                 document.body.removeChild(container);
                 //blob:
@@ -716,9 +676,10 @@ export class SvgParser extends SVGElementWalker {
                         const decodedText = tag.textContent;
                         const x = this.parseUnit(tag.getAttribute('x')) || 0;
                         const y = this.parseUnit(tag.getAttribute('y')) || 0;
-                        const path = font.getPath(decodedText, x, y, node.fontSize, { kerning: true });
+                        const path = font.getPath(decodedText, x, y, node.fontSize);
                         //Monkey patch for text-anchor and baseline attribute
                         //should be done when parsing attributes and then transform is already made
+                        //check Font.getAdvanceWidth as complement to boundingbox
                         const textAnchorAttr = tag.attributes.getNamedItem('text-anchor');
                         const baselineAttr = tag.attributes.getNamedItem('dominant-baseline');
                         if (textAnchorAttr || baselineAttr) {
@@ -731,6 +692,7 @@ export class SvgParser extends SVGElementWalker {
                                 alignX = (bounds.x2 - bounds.x1);
                             }
                             let alignY = 0;
+                            //TODO middle or center?? need to check this
                             if (baselineAttr.nodeValue === 'middle' || baselineAttr.nodeValue === 'center') {
                                 alignY = (bounds.y2 - bounds.y1) / 2;
                             }

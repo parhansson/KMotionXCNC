@@ -13,17 +13,22 @@ export declare class IGMModelSettings {
     fractionalDigits: number;
     translateToOrigo: boolean;
     removeOutline: boolean;
-    removeDuplicates: boolean;
     removeSingularites: boolean;
+    joinAdjacent: boolean;
+    calculateShortestPath: boolean;
     initCode: string;
     feedRate: number;
+    multipass: false;
+    materialThickness: number;
     passes: number;
-    materialWidth: number;
 }
 export declare class PDFModelSettings {
     page: number;
     rotate: number;
     scale: number;
+}
+export declare class DXFModelSettings {
+    includeDimension: true;
 }
 export declare class Material {
     name: string;
@@ -36,6 +41,7 @@ export declare class ModelSettings {
     svg: SVGModelSettings;
     pdf: PDFModelSettings;
     igm: IGMModelSettings;
+    dxf: DXFModelSettings;
     materials: Material[];
     update(from: ModelSettings): void;
 }

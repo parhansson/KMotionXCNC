@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { TabsModule } from 'ngx-bootstrap/tabs'
+import { DynamicFormModule } from '../form/dynamic-form.module'
 import { MCodeValueComponent } from './mcode-value.component'
 import { SettingsScreenComponent } from './settings-screen.component'
 import { GeneralSettingsComponent } from './general-settings.component'
@@ -17,7 +18,8 @@ import { MotionParametersSettingsComponent } from './motion-parameters-settings.
   imports: [CommonModule,
     FormsModule,
     TabsModule,
-    ResourceModule
+    ResourceModule,
+    DynamicFormModule
   ],
   declarations: [
     MCodeValueComponent,

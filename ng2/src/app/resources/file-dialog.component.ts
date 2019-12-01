@@ -16,7 +16,10 @@ import { Payload } from './payload'
           <div class="modal-body" file-dropzone (dropped)="setFileResource($event)">
             <file-path [resource]="resource" (changed)="listDir()" ></file-path>
             <ul class="modal-file-list">
-              <li class="button" (click)="selectFile(file)" *ngFor="let file of files">{{file.name}}</li>          
+              <li class="button" (click)="selectFile(file)" *ngFor="let file of files">
+              <b *ngIf="file.type == 4">{{file.name}}</b>
+              <span *ngIf="file.type != 4">{{file.name}}</span>
+              </li>          
             </ul>
             <p *ngIf="!saveMode">Open file by selecting or with drag and drop to editor from desktop</p>
             <div *ngIf="saveMode">
@@ -116,7 +119,9 @@ export class FileDialogComponent {
   public listDir() {
     this.fileBackend.listDir(this.resource.dir).subscribe(
       data => {
-        this.files = data.files
+        this.files = data.files.sort((f1, f2) => {
+          return f1.name.localeCompare(f2.name)
+        })
         this.resource.dir = data.dir
       },
       err => console.log(err)

@@ -1,18 +1,85 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 import { IGM, IGMDriver } from '../model/igm';
+import { igm2SVG } from '../transformer/igm-svg.transformer';
 export class MitreBox {
-    constructor(width, height, depth, materialThickness) {
-        this.width = width;
-        this.height = height;
-        this.depth = depth;
-        this.materialThickness = materialThickness;
+    constructor() {
     }
-    generate() {
+    requiredInput() {
+        const inputs = [
+            {
+                type: 'number',
+                controlType: 'text',
+                name: 'materialThickness',
+                label: 'Material thickness',
+                placeholder: 'Material thickness',
+                append: 'mm',
+                value: 4,
+                required: true,
+                min: 1,
+                order: 4
+            },
+            {
+                type: 'number',
+                controlType: 'text',
+                name: 'depth',
+                label: 'Box depth',
+                append: 'mm',
+                value: 50,
+                required: true,
+                min: 1,
+                order: 3
+            }, {
+                type: 'number',
+                controlType: 'text',
+                name: 'width',
+                label: 'Width',
+                append: 'mm',
+                value: 70,
+                required: true,
+                min: 1,
+                order: 1
+            }, {
+                type: 'number',
+                controlType: 'text',
+                name: 'height',
+                label: 'Height',
+                append: 'mm',
+                value: 60,
+                required: true,
+                min: 1,
+                order: 2
+            }, {
+                type: 'checkbox',
+                controlType: 'bool',
+                name: 'lid',
+                label: 'Create lid',
+                value: true,
+                order: 4
+            },
+        ];
+        return inputs;
+    }
+    generateSVG(values) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return Promise.resolve(igm2SVG(yield this.generate(values)));
+        });
+    }
+    generate(values) {
         /* Box dimensions (int 1 of a mm, and how many mitres to have, divided by two */
-        const w = this.width;
-        const h = this.height;
-        const d = this.depth;
+        const w = values.width;
+        const h = values.height;
+        const d = values.depth;
+        const lid = values.lid;
         /* Thickness for the material (depth of the mitres) in 1 of a mm */
-        const thick = this.materialThickness;
+        const thick = values.materialThickness;
         /* How big the corner mitres are, in 1 of a mm
           default is thickness of material times 4
         */
@@ -36,7 +103,6 @@ export class MitreBox {
         //this.MitrePanel(frame + w + frame + d / 2, frame + h / 2, d, h, corner, div_d, div_h, thick, 1, 0);
         //this.MitrePanel(frame + w / 2, frame + h + frame + d / 2, w, d, corner, div_w, div_d, thick, 1, 1);
         this.StartDoc(frame + w + d, frame + h + d);
-        const lid = false;
         if (lid) {
             const options = { mitreTop: true, mitreRight: true, mitreBottom: true, mitreLeft: true };
             this.MitrePanel(w / 2, h / 2, w, h, corner, div_w, div_h, thick, false, false, options);
@@ -56,7 +122,7 @@ export class MitreBox {
         const igm = new IGM();
         const driver = new IGMDriver(igm);
         driver.addToLayerObject('', this.models);
-        return igm;
+        return Promise.resolve(igm);
     }
     MitrePanel(x, y, w, h, corner_size, div_x, div_y, thick, invertX, invertY, options) {
         let a, b, i, d, half_cut;
@@ -251,13 +317,13 @@ export class MitreBox {
         this.PolyEnd();
     }
     PolyStart() {
-        this.models.push(IGMDriver.newIgmObject());
+        this.models.push(IGMDriver.newLine());
     }
     getLast() {
         return this.models[this.models.length - 1];
     }
     PolyPoint(x, y) {
-        this.getLast().vectors.push(IGMDriver.newGCodeVector(x, y));
+        this.getLast().geometry.vectors.push(IGMDriver.newGCodeVector(x, y));
     }
     PolyEnd() {
     }

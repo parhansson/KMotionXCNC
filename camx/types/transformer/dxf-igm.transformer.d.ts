@@ -1,19 +1,21 @@
-import { Observer } from 'rxjs';
 import { ModelTransformer } from './model.transformer';
-import { IGM, IgmObject } from '../model/igm';
-export declare class Dxf2IgmTransformer extends ModelTransformer<ArrayBuffer | string, IGM> {
-    constructor();
-    execute(source: ArrayBuffer | string, targetObserver: Observer<IGM>): void;
+import { IGM } from '../model/igm';
+import { DXFModelSettings } from '../model';
+export declare class Dxf2IgmTransformer implements ModelTransformer<ArrayBuffer | string, IGM> {
+    private settings;
+    private driver;
+    constructor(settings: DXFModelSettings);
+    transform(source: ArrayBuffer | string): Promise<IGM>;
     private isArc;
     private isLine;
     private isDimension;
     private isSpline;
     private isEllipse;
-    doEntity(entity: DxfParser.Entity, data: DxfParser.DXFDocument): IgmObject[];
-    scale(shape: IgmObject, dxf: DxfParser.DXFDocument): IgmObject;
-    doArc(entity: DxfParser.EntityARC | DxfParser.EntityCIRCLE, dxf: DxfParser.DXFDocument): IgmObject;
-    doEllipse(entity: DxfParser.EntityELLIPSE, dxf: DxfParser.DXFDocument): IgmObject;
-    doLine(entity: DxfParser.EntityLINE | DxfParser.EntityLWPOLYLINE | DxfParser.EntityPOLYLINE, dxf: DxfParser.DXFDocument): IgmObject;
-    doSpline(entity: DxfParser.EntitySPLINE, dxf: DxfParser.DXFDocument): IgmObject;
-    doDimension(entity: DxfParser.EntityDIMENSION, dxf: DxfParser.DXFDocument): IgmObject[];
+    private doEntity;
+    private scale;
+    private doArc;
+    private doEllipse;
+    private doLine;
+    private doSpline;
+    private doDimension;
 }

@@ -1,4 +1,5 @@
 import { IGMModelSettings } from './model.settings';
+import { Vector3, Vector2 } from './vector';
 export interface GCodeVector {
     x: number;
     y: number;
@@ -7,24 +8,54 @@ export interface GCodeVector {
     b: number;
     c: number;
 }
-export interface IgmObject {
-    cmd: string;
-    type: string;
+export interface Limit {
+    start: GCodeVector;
+    end: GCodeVector;
+}
+export interface Geometry {
+    limit?: Limit;
+}
+export interface ARC extends Geometry {
+    type: 'ARC';
+    x: number;
+    y: number;
+    radius: number;
+    startAngle: number;
+    endAngle: number;
+    clockwise: boolean;
+}
+export interface LINE extends Geometry {
+    type: 'LINE';
     vectors: GCodeVector[];
-    args: string[];
+}
+export interface IgmObject {
     bounds: BoundRect;
-    node: any;
+    comment?: string;
+    geometry: ARC | LINE;
+}
+export interface LineObject extends IgmObject {
+    geometry: LINE;
+}
+export interface ArcObject extends IgmObject {
+    geometry: ARC;
+}
+export interface Layer {
+    objects: IgmObject[];
+    visible: boolean;
 }
 export interface LayerMap {
-    [id: string]: IgmObject[];
+    [id: string]: Layer;
+}
+export interface LayerStatus {
+    [id: string]: boolean;
 }
 export declare class IGM {
     metric: boolean;
     readonly layers: LayerMap;
-    readonly layerKeys: any[];
     readonly textLayer: any[];
     readonly unsupported: any[];
     readonly rawLine: string[];
+    readonly layerStatus: LayerStatus;
     constructor(metric?: boolean);
 }
 /**
@@ -32,44 +63,57 @@ export declare class IGM {
  */
 export declare class IGMDriver {
     private igm;
+    static newLine(vectors?: GCodeVector[]): LineObject;
+    static newArc(x: number, //center of arc
+    y: number, //center of arc
+    radius: number, startAngle: number, endAngle: number, clockwise: boolean): ArcObject;
+    private static newIgmObject;
+    static newGCodeVector3(v: Vector3): {
+        x: number;
+        y: number;
+        z: number;
+        a: number;
+        b: number;
+        c: number;
+    };
+    static newGCodeVector(x?: number, y?: number, z?: number, a?: number, b?: number, c?: number): GCodeVector;
     constructor(igm: IGM);
+    reverse(shape: IgmObject): void;
+    private updateLimit;
+    private updateLineLimit;
+    private updateArcLimit;
+    start(shape: IgmObject): GCodeVector;
+    end(shape: IgmObject): GCodeVector;
     addRaw(raw: string): void;
     addUnsupported(obj: any): void;
-    addToLayerObject(layerKey: any, obj: IgmObject | IgmObject[], layerName?: string): void;
+    addToLayerObject(layerKey: string, obj: IgmObject | IgmObject[]): void;
+    readonly allVisibleObjects: IgmObject[];
     readonly allObjectsFlat: IgmObject[];
-    applyModifications(settings: IGMModelSettings): IgmObject[];
-    static newIgmObject(): IgmObject;
-    static newGCodeVector(x?: number, y?: number, z?: number, a?: number, b?: number, c?: number): GCodeVector;
-    static vectorScale(thisV: GCodeVector, scale: number): GCodeVector;
-    static vectorAdd(thisV: GCodeVector, v: GCodeVector): GCodeVector;
-    static vectorEquals(thisV: GCodeVector, v: GCodeVector): boolean;
-    static distanceSquared(thisV: GCodeVector, v: GCodeVector): number;
-    static distanceTo(thisV: GCodeVector, v: GCodeVector): number;
-    static doOperation(shape: IgmObject | IgmObject[], operation: (vec: GCodeVector) => void): IgmObject | IgmObject[];
-    static translate(shape: IgmObject | IgmObject[], translateVec: GCodeVector): IgmObject | IgmObject[];
-    static scale(shape: IgmObject | IgmObject[], ratio: number): IgmObject | IgmObject[];
-    static clone(shape: IgmObject): IgmObject;
-    static start(shape: IgmObject): GCodeVector;
-    static end(shape: IgmObject): GCodeVector;
-    static first<T>(arr: T[]): T;
-    static last<T>(arr: T[]): T;
-    static updateBounds(shapes: IgmObject[]): void;
-    getMaxBounds(paths: IgmObject[]): BoundRect;
-    /**
-     * I know I know, This does not work
-     */
-    removeDuplicates(paths: IgmObject[]): number;
-    removeSingularites(shapes: IgmObject[]): number;
-    removeOutline(paths: IgmObject[], maxBounds: any): void;
+    setLayerStatus(status: LayerStatus): void;
+    applyModifications(settings: IGMModelSettings, onlyVisible?: boolean): IgmObject[];
+    private vectorScale;
+    private vectorAdd;
+    private vectorEquals;
+    private distanceSquared;
+    private distanceTo;
+    private doOperation;
+    translate(input: IgmObject | IgmObject[], translateVec: GCodeVector): IgmObject | IgmObject[];
+    scale(input: IgmObject | IgmObject[], ratio: number): IgmObject | IgmObject[];
+    clone(shape: IgmObject): LineObject | ArcObject;
+    updateBounds(shapes: IgmObject[]): void;
+    private explode;
+    getMaxBounds(shapes: IgmObject[]): BoundRect;
+    private removeSingularites;
+    private removeOutline;
     /**
      * Joining adjacent shapes. This implementation depends on orderNearestNeighbour first
      * However orderNearestNeighbour might check if reverse path is nearest and reverses
-     * @param paths
+     * @param shapes
      * @param fractionalDigits
      */
-    joinAdjacent(paths: IgmObject[], fractionalDigits: number): number;
-    pointEquals(v1: GCodeVector, v2: GCodeVector, fractionalDigits: number): boolean;
-    orderNearestNeighbour(paths: IgmObject[], reversePaths: boolean): void;
+    private joinAdjacent;
+    private pointEquals;
+    private orderNearestNeighbour;
     private nearest;
 }
 export declare class GCodeSource {
@@ -83,10 +127,10 @@ export declare class BoundRect {
     x2: number;
     y2: number;
     constructor();
-    scale(ratio: any): this;
+    scale(ratio: number): this;
     vec1(): GCodeVector;
     vec2(): GCodeVector;
-    include(vec: any): void;
+    include(vec: Vector2): void;
     area(): number;
     height(): number;
     width(): number;

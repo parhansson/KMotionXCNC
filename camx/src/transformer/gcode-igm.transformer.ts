@@ -1,11 +1,11 @@
 
-import { IGM, IGMDriver, IgmObject, GCodeVector } from '../model/igm'
+import { IGM, IGMDriver, IgmObject, GCodeVector, LineObject } from '../model/igm'
 import { Curve3 } from '../model/vector'
 import { GCodeTransformer, State } from './gcode.transformer'
 //Copyright (c) 2014 par.hansson@gmail.com
 
 
-export class Gcode2IgmTransformer extends GCodeTransformer<IgmObject, IGM>{
+export class Gcode2IgmTransformer extends GCodeTransformer<LineObject, IGM>{
   private driver: IGMDriver
   constructor(disableWorker?: boolean) { 
     super(disableWorker) 
@@ -17,7 +17,7 @@ export class Gcode2IgmTransformer extends GCodeTransformer<IgmObject, IGM>{
   }
 
   protected startShape() {
-    const shape = IGMDriver.newIgmObject()
+    const shape = IGMDriver.newLine()
     //shape.userData = { lineNo: this.state.lineNo }
     this.driver.addToLayerObject('layer1',shape)
     return shape
@@ -28,13 +28,13 @@ export class Gcode2IgmTransformer extends GCodeTransformer<IgmObject, IGM>{
     //setBounds on shape since it is modified without knowledge by driver
   }
 
-  protected addLinearPoint(newPosition: GCodeVector, shape: IgmObject) {
-    shape.vectors.push(newPosition)
+  protected addLinearPoint(newPosition: GCodeVector, shape: LineObject) {
+    shape.geometry.vectors.push(newPosition)
   }
-  protected addCurve(curve: Curve3, shape: IgmObject) {
+  protected addCurve(curve: Curve3, shape: LineObject) {
     const vectors = curve.getPoints(50)
     for (const point of vectors) {
-      shape.vectors.push(IGMDriver.newGCodeVector(point.x, point.y, point.z))
+      shape.geometry.vectors.push(IGMDriver.newGCodeVector(point.x, point.y, point.z))
     }
   }
 

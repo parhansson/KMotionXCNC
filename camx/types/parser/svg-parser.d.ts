@@ -11,7 +11,7 @@ export declare class SvgNode {
     display: string;
     visibility: string;
     fill: string;
-    stroke: any;
+    stroke: string;
     color: string;
     opacity: number;
     fillOpacity: number;
@@ -97,7 +97,7 @@ export declare class SvgParser extends SVGElementWalker<SvgNode> {
         'font-size': (node: SvgNode, val: string) => void;
         'font-family': (node: SvgNode, val: string) => void;
         'font-style': (node: SvgNode, val: string) => void;
-        '__parseColor': (val: any, currentColor: any) => any;
+        '__parseColor': (val: string, currentColor: string) => string;
     };
     SVGTagMapping: {
         svg: (tag: SVGElement, node: SvgNode) => Promise<void>;
@@ -121,9 +121,9 @@ export declare class SvgParser extends SVGElementWalker<SvgNode> {
     };
     _textContent(tag: SVGTextContentElement, node: SvgNode): Promise<void>;
     addPath(dObject: string | PathDValue[], node: SvgNode): void;
-    addCubicBezier(subpath: Point[], x1: any, y1: any, x2: any, y2: any, x3: any, y3: any, x4: any, y4: any, level: any, tolerance2: any): void;
-    addQuadraticBezier(subpath: Point[], x1: any, y1: any, x2: any, y2: any, x3: any, y3: any, level: any, tolerance2: any): void;
-    addArc(subpath: Point[], x1: number, y1: number, rx: number, ry: number, phi: number, large_arc: any, sweep: any, x2: number, y2: number, tolerance2: number): void;
+    addCubicBezier(subpath: Point[], x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, x4: number, y4: number, level: number, tolerance2: number): void;
+    addQuadraticBezier(subpath: Point[], x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, level: number, tolerance2: number): void;
+    addArc(subpath: Point[], x1: number, y1: number, rx: number, ry: number, phi: number, large_arc: number, sweep: number, x2: number, y2: number, tolerance2: number): void;
     parseUnit(val: string): number;
     matrixMult(mA: Matrix, mB: Matrix): Matrix;
     matrixApply(mat: Matrix, vec: Point): Point;

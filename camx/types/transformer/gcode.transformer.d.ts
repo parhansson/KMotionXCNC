@@ -1,6 +1,5 @@
 import { Curve3, Vector3, MoveArcArguments, MoveArguments } from '../model/vector';
 import { Block, Word } from '../gcode';
-import { Observer } from 'rxjs';
 import { GCodeSource, GCodeVector } from '../model/igm';
 import { ModelTransformer } from './model.transformer';
 export declare class ModalGroup {
@@ -27,7 +26,7 @@ export declare class State<ShapeType> extends GCodeState {
     handleWord(cmd: Word): void;
     private wordHandlers;
 }
-export declare abstract class GCodeTransformer<ShapeType, OutputType> extends ModelTransformer<GCodeSource, OutputType> {
+export declare abstract class GCodeTransformer<ShapeType, OutputType> implements ModelTransformer<GCodeSource, OutputType> {
     protected disableWorker?: boolean;
     output: OutputType;
     protected state: State<ShapeType>;
@@ -35,9 +34,9 @@ export declare abstract class GCodeTransformer<ShapeType, OutputType> extends Mo
     protected abstract createOutput(): OutputType;
     protected abstract startShape(): ShapeType;
     protected abstract endShape(): void;
-    protected abstract addLinearPoint(newPosition: GCodeVector, shape: ShapeType): any;
-    protected abstract addCurve(curve: Curve3, shape: ShapeType): any;
-    execute(gcode: GCodeSource, observer: Observer<OutputType>): void;
+    protected abstract addLinearPoint(newPosition: GCodeVector, shape: ShapeType): void;
+    protected abstract addCurve(curve: Curve3, shape: ShapeType): void;
+    transform(gcode: GCodeSource): Promise<OutputType>;
     private onBlock;
     private onEndProgram;
     private onStartShape;

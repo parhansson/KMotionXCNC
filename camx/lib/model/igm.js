@@ -1,13 +1,15 @@
+import { ArcCurve } from './vector';
 // Intermediate Gcode Model
 export class IGM {
     constructor(metric = true) {
         this.metric = metric;
         //TODO Changing IGM to interface will break instanceof when transforming
         this.layers = {}; // sort by stroke color
-        this.layerKeys = []; // layerKey is a mapping to add unnamed layers, layer will get a generated name
+        //readonly layerKeys: any[] = [] // layerKey is a mapping to add unnamed layers, layer will get a generated name
         this.textLayer = []; // textpaths
         this.unsupported = []; // Unsupported nodes
         this.rawLine = [];
+        this.layerStatus = {};
     }
 }
 /**
@@ -17,107 +19,40 @@ export class IGMDriver {
     constructor(igm) {
         this.igm = igm;
     }
-    addRaw(raw) {
-        this.igm.rawLine.push(raw);
+    static newLine(vectors) {
+        return this.newIgmObject({
+            type: 'LINE',
+            vectors: vectors || []
+        });
     }
-    addUnsupported(obj) {
-        this.igm.unsupported.push(obj);
+    static newArc(x, //center of arc
+    y, //center of arc
+    radius, startAngle, endAngle, clockwise) {
+        return this.newIgmObject({
+            type: 'ARC',
+            x,
+            y,
+            radius,
+            startAngle,
+            endAngle,
+            clockwise
+        });
     }
-    addToLayerObject(layerKey, obj, layerName) {
-        if (layerName === undefined) {
-            layerName = this.igm.layerKeys[layerKey];
-            if (layerName === undefined) {
-                let layerNumber = 0; //this.layerKeys.length;
-                do {
-                    layerNumber++;
-                    layerName = 'layer' + layerNumber;
-                } while (this.igm.layers[layerName] !== undefined);
-            }
-        }
-        //TODO check for renaming layers
-        this.igm.layerKeys[layerKey] = layerName;
-        this.igm.layers[layerName] = this.igm.layers[layerName] || [];
-        if (obj instanceof Array) {
-            Array.prototype.push.apply(this.igm.layers[layerName], obj);
-        }
-        else {
-            this.igm.layers[layerName].push(obj);
-        }
-    }
-    get allObjectsFlat() {
-        let all = [];
-        for (const prop in this.igm.layers) {
-            // important check that this is objects own property 
-            // not from prototype prop inherited
-            if (this.igm.layers.hasOwnProperty(prop)) {
-                console.log('layerName', prop);
-                const vectors = this.igm.layers[prop];
-                all = all.concat(vectors);
-            }
-        }
-        return all;
-    }
-    applyModifications(settings) {
-        const shapes = this.allObjectsFlat;
-        console.info('Nr of Shapes: ', shapes.length);
-        if (settings.removeSingularites) {
-            console.time('Removed single points');
-            const removed = this.removeSingularites(shapes);
-            console.info('Removed single points: ', removed);
-            console.timeEnd('Removed single points');
-        }
-        console.log('Scaling model', settings.scale);
-        console.time('Scaling');
-        IGMDriver.scale(shapes, settings.scale);
-        console.timeEnd('Scaling');
-        //Bounds are needed by removeDuplicates
-        console.time('Update bounds');
-        IGMDriver.updateBounds(shapes);
-        console.timeEnd('Update bounds');
-        // cut the inside parts first
-        if (settings.removeDuplicates) {
-            //This function will change the order of the paths
-            console.time('Remove duplcates');
-            const removed = this.removeDuplicates(shapes);
-            console.info('Removed duplicates: ', removed);
-            console.timeEnd('Remove duplcates');
-        }
-        console.time('Order nearest');
-        this.orderNearestNeighbour(shapes, true);
-        console.timeEnd('Order nearest');
-        console.time('Join adjacent');
-        const joined = this.joinAdjacent(shapes, settings.fractionalDigits);
-        console.info('Joined adjacents: ', joined);
-        console.timeEnd('Join adjacent');
-        IGMDriver.updateBounds(shapes);
-        const maxBounds = this.getMaxBounds(shapes);
-        if (settings.removeOutline) {
-            //Some files has an outline. remove it if requested
-            this.removeOutline(shapes, maxBounds);
-        }
-        if (settings.translateToOrigo) {
-            const translateVec = IGMDriver.newGCodeVector(-maxBounds.x, -maxBounds.y, 0);
-            IGMDriver.translate(shapes, translateVec);
-        }
-        //Add support for offsetting models on import
-        //if(settings.offset){
-        //const offesetVec = IGMDriver.newGCodeVector(0, -60, 0)
-        //IGMDriver.translate(shapes, offesetVec)
-        //}
-        console.info('Nr of Shapes after: ', shapes.length);
-        return shapes;
-    }
-    static newIgmObject() {
-        return {
-            cmd: '',
-            type: '',
-            vectors: [],
-            args: [],
+    static newIgmObject(geometry) {
+        const object = {
+            geometry,
             bounds: null,
-            //replace bounds with min and max. this will include all axes
-            // min: GCodeVector
-            // max: GCodeVector
-            node: null
+        };
+        return object;
+    }
+    static newGCodeVector3(v) {
+        return {
+            x: v.x || 0,
+            y: v.y || 0,
+            z: v.z || 0,
+            a: 0,
+            b: 0,
+            c: 0
         };
     }
     static newGCodeVector(x, y, z, a, b, c) {
@@ -130,148 +65,288 @@ export class IGMDriver {
             c: c || 0
         };
     }
-    static vectorScale(thisV, scale) {
+    reverse(shape) {
+        const geometry = shape.geometry;
+        if (geometry.type === 'ARC') {
+            geometry.clockwise = !geometry.clockwise;
+            const startAngle = geometry.startAngle;
+            geometry.startAngle = geometry.endAngle;
+            geometry.endAngle = startAngle;
+        }
+        else if (geometry.type === 'LINE') {
+            geometry.vectors.reverse();
+        }
+        this.updateLimit(geometry);
+    }
+    updateLimit(geometry) {
+        if (geometry.type === 'ARC') {
+            this.updateArcLimit(geometry);
+        }
+        if (geometry.type === 'LINE') {
+            this.updateLineLimit(geometry);
+        }
+    }
+    updateLineLimit(geometry) {
+        geometry.limit = {
+            start: geometry.vectors[0],
+            end: geometry.vectors[geometry.vectors.length - 1]
+        };
+    }
+    updateArcLimit(geometry) {
+        const curve = new ArcCurve(geometry.x, geometry.y, geometry.radius, geometry.startAngle, geometry.endAngle, geometry.clockwise);
+        const start = curve.getPoint(0);
+        const end = curve.getPoint(1);
+        geometry.limit = {
+            start: IGMDriver.newGCodeVector3(start),
+            end: IGMDriver.newGCodeVector3(end)
+        };
+    }
+    start(shape) {
+        //this.updateLimit(shape.geometry)
+        return shape.geometry.limit.start;
+    }
+    end(shape) {
+        //this.updateLimit(shape.geometry)
+        return shape.geometry.limit.end;
+    }
+    addRaw(raw) {
+        this.igm.rawLine.push(raw);
+    }
+    addUnsupported(obj) {
+        this.igm.unsupported.push(obj);
+    }
+    addToLayerObject(layerKey, obj) {
+        if (layerKey === undefined) {
+            layerKey = 'undefined';
+        }
+        if (layerKey === null) {
+            layerKey = 'null';
+        }
+        //TODO check for renaming layers
+        this.igm.layers[layerKey] = this.igm.layers[layerKey] || { visible: true, objects: [] };
+        const layerObjects = this.igm.layers[layerKey].objects;
+        const newObjects = obj instanceof Array ? obj : [obj];
+        for (const shape of newObjects) {
+            this.updateLimit(shape.geometry);
+            layerObjects.push(shape);
+        }
+        this.updateBounds(newObjects);
+    }
+    get allVisibleObjects() {
+        let all = [];
+        for (const layerName in this.igm.layers) {
+            // important check that this is objects own property 
+            // not from prototype prop inherited
+            if (this.igm.layers.hasOwnProperty(layerName)) {
+                const layer = this.igm.layers[layerName];
+                if (layer.visible !== false) {
+                    console.log('layerName', layerName);
+                    const vectors = layer.objects;
+                    all = all.concat(vectors);
+                }
+            }
+        }
+        return all;
+    }
+    get allObjectsFlat() {
+        let all = [];
+        for (const layerName in this.igm.layers) {
+            // important check that this is objects own property 
+            // not from prototype prop inherited
+            if (this.igm.layers.hasOwnProperty(layerName)) {
+                console.log('layerName', layerName);
+                const layer = this.igm.layers[layerName];
+                const vectors = layer.objects;
+                all = all.concat(vectors);
+            }
+        }
+        return all;
+    }
+    setLayerStatus(status) {
+        for (const layerName in status) {
+            // important check that this is objects own property 
+            // not from prototype prop inherited
+            if (status.hasOwnProperty(layerName)) {
+                const layer = this.igm.layers[layerName];
+                if (layer) {
+                    layer.visible = status[layerName];
+                }
+            }
+        }
+    }
+    applyModifications(settings, onlyVisible) {
+        const shapes = onlyVisible ? this.allVisibleObjects : this.allObjectsFlat;
+        console.info('Nr of Shapes: ', shapes.length);
+        const time = (name, f) => {
+            console.time(name);
+            const result = f();
+            console.timeEnd(name);
+            return result;
+        };
+        if (settings.removeSingularites) {
+            const removed = time('Remove single points', () => this.removeSingularites(shapes));
+            console.info('Single points removed: ', removed);
+        }
+        if (settings.scale !== 1) {
+            console.log('Scaling model', settings.scale);
+            time('Scaling', () => this.scale(shapes, settings.scale));
+        }
+        //Bounds are needed by removeDuplicates (wich is removed)
+        time('Update bounds', () => this.updateBounds(shapes));
+        if (settings.calculateShortestPath || settings.joinAdjacent) {
+            time('Order nearest', () => this.orderNearestNeighbour(shapes, true));
+        }
+        if (settings.joinAdjacent) {
+            const joined = time('Join adjacent', () => this.joinAdjacent(shapes, settings.fractionalDigits));
+            console.info('Joined adjacents: ', joined);
+            this.updateBounds(shapes);
+        }
+        const maxBounds = this.getMaxBounds(shapes);
+        if (settings.removeOutline) {
+            //Some files has an outline. remove it if requested
+            console.info('Removing outline');
+            this.removeOutline(shapes, maxBounds);
+        }
+        if (settings.translateToOrigo) {
+            time('Abut origo', () => {
+                const translateVec = IGMDriver.newGCodeVector(-maxBounds.x, -maxBounds.y, 0);
+                this.translate(shapes, translateVec);
+            });
+        }
+        //Add support for offsetting models on import
+        //if(settings.offset){
+        //const offesetVec = IGMDriver.newGCodeVector(0, -60, 0)
+        //IGMDriver.translate(shapes, offesetVec)
+        //}
+        console.info('Nr of Shapes after: ', shapes.length);
+        return shapes;
+    }
+    vectorScale(thisV, scale) {
         thisV.x = thisV.x * scale;
         thisV.y = thisV.y * scale;
         thisV.z = thisV.z * scale;
         return thisV;
     }
-    static vectorAdd(thisV, v) {
+    vectorAdd(thisV, v) {
         thisV.x += v.x;
         thisV.y += v.y;
         thisV.z += v.z;
         return thisV;
     }
-    static vectorEquals(thisV, v) {
+    vectorEquals(thisV, v) {
         return ((v.x === thisV.x) && (v.y === thisV.y) && (v.z === thisV.z));
     }
-    static distanceSquared(thisV, v) {
+    distanceSquared(thisV, v) {
         const dx = thisV.x - v.x;
         const dy = thisV.y - v.y;
         const dz = thisV.z - v.z;
         return dx * dx + dy * dy + dz * dz;
     }
-    static distanceTo(thisV, v) {
-        return Math.cbrt(IGMDriver.distanceSquared(thisV, v));
+    distanceTo(thisV, v) {
+        return Math.sqrt(this.distanceSquared(thisV, v));
     }
-    static doOperation(shape, operation) {
-        let shapes;
-        if (shape instanceof Array) {
-            shapes = shape;
-        }
-        else {
-            shapes = [shape];
-        }
-        let shapeIdx = shapes.length;
-        while (shapeIdx--) {
-            const curShape = shapes[shapeIdx];
-            let vecIdx = curShape.vectors.length;
-            while (vecIdx--) {
-                const vec = curShape.vectors[vecIdx];
-                operation(vec);
+    doOperation(shape, type, operation) {
+        if (shape.geometry.type == 'ARC') {
+            const arc = shape.geometry;
+            if (type === 'scale') {
+                //This works for scaling, but will break radii when moving
+                const scaleHack = IGMDriver.newGCodeVector(arc.x, arc.y, arc.radius);
+                operation(scaleHack);
+                arc.x = scaleHack.x;
+                arc.y = scaleHack.y;
+                arc.radius = scaleHack.z;
+            }
+            else {
+                const translation = IGMDriver.newGCodeVector(arc.x, arc.y, 0);
+                operation(translation);
+                arc.x = translation.x;
+                arc.y = translation.y;
+                //arc.radius = scaleHack.z
             }
         }
+        else if (shape.geometry.type == 'LINE') {
+            shape.geometry.vectors.forEach(vec => operation(vec));
+        }
+        this.updateLimit(shape.geometry);
+        //TODO add operations for other geometries
         return shape;
     }
-    static translate(shape, translateVec) {
-        return this.doOperation(shape, (vec) => IGMDriver.vectorAdd(vec, translateVec));
+    translate(input, translateVec) {
+        const shapes = input instanceof Array ? input : [input];
+        for (const shape of shapes) {
+            this.doOperation(shape, 'translate', (vec) => this.vectorAdd(vec, translateVec));
+        }
+        return input;
     }
-    static scale(shape, ratio) {
+    scale(input, ratio) {
         if (ratio === 1) {
-            return shape;
+            return input;
         }
-        return this.doOperation(shape, (vec) => IGMDriver.vectorScale(vec, ratio));
-    }
-    static clone(shape) {
-        const copy = IGMDriver.newIgmObject();
-        for (const vec of shape.vectors) {
-            copy.vectors.push(IGMDriver.newGCodeVector(vec.x, vec.y, vec.z, vec.a, vec.b, vec.c));
+        const shapes = input instanceof Array ? input : [input];
+        for (const shape of shapes) {
+            this.doOperation(shape, 'scale', (vec) => this.vectorScale(vec, ratio));
         }
-        return copy;
+        return input;
     }
-    static start(shape) {
-        return shape.vectors[0];
+    clone(shape) {
+        const cloneVec = (vec) => IGMDriver.newGCodeVector(vec.x, vec.y, vec.z, vec.a, vec.b, vec.c);
+        if (shape.geometry.type == 'LINE') {
+            const copyVec = [];
+            for (const vec of shape.geometry.vectors) {
+                copyVec.push(cloneVec(vec));
+            }
+            return IGMDriver.newLine(copyVec);
+        }
+        else if (shape.geometry.type == 'ARC') {
+            const g = shape.geometry;
+            return IGMDriver.newArc(g.x, g.y, g.radius, g.startAngle, g.endAngle, g.clockwise);
+        }
     }
-    static end(shape) {
-        return shape.vectors[shape.vectors.length - 1];
-    }
-    static first(arr) {
-        return arr[0];
-    }
-    static last(arr) {
-        return arr[arr.length - 1];
-    }
-    static updateBounds(shapes) {
+    updateBounds(shapes) {
+        shapes.forEach(shape => {
+            const bounds = new BoundRect();
+            const vectors = this.explode(shape);
+            vectors.forEach(vec => bounds.include(vec));
+            shape.bounds = bounds;
+        });
         let idx = shapes.length;
         while (idx--) {
-            const bounds = new BoundRect();
             const shape = shapes[idx];
-            const vectors = shape.vectors;
-            if (vectors === undefined) {
-                console.info('what', idx);
-            }
-            let subidx = vectors.length;
-            while (subidx--) {
-                const vec = vectors[subidx];
-                bounds.include(vec);
-            }
-            shape.bounds = bounds;
         }
     }
-    getMaxBounds(paths) {
+    explode(shape) {
+        const geometry = shape.geometry;
+        if (geometry.type === 'LINE') {
+            return geometry.vectors;
+        }
+        if (geometry.type === 'ARC') {
+            //need to explode arc into vectors
+            //32 vectors should be enough to approximate bounds
+            return new ArcCurve(geometry.x, geometry.y, geometry.radius, geometry.startAngle, geometry.endAngle, geometry.clockwise).getPoints(32);
+        }
+        return [];
+    }
+    getMaxBounds(shapes) {
+        this.updateBounds(shapes);
         const maxBounds = new BoundRect();
-        let idx = paths.length;
+        let idx = shapes.length;
         while (idx--) {
-            const igmObj = paths[idx];
-            const vectors = igmObj.vectors;
-            maxBounds.include(igmObj.bounds.vec1());
-            maxBounds.include(igmObj.bounds.vec2());
+            const shape = shapes[idx];
+            maxBounds.include(shape.bounds.vec1());
+            maxBounds.include(shape.bounds.vec2());
         }
         return maxBounds;
-    }
-    /**
-     * I know I know, This does not work
-     */
-    removeDuplicates(paths) {
-        let removed = 0;
-        paths.sort(function (a, b) {
-            //TODO sort by number of vectors. should work alot better
-            //Only compare shapes with the same number of vectors
-            // sort by area
-            const aArea = a.bounds.area(); //TODO area needs to count zero with as 1
-            const bArea = b.bounds.area();
-            let result = aArea - bArea;
-            if (result == 0) {
-                const avec = a.vectors[0];
-                const bvec = b.vectors[0];
-                //TODO Experimental only, Need to compare whole path not just first point
-                //and reverse path
-                result = avec.x - bvec.x;
-                if (result == 0) {
-                    result = avec.y - bvec.y;
-                }
-            }
-            return result;
-        });
-        let idx = paths.length;
-        while (idx-- > 1) {
-            //TODO Experimental only, Need to compare whole path not just start and end point
-            const o1 = paths[idx];
-            const o2 = paths[idx - 1];
-            if (IGMDriver.vectorEquals(IGMDriver.start(o1), IGMDriver.start(o2)) && IGMDriver.vectorEquals(IGMDriver.end(o1), IGMDriver.end(o2))) {
-                removed++;
-                paths.splice(idx, 1);
-            }
-        }
-        return removed;
     }
     removeSingularites(shapes) {
         let removed = 0;
         let idx = shapes.length;
         while (idx--) {
-            if (shapes[idx].vectors.length == 1) {
-                removed++;
-                shapes.splice(idx, 1);
+            const shape = shapes[idx];
+            if (shape.geometry.type === 'LINE') {
+                if (shape.geometry.vectors.length == 1) {
+                    removed++;
+                    shapes.splice(idx, 1);
+                }
             }
         }
         return removed;
@@ -284,30 +359,39 @@ export class IGMDriver {
     /**
      * Joining adjacent shapes. This implementation depends on orderNearestNeighbour first
      * However orderNearestNeighbour might check if reverse path is nearest and reverses
-     * @param paths
+     * @param shapes
      * @param fractionalDigits
      */
-    joinAdjacent(paths, fractionalDigits) {
+    joinAdjacent(shapes, fractionalDigits) {
         let joined = 0;
-        if (paths.length < 2) {
+        if (shapes.length < 2) {
             return joined;
         }
         let idx = 0;
-        let last = paths[idx++];
-        while (idx < paths.length) {
-            const next = paths[idx];
-            const lastEnd = IGMDriver.end(last);
-            const nextStart = IGMDriver.start(next);
+        let last = shapes[idx++];
+        while (idx < shapes.length) {
+            const next = shapes[idx];
+            if (next.geometry) {
+                idx++;
+                continue;
+            }
+            const lastEnd = this.end(last);
+            const nextStart = this.start(next);
             //console.info(lastEnd, nextStart);
             //TODO check reverse path as well and reverse that
-            if (this.pointEquals(lastEnd, nextStart, fractionalDigits)) {
-                last.vectors.push.apply(last.vectors, next.vectors);
-                paths.splice(idx, 1);
-                joined++;
-            }
-            else {
-                last = next;
-                idx++;
+            if (last.geometry.type === 'LINE' && next.geometry.type === 'LINE') {
+                if (this.pointEquals(lastEnd, nextStart, fractionalDigits)) {
+                    Array.prototype.push.apply(last.geometry.vectors, next.geometry.vectors);
+                    //
+                    this.updateLimit(last.geometry);
+                    this.updateBounds([last]);
+                    shapes.splice(idx, 1);
+                    joined++;
+                }
+                else {
+                    last = next;
+                    idx++;
+                }
             }
         }
         return joined;
@@ -317,7 +401,7 @@ export class IGMDriver {
         return (v1.x.toFixed(fractionalDigits) === v2.x.toFixed(fractionalDigits) &&
             v1.y.toFixed(fractionalDigits) === v2.y.toFixed(fractionalDigits));
     }
-    orderNearestNeighbour(paths, reversePaths) {
+    orderNearestNeighbour(shapes, reversePaths) {
         //These are the steps of the algorithm:
         //
         //  start on an arbitrary vertex as current vertex.
@@ -327,45 +411,48 @@ export class IGMDriver {
         //  if all the vertices in domain are visited, then terminate.
         //  Go to step 2.
         const orderedPaths = [];
-        let next = this.nearest(IGMDriver.newGCodeVector(0, 0, 0), paths, reversePaths);
+        let next = this.nearest(IGMDriver.newGCodeVector(0, 0, 0), shapes, reversePaths);
         if (next) { // next is undefined if paths is an empty array
             orderedPaths.push(next);
-            while (paths.length > 0) {
-                next = this.nearest(IGMDriver.end(next), paths, reversePaths);
+            while (shapes.length > 0) {
+                next = this.nearest(this.end(next), shapes, reversePaths);
                 orderedPaths.push(next);
             }
-            paths.push.apply(paths, orderedPaths);
+            shapes.push.apply(shapes, orderedPaths);
         }
     }
-    nearest(point, paths, reversePaths) {
+    nearest(point, shapes, reversePaths) {
         let dist = Infinity;
         let index = -1;
         let reverseIndex = -1;
-        for (let pathIdx = 0, pathLength = paths.length; pathIdx < pathLength; pathIdx++) {
-            const shape = paths[pathIdx];
-            const pathStartPoint = shape.vectors[0];
-            let distanceSquared;
-            const startDS = IGMDriver.distanceSquared(pathStartPoint, point);
+        for (let shapeIdx = 0, shapeCount = shapes.length; shapeIdx < shapeCount; shapeIdx++) {
+            const shape = shapes[shapeIdx];
+            const shapeStart = this.start(shape);
+            let distance;
+            const startDS = this.distanceTo(shapeStart, point);
+            let foundreverse = false;
             if (reversePaths) {
                 //check endpoint as well and reverse path if endpoint is closer
-                const pathEndPoint = IGMDriver.end(shape);
-                const endDS = IGMDriver.distanceSquared(pathEndPoint, point);
-                if (startDS < endDS) {
-                    distanceSquared = startDS;
+                const shapeEnd = this.end(shape);
+                const endDS = this.distanceTo(shapeEnd, point);
+                if (startDS <= endDS) {
+                    distance = startDS;
                 }
                 else {
-                    distanceSquared = endDS;
+                    distance = endDS;
                     //only reverse if shape actually used
-                    reverseIndex = pathIdx;
-                    //shape.vectors.reverse()
+                    foundreverse = true;
                 }
             }
             else {
-                distanceSquared = startDS;
+                distance = startDS;
             }
-            if (distanceSquared < dist) {
-                dist = distanceSquared;
-                index = pathIdx;
+            if (distance < dist) {
+                dist = distance;
+                index = shapeIdx;
+                if (foundreverse) {
+                    reverseIndex = shapeIdx;
+                }
             }
             //experiment with tolerance check. If dist < tolerance break loop since finding a closer path probably won't matter
             // if(!shape.node.text){ //some text shapes generates 
@@ -376,11 +463,10 @@ export class IGMDriver {
             //   console.log(shape.node.text)
             // }
         }
-        //console.log(reverseIndex, paths.length)
-        const nearest = paths.splice(index, 1)[0];
+        const nearest = shapes.splice(index, 1)[0];
         //only reverse if shape actually used
         if (index > -1 && index === reverseIndex) {
-            nearest.vectors.reverse();
+            this.reverse(nearest);
         }
         return nearest;
     }

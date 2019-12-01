@@ -119,9 +119,14 @@ export class EllipseCurve extends Curve3 {
 
 }
 
+//ArcCurve is the same as EllipseCurve but radius is the same in both axes
 export class ArcCurve extends EllipseCurve {
-
-  constructor(aX: number, aY: number, aRadius: number, aStartAngle: number, aEndAngle: number, aClockwise: boolean) {
+  constructor(aX: number,
+    aY: number,
+    aRadius: number,
+    aStartAngle: number,
+    aEndAngle: number,
+    aClockwise: boolean) {
     super(aX, aY, aRadius, aRadius, aStartAngle, aEndAngle, aClockwise)
   }
 }

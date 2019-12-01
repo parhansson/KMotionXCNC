@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core'
-import { Observable, Observer, Subject } from 'rxjs'
+import { Observer, Subject } from 'rxjs'
 import {
   ModelTransformer,
   Igm2GcodeTransformer,
@@ -18,25 +18,41 @@ import * as THREE from 'three'
 
 export type Payload = ArrayBuffer | SVGElement | IGM | string[] | string
 
+
+//wrapper due to rxjs removal i camx. 
+//Should be refactored and removed
+class ModelTransformerWrapper<Source, Target> implements ModelTransformer<Source, Target>{
+
+  constructor(private delegate: ModelTransformer<Source, Target>) {
+
+  }
+  execute(input: Source, targetObserver: Observer<Target>) {
+    this.transform(input).then(output => targetObserver.next(output), err => targetObserver.error(err))
+  }
+  transform(source: Source): Promise<Target> {
+    return this.delegate.transform(source)
+  }
+}
+
 @Injectable()
 export class StaticTransformer {
   gcodeSubject = new Subject<GCodeSource>()
   threeSubject = new Subject<THREE.Group>()
   svgSubject = new Subject<SVGElement>()
   igmSubject = new Subject<IGM>()
-  pdf2svgTransformer: Pdf2SvgTransformer
-  img2gcodeTransformer: Igm2GcodeTransformer
-  svg2IgmTransformer: Svg2IgmTransformer
+  pdf2svgTransformer: ModelTransformerWrapper<ArrayBuffer, SVGElement>
+  img2gcodeTransformer: ModelTransformerWrapper<IGM, GCodeSource>
+  svg2IgmTransformer: ModelTransformerWrapper<SVGElement, IGM>
 
-  gcode2IgmTransformer: Gcode2IgmTransformer
-  dxf2IgmTransformer: Dxf2IgmTransformer
+  gcode2IgmTransformer: ModelTransformerWrapper<GCodeSource, IGM>
+  dxf2IgmTransformer: ModelTransformerWrapper<ArrayBuffer | string, IGM>
 
   constructor(private logService: LogService, private modelSettings: ModelSettingsService) {
-    this.pdf2svgTransformer = new Pdf2SvgTransformer(modelSettings.settings)
-    this.img2gcodeTransformer = new Igm2GcodeTransformer(modelSettings.settings.igm)
-    this.svg2IgmTransformer = new Svg2IgmTransformer(modelSettings.settings.svg)
-    this.dxf2IgmTransformer = new Dxf2IgmTransformer()
-    this.gcode2IgmTransformer = new Gcode2IgmTransformer(true)
+    this.pdf2svgTransformer = new ModelTransformerWrapper(new Pdf2SvgTransformer(modelSettings.settings))
+    this.img2gcodeTransformer = new ModelTransformerWrapper(new Igm2GcodeTransformer(modelSettings.settings.igm))
+    this.svg2IgmTransformer = new ModelTransformerWrapper(new Svg2IgmTransformer(modelSettings.settings.svg))
+    this.dxf2IgmTransformer = new ModelTransformerWrapper(new Dxf2IgmTransformer(modelSettings.settings.dxf))
+    this.gcode2IgmTransformer = new ModelTransformerWrapper(new Gcode2IgmTransformer(true))
 
     this.igmSubject.subscribe(
       igm => this.img2gcodeTransformer.execute(igm, this.gcodeSubject),
@@ -47,7 +63,7 @@ export class StaticTransformer {
       err => console.error(err))
 
     this.gcodeSubject.subscribe(
-      gcode => new Gcode2ThreeTransformer(true).execute(gcode, this.threeSubject),
+      gcode => new ModelTransformerWrapper(new Gcode2ThreeTransformer(true)).execute(gcode, this.threeSubject),
       err => console.error(err))
   }
   isSVG(payload: Payload, contentType: string): payload is (SVGElement | ArrayBuffer | string) {

@@ -1,12 +1,10 @@
 import { IGM, IGMDriver } from '../model/igm';
-import { ModelTransformer } from './model.transformer';
 import { SvgParser } from '../parser/svg-parser';
-export class Svg2IgmTransformer extends ModelTransformer {
+export class Svg2IgmTransformer {
     constructor(settings) {
-        super();
         this.settings = settings;
     }
-    execute(svgRootElement, targetObserver) {
+    transform(svgRootElement) {
         const igm = new IGM();
         const driver = new IGMDriver(igm);
         // let the fun begin
@@ -17,9 +15,9 @@ export class Svg2IgmTransformer extends ModelTransformer {
         const contentFilter = (element) => {
             return contentFilterDissalowed.indexOf(element.localName) < 0;
         };
-        new SvgParser(contentFilter, this.settings.renderText).parse(svgRootElement).then(node => {
+        return new SvgParser(contentFilter, this.settings.renderText).parse(svgRootElement).then(node => {
             this.makeModel(node, driver);
-            targetObserver.next(igm);
+            return igm;
         });
     }
     makeModel(node, driver) {
@@ -50,15 +48,13 @@ export class Svg2IgmTransformer extends ModelTransformer {
     makeShape(node, driver) {
         const dpiScaleFactor = this.settings.getDPIScaleFactor();
         for (const subpath of node.path) {
-            const shape = IGMDriver.newIgmObject();
-            shape.type = 'Linear interpolation';
-            shape.cmd = 'G1';
-            shape.node = node; //Not currently in use
+            const vectors = [];
             for (const point of subpath) {
-                shape.vectors.push(IGMDriver.newGCodeVector(point[0], point[1], 0));
+                vectors.push(IGMDriver.newGCodeVector(point[0], point[1], 0));
                 //TODO clip on clipPath here. this will be extremely difficult
             }
-            IGMDriver.scale(shape, dpiScaleFactor);
+            const shape = IGMDriver.newLine(vectors);
+            driver.scale(shape, dpiScaleFactor);
             if (node.unsupported === true) {
                 driver.addUnsupported(subpath);
             }

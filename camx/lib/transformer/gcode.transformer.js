@@ -1,9 +1,16 @@
-import { Curve3, EllipseCurve } from '../model/vector';
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+import { Curve3, ArcCurve } from '../model/vector';
 import { GCodeParser } from '../parser/gcode-parser';
 import { Word, WordParameters } from '../gcode';
-import { Subject } from 'rxjs';
 import { IGMDriver } from '../model/igm';
-import { ModelTransformer } from './model.transformer';
 //Copyright (c) 2014 par.hansson@gmail.com
 //Modal G codes 
 // Group 1	{G0, G1, G2, G3, G80, G81, G82, G83, G84, G85, G86, G87, G88, G89} - motion
@@ -123,56 +130,55 @@ export class State extends GCodeState {
         handler(cmd);
     }
 }
-export class GCodeTransformer extends ModelTransformer {
+export class GCodeTransformer {
     constructor(disableWorker) {
-        super();
         this.disableWorker = disableWorker;
     }
-    execute(gcode, observer) {
-        this.output = this.createOutput();
-        //this.group.name = 'GCODE';
-        this.state = new State();
-        //TODO parsing should be done outside of this transformer
-        //this transformer should Subject<Block> instead of GCodeSource
-        const subject = new Subject();
-        const subcripion = subject.subscribe((block) => {
-            this.onBlock(block);
-        }, (error) => { observer.error(error); }, () => {
-            this.onEndProgram();
-            subcripion.unsubscribe();
-            observer.next(this.output);
-            //observer.complete();
+    transform(gcode) {
+        return __awaiter(this, void 0, void 0, function* () {
+            this.output = this.createOutput();
+            //this.group.name = 'GCODE';
+            this.state = new State();
+            //this transformer should Subject<Block> instead of GCodeSource
+            return new Promise((resolve, reject) => {
+                GCodeParser.parse((block) => {
+                    this.onBlock(block);
+                }, gcode.lines)
+                    .then(() => {
+                    this.onEndProgram();
+                    resolve(this.output);
+                }, err => reject(err));
+            });
+            /*
+                if (disableWorker) {
+                  // parse without worker. Application will freeze during parsing
+                  KMXUtil.injectScript("js/import/gcode2three/gcode-parser.js", window.GCodeParser] !== undefined)
+                    .then(
+                    function() {
+                      new GCodeParser(parserDataHandler, parserDataHandler).parse(gcode.lines);
+                      parserDataHandler('done');
+                    },
+                    function(reason) {
+                      transformedDefer.reject(reason);
+                    });
+                } else {
+                  //Parse with worker in background
+                  KMXUtil.getSingletonWorker("js/import/gcode2three/gcode-worker.js",
+                    function workerEventHandler(event) {
+                      parserDataHandler(event.data);
+                    })
+                    .then(
+                    function(parserWorker) {
+                      console.time("parsingAndTransfer");
+                      parserWorker.postMessage({ command: 'parse', gcode: gcode.lines });
+                    },
+                    function(reason) {
+                      transformedDefer.reject(reason);
+                    });
+                  //console.profile();
+                }
+            */
         });
-        GCodeParser.parse(subject, gcode.lines);
-        /*
-            if (disableWorker) {
-              // parse without worker. Application will freeze during parsing
-              KMXUtil.injectScript("js/import/gcode2three/gcode-parser.js", window.GCodeParser] !== undefined)
-                .then(
-                function() {
-                  new GCodeParser(parserDataHandler, parserDataHandler).parse(gcode.lines);
-                  parserDataHandler('done');
-                },
-                function(reason) {
-                  transformedDefer.reject(reason);
-                });
-            } else {
-              //Parse with worker in background
-              KMXUtil.getSingletonWorker("js/import/gcode2three/gcode-worker.js",
-                function workerEventHandler(event) {
-                  parserDataHandler(event.data);
-                })
-                .then(
-                function(parserWorker) {
-                  console.time("parsingAndTransfer");
-                  parserWorker.postMessage({ command: 'parse', gcode: gcode.lines });
-                },
-                function(reason) {
-                  transformedDefer.reject(reason);
-                });
-              //console.profile();
-            }
-        */
     }
     onBlock(block) {
         //A Block is one line of gcode
@@ -349,12 +355,7 @@ export class GCodeCurve3 extends Curve3 {
             }
         }
         //console.info("Curve ax, ay, radius, startangle, endangle",aX, aY, radius,aStartAngle,  aEndAngle);
-        this.delegate = new EllipseCurve(centerX, centerY, // ax, aY
-        radius, radius, // xRadius, yRadius
-        startAngle, endAngle, // aStartAngle, aEndAngle
-        clockWise, // aClockwise,
-        0 //rotation
-        );
+        this.delegate = new ArcCurve(centerX, centerY, radius, startAngle, endAngle, clockWise);
         //store deltaZ for later
         this.deltaZ = endPoint.z - startPoint.z;
         this.plane = plane;

@@ -1,18 +1,25 @@
 import { IGM } from '../model/igm';
-export declare class MitreBox {
+import { ModelGenerator } from './model-generator';
+import { GeneratorInput } from './generator-input';
+export interface MitreBoxInput {
+    materialThickness: number;
+    depth: number;
     width: number;
     height: number;
-    depth: number;
-    materialThickness: number;
+    lid: boolean;
+}
+export declare class MitreBox implements ModelGenerator<MitreBoxInput> {
     private models;
     private cut_width;
-    constructor(width: number, height: number, depth: number, materialThickness: number);
-    generate(): IGM;
+    constructor();
+    requiredInput(): GeneratorInput<MitreBoxInput>[];
+    generateSVG(values: MitreBoxInput): Promise<string>;
+    generate(values: MitreBoxInput): Promise<IGM>;
     private MitrePanel;
     protected PolyStart(): void;
     private getLast;
-    protected PolyPoint(x: any, y: any): void;
+    protected PolyPoint(x: number, y: number): void;
     protected PolyEnd(): void;
-    protected StartDoc(w: any, h: any): void;
+    protected StartDoc(w: number, h: number): void;
     protected EndDoc(): void;
 }
