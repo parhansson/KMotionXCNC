@@ -20,13 +20,16 @@ export function igm2SVG(model: IGM) {
   const paths = driver.allVisibleObjects
   driver.updateBounds(paths)
   const bounds = driver.getMaxBounds(paths)
-  const w = bounds.x2
-  const h = bounds.y2
   const dpi = 72 //output DPI
   const dpiScale = dpi / 25.4 // assuming input model in mm not in inches
+  const minx = bounds.x
+  const miny = bounds.y
+  const height = bounds.height()
+  const width = bounds.width()
   svg += '<?xml version="1.0" standalone="no"?>\r\n'
   svg += '<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">\r\n'
-  svg += `<svg width="${w / res}mm" height="${h / res}mm" viewBox="0 0 ${w * dpiScale} ${h * dpiScale}" xmlns="http://www.w3.org/2000/svg" version="1.1">\r\n`
+  svg += `<svg width="${width}mm" height="${height}mm" viewBox="${minx* dpiScale} ${miny* dpiScale} ${width * dpiScale} ${height * dpiScale}" xmlns="http://www.w3.org/2000/svg" version="1.1">\r\n`
+  
 
 
   const linePath = (vectors: Vector3[]) => {
