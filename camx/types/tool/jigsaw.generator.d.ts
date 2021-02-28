@@ -1,5 +1,6 @@
 import { ModelGenerator } from './model-generator';
 import { GeneratorInput } from './generator-input';
+declare type Point = [number, number];
 export interface JigsawGeneratorInput {
     rows: number;
     columns: number;
@@ -36,6 +37,7 @@ export declare class JigsawGenerator implements ModelGenerator<JigsawGeneratorIn
         styletag: string;
         closeTag: string;
         path: (pathData: string) => string;
-        circle: (point: [number, number]) => string;
+        circle: (point: Point) => string;
     };
 }
+export {};

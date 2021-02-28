@@ -147,10 +147,8 @@ export class Igm2GcodeTransformer implements ModelTransformer<IGM, GCodeSource>{
     const driver = new IGMDriver(igm)
     const shapes = driver.applyModifications(settings, true)
 
-    //var LaserON = '(BUF,SetBitBuf14)';
-    //var LaserOFF = '(BUF,ClearBitBuf14)';
-    //const gcode = new GCodeOutput('M3 (laser on)', 'M5 (laser off)', true, this.settings.fractionalDigits)
-    const gcode = new GCodeOutput(null, null, false, this.settings.fractionalDigits)
+    const gcode = new GCodeOutput('M3 (laser on)', 'M5 (laser off)', true, this.settings.fractionalDigits)
+    //const gcode = new GCodeOutput(null, null, false, this.settings.fractionalDigits)
 
     const maxBounds = driver.getMaxBounds(shapes)
     gcode.comment(this.describe(maxBounds))

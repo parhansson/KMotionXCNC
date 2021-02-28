@@ -18,7 +18,8 @@
     "baseUrl": "./",
     "declarationDir": "./types",
     "types": [
-      "./types-merge"
+      "./types-merge",
+      "./node_modules/dxf-parser-typings/dxf-parser"
     ]
   },
   "exclude": [

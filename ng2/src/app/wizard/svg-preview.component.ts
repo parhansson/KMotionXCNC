@@ -12,8 +12,10 @@ export class SvgPreviewComponent {
   private previewContainer: ElementRef
   private svgEditor: SvgEditor
   private svgDoc: SVGSVGElement
+  private rotationAngle: number
   constructor(private staticTransformer: StaticTransformer) {
     this.svgEditor = new SvgEditor()
+    this.rotationAngle = 45
   }
 
   render(svg: string | SVGElement) {
@@ -40,7 +42,7 @@ export class SvgPreviewComponent {
     this.svgEditor.delete()
   }
   rotate(){
-    this.svgEditor.rotate()
+    this.svgEditor.rotate(this.rotationAngle)
   }
   transformGCode() {
     //TODO only content of currently loaded gcode file is changed not the file name

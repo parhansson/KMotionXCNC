@@ -5,6 +5,4 @@ export declare class Pdf2SvgTransformer implements ModelTransformer<ArrayBuffer,
     constructor(transformerSettings: ModelSettings);
     transform(source: ArrayBuffer): Promise<SVGElement>;
     private logSvg;
-    createContainer(pageNum: number, width: number, height: number, parentElement: HTMLElement): HTMLDivElement;
-    createAnchor(pageNum: number): HTMLAnchorElement;
 }

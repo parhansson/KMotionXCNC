@@ -88,7 +88,9 @@ module.exports = {
         use: [
           { 
             loader: 'worker-loader',
-            options: { name: '[name].[hash].js' }
+            options: { 
+              filename: '[name].[hash].js',
+             }
           },
           { loader: 'ts-loader' }
         ],
@@ -103,6 +105,7 @@ module.exports = {
         loader: 'html-loader'
       },
       {
+        //fontawesome
         test: /\.(png|jpe?g|gif|svg|woff|woff2|ttf|eot|ico)$/,
         loader: 'file-loader',
         options: { name: 'assets/[name].[hash].[ext]' }
@@ -145,11 +148,11 @@ module.exports = {
       //   loader: 'raw-loader'
       // }
     ],
-    // noParse: [
-    //   /pdfjs-dist\/build\/pdf\.js$/,
+    noParse: [
+       /pdfjs-dist\/build\/pdf\.js$/,
     //   /pdfjs-dist\/build\/pdf\.min\.js$/,
     //   /pdfjs-dist\/build\/pdf\.worker\.js$/
-    // ],
+    ],
   }
 
 };

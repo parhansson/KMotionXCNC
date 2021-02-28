@@ -29,41 +29,16 @@ export function igm2SVG(model: IGM) {
   svg += '<?xml version="1.0" standalone="no"?>\r\n'
   svg += '<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">\r\n'
   svg += `<svg width="${width}mm" height="${height}mm" viewBox="${minx* dpiScale} ${miny* dpiScale} ${width * dpiScale} ${height * dpiScale}" xmlns="http://www.w3.org/2000/svg" version="1.1">\r\n`
-  
+  svg += '<g fill="steelblue" fill-opacity="25%" stroke="black" vector-effect="non-scaling-stroke" stroke-width="0.2">'
+  svg += createPaths(driver, dpiScale)
+    .map(path => `<path d="${path}"/>`).join('\r\n')
+    svg += ('</g>\r\n')
+    svg += ('</svg>\r\n')
+  return svg
+}
 
-
-  const linePath = (vectors: Vector3[]) => {
-    const points: Array<string | number> = []
-    let first = true
-    for (const vec of vectors) {
-      if (first) {
-        first = false
-        points.push('M')
-        points.push(vec.x)
-        points.push(vec.y)
-        points.push('L')
-      } else {
-        points.push(vec.x)
-        points.push(vec.y)
-      }
-    }
-    return points.join(' ')
-  }
-
-  const arcPath = (start, end, radius, startAngle, endAngle, clockwise) => {
-
-    //TODO red ut hur det här kana bli rätt nån gång
-    const sweep = clockwise ? 0 : 1
-    const largeArcFlag = Math.abs(endAngle - startAngle) <= Math.PI ? '0' : '1'
-
-    const d = [
-      'M', start.x, start.y,
-      'A', radius, radius, 0, largeArcFlag, sweep, end.x, end.y
-    ].join(' ')
-
-    return d
-  }
-
+const createPaths = (driver: IGMDriver, dpiScale: number) => {
+  const paths:String[] = []
   for (const shape of driver.allVisibleObjects) {
     //we need to clone because we scale it and would not like to scale original model
     const part = driver.clone(shape)
@@ -83,11 +58,39 @@ export function igm2SVG(model: IGM) {
         geometry.endAngle,
         geometry.clockwise)
     }
-
-    svg += `<path d="${path}" fill="steelblue" vector-effect="non-scaling-stroke" stroke="black" stroke-width="0.2" />\r\n`
+    paths.push(path)
   }
-
-  svg += ('</svg>\r\n')
-  return svg
+  return paths
 }
 
+const linePath = (vectors: Vector3[]) => {
+  const points: Array<string | number> = []
+  let first = true
+  for (const vec of vectors) {
+    if (first) {
+      first = false
+      points.push('M')
+      points.push(vec.x)
+      points.push(vec.y)
+      points.push('L')
+    } else {
+      points.push(vec.x)
+      points.push(vec.y)
+    }
+  }
+  return points.join(' ')
+}
+
+const arcPath = (start, end, radius, startAngle, endAngle, clockwise) => {
+
+  //TODO red ut hur det här kana bli rätt nån gång
+  const sweep = clockwise ? 0 : 1
+  const largeArcFlag = Math.abs(endAngle - startAngle) <= Math.PI ? '0' : '1'
+
+  const d = [
+    'M', start.x, start.y,
+    'A', radius, radius, 0, largeArcFlag, sweep, end.x, end.y
+  ].join(' ')
+
+  return d
+}

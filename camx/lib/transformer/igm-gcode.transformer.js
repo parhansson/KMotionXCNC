@@ -131,10 +131,8 @@ export class Igm2GcodeTransformer {
             //settings.bitWidth = settings.bitWidth || 1; // in mm 
             const driver = new IGMDriver(igm);
             const shapes = driver.applyModifications(settings, true);
-            //var LaserON = '(BUF,SetBitBuf14)';
-            //var LaserOFF = '(BUF,ClearBitBuf14)';
-            //const gcode = new GCodeOutput('M3 (laser on)', 'M5 (laser off)', true, this.settings.fractionalDigits)
-            const gcode = new GCodeOutput(null, null, false, this.settings.fractionalDigits);
+            const gcode = new GCodeOutput('M3 (laser on)', 'M5 (laser off)', true, this.settings.fractionalDigits);
+            //const gcode = new GCodeOutput(null, null, false, this.settings.fractionalDigits)
             const maxBounds = driver.getMaxBounds(shapes);
             gcode.comment(this.describe(maxBounds));
             gcode.addBlocks('G90'); //Absolute Coordinates

@@ -62,7 +62,7 @@ export class SvgEditor {
       this.selection.splice(0)[0].delete()
     }
   }
-  rotate() {
+  rotate(angleDegrees:number) {
 
     for (const selected of this.selection) {
       const path = selected.element
@@ -89,7 +89,7 @@ export class SvgEditor {
       //transformRequestObj.setScale(.8, .8)
 
       //---rotate 90 degrees at center----
-      transformRequestObj.setRotate(90,0,0)
+      transformRequestObj.setRotate(angleDegrees,0,0)
       transformList.appendItem(transformRequestObj)
       transformList.consolidate()
 

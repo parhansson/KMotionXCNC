@@ -81,7 +81,7 @@ abstract class SVGElementWalker<T> {
       await this.accept(element, resultData)
     }
   }
-  protected abstract async onElement(element: SVGElement, parentData: T): Promise<T>
+  protected abstract /*async*/ onElement(element: SVGElement, parentData: T): Promise<T>
 }
 
 /**
@@ -675,8 +675,12 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
           const style = fontFaceRule.style
           const fontFamily = style.fontFamily
           //tslint:disable-next-line:no-string-literal
-          const src = style['src'] as string
+          const src = style.getPropertyValue('src')
+          //beware of extra quotes in chrome
+          //src format chrome "url("blob:http://localhost:8081/c3061362-fee0-483c-9036-4e75ef60e1b4")"
+          //src format safari "url(blob:http://localhost:8081/46fd3875-c73b-45cc-b545-6cfdb3d72f5b)"
           const fontBlob = src.substring(5, src.length - 2)
+          //const fontBlob = src.substring(4, src.length - 1)
           await this.fontService.preloadFont(fontBlob, fontFamily)
         }
       }

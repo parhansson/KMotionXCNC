@@ -7,8 +7,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import * as pdfjs from 'pdfjs-dist/webpack';
-//These types comes from types-merge
+//SVGGraphics comes from types-merge
 import { getDocument, SVGGraphics } from 'pdfjs-dist/webpack';
 export class Pdf2SvgTransformer {
     constructor(transformerSettings) {
@@ -16,13 +15,9 @@ export class Pdf2SvgTransformer {
     }
     transform(source) {
         return __awaiter(this, void 0, void 0, function* () {
-            //let s  = new SVGGraphics(null,null,null)
-            const PDFJS = pdfjs;
             //this will use base64 encoded instead of bloburls for images
             //PDFJS.disableCreateObjectURL = true
-            //
-            PDFJS.disableFontFace = false;
-            PDFJS.disableWorker = false;
+            //PDFJS.disableWorker = false
             //currently does not work. fake worker is used
             //PDFJS.GlobalWorkerOptions.workerSrc = 'pdf.worker.js'
             //Another option is to set workerPort instead of workerSrc althogh workerSrc is promoted
@@ -35,29 +30,37 @@ export class Pdf2SvgTransformer {
             const rotation = transformer.transformerSettings.pdf.rotate;
             const resultPromise = new Promise((resolve, reject) => {
                 //PDFJS.getDocument(source).promise.then((pdf) => {
-                getDocument(source).promise.then((pdf) => {
+                getDocument({
+                    data: new Uint8Array(source),
+                    disableFontFace: false,
+                    fontExtraProperties: true
+                    //disableWorker:false
+                }).promise.then((pdf) => {
                     const numPages = pdf.numPages;
                     // Using promise to fetch the page
                     // For testing only.
                     const MAX_NUM_PAGES = 50;
                     const ii = Math.min(MAX_NUM_PAGES, numPages);
                     const svgPages = [];
+                    const applyMokeyPatch = false;
                     let promise = Promise.resolve();
                     for (let i = 1; i <= ii; i++) {
                         if (page != i) {
                             continue;
                         }
                         //when anchor is not null svg will be rendered on screen for debugging
-                        const anchor = null; // this.createAnchor(i)
+                        const anchor = null; // createAnchor(i)
                         // Using promise to fetch and render the next page
                         promise = promise.then(function (pageNum, anchor) {
                             return pdf.getPage(pageNum).then(page => {
                                 const viewport = page.getViewport({ scale, rotation });
-                                const container = this.createContainer(pageNum, viewport.width, viewport.height, anchor);
+                                const container = createContainer(pageNum, viewport.width, viewport.height, anchor);
                                 return page.getOperatorList().then(opList => {
                                     const svgGfx = new SVGGraphics(page.commonObjs, page.objs);
                                     //apply monkey patch for zero width strokes
-                                    svgGfx._setStrokeAttributes = _setStrokeAttributes.bind(svgGfx);
+                                    if (applyMokeyPatch) {
+                                        svgGfx._setStrokeAttributes = _setStrokeAttributes.bind(svgGfx);
+                                    }
                                     svgGfx.embedFonts = true;
                                     return svgGfx.getSVG(opList, viewport).then(svg => {
                                         transformer.logSvg(svg);
@@ -87,24 +90,25 @@ export class Pdf2SvgTransformer {
         container.appendChild(svg);
         console.log('PDF-SVG', container.innerHTML);
     }
-    createContainer(pageNum, width, height, parentElement) {
-        if (parentElement) {
-            const container = document.createElement('div');
-            container.id = 'pageContainer' + pageNum;
-            container.className = 'pageContainer';
-            container.style.width = width + 'px';
-            container.style.height = height + 'px';
-            parentElement.appendChild(container);
-            return container;
-        }
+}
+function createContainer(pageNum, width, height, parentElement) {
+    if (parentElement) {
+        const container = document.createElement('div');
+        container.id = 'pageContainer' + pageNum;
+        container.className = 'pageContainer';
+        container.style.width = width + 'px';
+        container.style.height = height + 'px';
+        parentElement.appendChild(container);
+        return container;
     }
-    createAnchor(pageNum) {
-        const anchor = document.createElement('a');
-        anchor.setAttribute('name', 'page=' + pageNum);
-        anchor.setAttribute('title', 'Page ' + pageNum);
-        document.body.appendChild(anchor);
-        return anchor;
-    }
+    return null;
+}
+function createAnchor(pageNum) {
+    const anchor = document.createElement('a');
+    anchor.setAttribute('name', 'page=' + pageNum);
+    anchor.setAttribute('title', 'Page ' + pageNum);
+    document.body.appendChild(anchor);
+    return anchor;
 }
 function _setStrokeAttributes(element, lineWidthScale = 1) {
     const current = this.current;

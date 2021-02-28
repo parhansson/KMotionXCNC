@@ -85,7 +85,7 @@ function toSVG(dPath: string, fontSize: number): string {
   svg += '<?xml version="1.0" standalone="no"?>\r\n'
   svg += '<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">\r\n'
   svg += '<svg width="' + w / res + 'mm" height="' + h / res + 'mm" viewBox="0 0 ' + w * dpiScale + ' ' + h * dpiScale + '" xmlns="http://www.w3.org/2000/svg" version="1.1">\r\n'
-  svg += '<g transform="matrix(1, 0, 0, 1, 0, ' + fontSize + ')" fill="steelblue" stroke="black" stroke-width="0.1">\r\n'
+  svg += '<g transform="matrix(1, 0, 0, 1, 0, ' + fontSize + ')" fill="steelblue" fill-opacity="25%" stroke="black" stroke-width="0.1">\r\n'
   svg += `<path d="${dPath}"/>`
   svg += ('\r\n</g>')
   svg += ('</svg>\r\n')

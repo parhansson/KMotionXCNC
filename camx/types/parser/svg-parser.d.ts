@@ -83,21 +83,21 @@ export declare class SvgParser extends SVGElementWalker<SvgNode> {
     parse(rootElement: SVGElement): Promise<SvgNode>;
     protected onElement(element: SVGElement, parentNode: SvgNode): Promise<SvgNode>;
     SVGAttributeMapping: {
-        'id': (node: SvgNode, val: string, element?: SVGElement) => void;
-        'transform': (node: SvgNode, val: string) => void;
-        'style': (node: SvgNode, val: string) => void;
-        'opacity': (node: SvgNode, val: string) => void;
-        'display': (node: SvgNode, val: string) => void;
-        'visibility': (node: SvgNode, val: string) => void;
-        'fill': (node: SvgNode, val: string) => void;
-        'stroke': (node: SvgNode, val: string) => void;
-        'color': (node: SvgNode, val: string) => void;
+        id: (node: SvgNode, val: string, element?: SVGElement) => void;
+        transform: (node: SvgNode, val: string) => void;
+        style: (node: SvgNode, val: string) => void;
+        opacity: (node: SvgNode, val: string) => void;
+        display: (node: SvgNode, val: string) => void;
+        visibility: (node: SvgNode, val: string) => void;
+        fill: (node: SvgNode, val: string) => void;
+        stroke: (node: SvgNode, val: string) => void;
+        color: (node: SvgNode, val: string) => void;
         'fill-opacity': (node: SvgNode, val: string) => void;
         'stroke-opacity': (node: SvgNode, val: string) => void;
         'font-size': (node: SvgNode, val: string) => void;
         'font-family': (node: SvgNode, val: string) => void;
         'font-style': (node: SvgNode, val: string) => void;
-        '__parseColor': (val: string, currentColor: string) => string;
+        __parseColor: (val: string, currentColor: string) => string;
     };
     SVGTagMapping: {
         svg: (tag: SVGElement, node: SvgNode) => Promise<void>;

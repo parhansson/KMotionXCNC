@@ -87,8 +87,8 @@ export declare class IGMDriver {
     addRaw(raw: string): void;
     addUnsupported(obj: any): void;
     addToLayerObject(layerKey: string, obj: IgmObject | IgmObject[]): void;
-    readonly allVisibleObjects: IgmObject[];
-    readonly allObjectsFlat: IgmObject[];
+    get allVisibleObjects(): IgmObject[];
+    get allObjectsFlat(): IgmObject[];
     setLayerStatus(status: LayerStatus): void;
     applyModifications(settings: IGMModelSettings, onlyVisible?: boolean): IgmObject[];
     private vectorScale;

@@ -436,6 +436,7 @@ export class JigsawGenerator implements ModelGenerator<JigsawGeneratorInput> {
         rect,
         path {
           fill: steelblue;
+          fill-opacity: .25;
           stroke: black;
           stroke-width: 1px;
         }
