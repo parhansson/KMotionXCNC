@@ -7,7 +7,7 @@ import { InputBase } from './input-base'
 export class InputControlService {
   constructor() { }
 
-  toFormGroup(inputs: Array<InputBase<any>>) {
+  toFormGroup(inputs: InputBase<any>[]) {
     const group: any = {}
     inputs.sort((a, b) => a.order - b.order)
     inputs.forEach(input => {

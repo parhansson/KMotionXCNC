@@ -23,7 +23,7 @@ export class GeneratorWizardComponent {
   @ViewChild(SvgPreviewComponent, { static: false })
   private previewContainer: SvgPreviewComponent
 
-  inputs: Array<InputBase<any>>
+  inputs: InputBase<any>[]
   constructor() {
   }
   

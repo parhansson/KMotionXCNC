@@ -3,7 +3,7 @@ export type InputType = 'text' | 'number' | 'email' | 'checkbox' | 'radio'
 export type ControlType = 'selection' | 'option' | 'text' | 'bool'
 export interface InputOptions<K> {
   value?: string | number | boolean
-  options?: Array<{ key: string, value: string | number }>
+  options?: { key: string, value: string | number }[]
   label?: string //Human name
   description?: string
 
@@ -36,7 +36,7 @@ export class InputBase<K> implements InputOptions<K>{
   maxlength: number
   min: number
   max: number
-  options?: Array<{ key: string, value: string | number }>
+  options?: { key: string, value: string | number }[]
 
   constructor(public controlType: ControlType, options: InputOptions<K>) {
     this.value = options.value

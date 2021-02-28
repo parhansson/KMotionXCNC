@@ -20,13 +20,13 @@ export class DynamicFormComponent {
   form: FormGroup
   submitted = false
 
-  private _inputs: Array<InputBase<any>> = []
+  private _inputs: InputBase<any>[] = []
   private valueChangesSubscription:Subscription
   
   constructor(private qcs: InputControlService) { }
 
   @Input() 
-  set inputs(value: Array<InputBase<any>> ){
+  set inputs(value: InputBase<any>[] ){
     this._inputs = value
     this.createForm()
   }

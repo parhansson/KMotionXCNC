@@ -9,10 +9,10 @@ import { InputBase } from '@kmx/form/input-base'
 })
 export class TransformerSettingsComponent {
   transformerSettings: ModelSettings
-  pdfSettings: Array<InputBase<PDFModelSettings>>
-  svgSettings: Array<InputBase<SVGModelSettings>>
-  igmSettings: Array<InputBase<IGMModelSettings>>
-  dxfSettings: Array<InputBase<DXFModelSettings>>
+  pdfSettings: InputBase<PDFModelSettings>[]
+  svgSettings: InputBase<SVGModelSettings>[]
+  igmSettings: InputBase<IGMModelSettings>[]
+  dxfSettings: InputBase<DXFModelSettings>[]
   constructor(private modelSettingsService: ModelSettingsService) {
     this.transformerSettings = modelSettingsService.settings
     this.pdfSettings = [

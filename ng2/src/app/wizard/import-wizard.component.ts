@@ -62,7 +62,7 @@ export class ImportWizardComponent {
       err => console.error(err))
   }
 
-  layerInputs: Array<InputBase<any>> = []
+  layerInputs: InputBase<any>[] = []
 
   private showLayers(igm: IGM) {
     this.igm = igm
