@@ -1,6 +1,8 @@
-import { RouteReuseStrategy, DetachedRouteHandle,ActivatedRouteSnapshot } from '@angular/router'
+import { RouteReuseStrategy, DetachedRouteHandle, ActivatedRouteSnapshot } from '@angular/router'
+import { Injectable } from '@angular/core'
 //https://www.softwarearchitekt.at/post/2016/12/02/sticky-routes-in-angular-2-3-with-routereusestrategy.aspx
 // This impl. bases upon one that can be found in the router's test cases.
+@Injectable()
 export class CustomReuseStrategy1 implements RouteReuseStrategy {
 
     storedRouteHandles: {[key: string]: DetachedRouteHandle} = {}

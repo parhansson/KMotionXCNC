@@ -12,6 +12,9 @@
     "quotemark": [true, "single", "avoid-escape", "avoid-template"],    
     "ordered-imports": false,
     "comment-format": false,
+    "deprecation": {
+      "severity": "warning"
+    },
     "object-literal-sort-keys": false,
     "interface-name": false,
     "max-classes-per-file": false,
