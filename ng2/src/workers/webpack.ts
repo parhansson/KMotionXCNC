@@ -4,7 +4,7 @@
 export class WebpackWorker implements Worker{
   constructor(){}
     onmessage: ((this: Worker, ev: MessageEvent) => any) | null
-    onmessageerror: ((this: Worker, ev: MessageEvent) => any) | null;
+    onmessageerror: ((this: Worker, ev: MessageEvent) => any) | null
     
     postMessage(message: any, options?: PostMessageOptions | Transferable[]): void
     postMessage(message: any, transfer: Transferable[]): void {}

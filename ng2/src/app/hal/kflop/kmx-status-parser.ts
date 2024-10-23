@@ -15,20 +15,20 @@ export class KmxStatusParser {
     //int PWM[N_PWMS+2*N_PWMS_SNAP]; //[16]*4
     r.skip(64)
 
-    //double Position[N_CHANNELS];   //[8]*8
+    //double Position[N_CHANNELS_KFLOP];   //[8]*8
     const positions: number[] = []
     for (let i = 0; i < 8; i++) {
       positions.push(r.double())
     }
 
-    //double Dest[N_CHANNELS];       //[8]*8
+    //double Dest[N_CHANNELS_KFLOP];       //[8]*8
     const dests: number[] = []
     for (let i = 0; i < 8; i++) {
       dests.push(r.double())
     }
 
     r.skip(8)
-    //unsigned char OutputChan0[N_CHANNELS]; //[8]*1
+    //unsigned char OutputChan0[N_CHANNELS_KFLOP]; //[8]*1
 
     const /*int*/ InputModes = r.int()         // 4 bits for each axis 
     const /*int*/ InputModes2 = r.int()        // 4 bits for each axis 

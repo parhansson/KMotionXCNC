@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-
+import {baseUrl} from '../../main'
 export class OrientationCube {
   CANVAS_WIDTH = 400
   CANVAS_HEIGHT = 400
@@ -42,7 +42,7 @@ export class OrientationCube {
   }
 
   createCube(scene: THREE.Scene) { // create an array with six textures for a cool cube
-    new THREE.TextureLoader().load('/settings/textures/textures.png', (texture: THREE.Texture) => {
+    new THREE.TextureLoader().load(baseUrl + '/settings/textures/textures.png', (texture: THREE.Texture) => {
       //let material = new THREE.MeshPhongMaterial( { map: THREE.ImageUtils.loadTexture('images/box-atlas.png') } );
       const material = new THREE.MeshBasicMaterial({
         map: texture

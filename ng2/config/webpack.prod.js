@@ -42,7 +42,7 @@ module.exports = webpackMerge(commonConfig, {
     new BaseHrefWebpackPlugin({ baseHref: baseHref }),
     new MiniCssExtractPlugin({
       filename: '[name].[chunkhash].css',
-      allChunks: true
+      //allChunks: true
     }),
     new webpack.DefinePlugin({
       'process.env': {

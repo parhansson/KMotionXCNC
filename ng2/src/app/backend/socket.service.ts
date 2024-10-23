@@ -8,6 +8,8 @@ import { LogMessage } from './socket/messages'
 import { FileResource } from '../resources'
 
 import SocketWorker from '@workers/socket.worker'
+import {baseUrl} from '../../main'
+
 
 @Injectable()
 export class SocketService {
@@ -69,7 +71,7 @@ export class SocketService {
 
   private onTextMessage(textMessage: string) {
     if (textMessage === 'WorkerReady') {
-      const url = 'ws://' + window.location.host + '/ws'
+      const url =  baseUrl.replace('https://','wss://').replace('http://','ws://') + '/ws'
       this.socketWorker.postMessage({ command: 'connect', url })
     }
   }

@@ -33,7 +33,7 @@ export class SocketConnector
 
   reconnect() {
     if (this.connectTimeout == null) {
-      this.connectTimeout = setInterval(this.connect.bind(this, this.url), this.reconnectDelayMs)
+      this.connectTimeout = window.setInterval(this.connect.bind(this, this.url), this.reconnectDelayMs)
     }
   }
 

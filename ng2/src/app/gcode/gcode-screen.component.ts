@@ -6,6 +6,7 @@ import { StaticTransformer } from '../model/transformers'
 import { SettingsService, Machine } from '../settings/settings.service'
 import { GCodeEditorComponent } from './gcode-editor.component'
 import * as THREE from 'three'
+import {baseUrl} from '../../main'
 
 @Component({
   selector: 'gcode-screen',
@@ -140,7 +141,7 @@ export class GCodeScreenComponent {
 
   private renderBackground(x, y, z) {
 
-    const texture = new THREE.TextureLoader().load('/settings/textures/bghoneym.png')
+    const texture = new THREE.TextureLoader().load(baseUrl + '/settings/textures/bghoneym.png')
 
 
     // assuming you want the texture to repeat in both directions:

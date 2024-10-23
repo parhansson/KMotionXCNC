@@ -5,7 +5,9 @@ const commonConfig = require('./webpack.common.js');
 const helpers = require('./helpers');
 const { BaseHrefWebpackPlugin } = require('base-href-webpack-plugin');
 // Base Href same as in index.html
-const baseHref = '/kmx/'
+//const baseHref = '/kmx/'
+//const baseHref = '/'
+const baseHref = './'
 
 module.exports = webpackMerge(commonConfig, {
   mode: 'development',

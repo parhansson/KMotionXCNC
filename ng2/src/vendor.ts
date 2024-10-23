@@ -17,9 +17,9 @@
 //import 'pdfjs-dist/build/pdf.js'
 //import 'pdfjs-dist/build/pdf.worker.js'
 
+import './styles.css'
 import 'font-awesome/css/font-awesome.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
-import './styles.css'
 
 //import 'script-loader!dxf-parser/dist/dxf-parser.js'
 

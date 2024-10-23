@@ -43,7 +43,7 @@ export class ImportWizardComponent {
   @ViewChild(FileDialogComponent, { static: false })
   private resourceComponent: FileDialogComponent
 
-  private igm: IGM = null
+  public igm: IGM = null
 
   constructor(@Inject(FileStoreToken) private fileStore: FileStore,
     private transformingFileStore: TransformingFileStore,

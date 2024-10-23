@@ -18,10 +18,17 @@
     "declaration": true,
     "baseUrl": "./",
     "paths": {
-      "@kmx/*": [ "./src/app/*" ] 
-      //"@workers/*": [ "./src/workers/*" ]
+      "@kmx/*": [ "./src/app/*" ],
+      "@workers/*": [ "./src/workers/*" ]
     }
   },
+  "files": [
+    //"src/main.aot.ts",
+    "src/main.ts",
+    "src/polyfills.ts",
+    "src/vendor.ts",
+    "src/workers/socket.worker.ts"
+  ],
   "exclude": [
     "dist",
     "vendor",

@@ -117,7 +117,7 @@ module.exports = {
           {
             loader: MiniCssExtractPlugin.loader,
             options: {
-              hmr: process.env.NODE_ENV === 'development',
+              //hmr: process.env.NODE_ENV === 'development',
               // publicPath: (resourcePath, context) => {
               //   // publicPath is the relative path of the resource to the context
               //   // e.g. for ./css/admin/main.css the publicPath will be ../../
