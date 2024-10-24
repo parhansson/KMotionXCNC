@@ -1,4 +1,7 @@
-export class ChipherWheelGenerator {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ChipherWheelGenerator = void 0;
+class ChipherWheelGenerator {
     requiredInput() {
         const inputs = [
             {
@@ -95,4 +98,4 @@ export class ChipherWheelGenerator {
         return svg;
     }
 }
-//# sourceMappingURL=chipher-wheel.generator.js.map
+exports.ChipherWheelGenerator = ChipherWheelGenerator;

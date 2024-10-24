@@ -10,7 +10,7 @@ interface ExtendedGCodeVector extends GCodeVector {
   e: number// 0
   extruding: boolean// = false
 }
-class ThreeShapeData {
+type ThreeShapeData = {
   material: THREE.LineBasicMaterial
 }
 export class Gcode2ThreeTransformer extends GCodeTransformer<THREE.Geometry, THREE.Group>{
@@ -67,8 +67,8 @@ export class Gcode2ThreeTransformer extends GCodeTransformer<THREE.Geometry, THR
     const data = this.getShapeData()
     const lineGeometry = new THREE.Geometry()
     const shape = new THREE.Line(lineGeometry, data.material)
-    shape.userData = { startLine: this.state.lineNo }
-    this.output.add(shape)
+    shape.userData = { startLine: this.state!.lineNo }
+    this.output!.add(shape)
     //console.log("new line");
     return lineGeometry
   }
@@ -77,17 +77,19 @@ export class Gcode2ThreeTransformer extends GCodeTransformer<THREE.Geometry, THR
     // if(this.state.currentShape){
     //   this.state.currentShape.userData.endLine = this.state.lineNo
     // }
-    const shapes = this.output.children
+    const state = this.state!
+    const shapes = this.output!.children
     if (shapes.length > 0) {
       const shape = shapes[shapes.length - 1]
-      shape.userData.endLine = this.state.lineNo;
+      shape.userData.endLine = state.lineNo;
       //Needed if line dashed material
       (shape as any as THREE.Line).computeLineDistances()
     }
   }
 
   private getShapeData() {
-    switch (this.state.moveGroup.code) {
+    const state = this.state!
+    switch (state.moveGroup.code) {
       case ('G0'):
         return this.moveShapeData
       case ('G1'):
@@ -96,6 +98,7 @@ export class Gcode2ThreeTransformer extends GCodeTransformer<THREE.Geometry, THR
         return this.interpolateShapeData
       case ('G3'):
         return this.interpolateShapeData
+      default: throw new Error(`Invalid G Gode ${state.moveGroup.code}`)
     }
   }
 

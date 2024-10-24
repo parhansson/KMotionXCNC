@@ -33,7 +33,7 @@ const INSUNITS = {
 }
 
 export class Dxf2IgmTransformer implements ModelTransformer<ArrayBuffer | string, IGM> {
-  private driver: IGMDriver
+  private driver: IGMDriver | undefined
   constructor(private settings: DXFModelSettings) {
 
   }
@@ -50,7 +50,7 @@ export class Dxf2IgmTransformer implements ModelTransformer<ArrayBuffer | string
     const parser = new DxfParser()
     try {
       const dxf = parser.parseSync(fileText)
-      for (const entity of dxf.entities) {
+      for (const entity of dxf.entities || []) {
         const shapes = this.doEntity(entity, dxf)
         for (const shape of shapes) {
           this.driver.addToLayerObject(entity.layer, this.scale(shape, dxf))
@@ -58,7 +58,7 @@ export class Dxf2IgmTransformer implements ModelTransformer<ArrayBuffer | string
       }
       console.log(dxf)
       return Promise.resolve(model)
-    } catch (err) {
+    } catch (err:any) {
       console.error(err.stack)
       return Promise.reject(err)
     }
@@ -100,7 +100,7 @@ export class Dxf2IgmTransformer implements ModelTransformer<ArrayBuffer | string
       shapes.push(this.doEllipse(entity, data))
     } else if (this.isDimension(entity) && this.settings.includeDimension) {
       /* tslint:disable:no-bitwise */
-      const dimTypeEnum = entity.dimensionType & 7
+      const dimTypeEnum = entity.dimensionType! & 7
       if (dimTypeEnum === 0) {
         for (const childEntity of this.doDimension(entity, data)) {
           shapes.push(childEntity)
@@ -117,12 +117,12 @@ export class Dxf2IgmTransformer implements ModelTransformer<ArrayBuffer | string
 
 
   private scale(shape: IgmObject, dxf: DxfParser.DXFDocument): IgmObject {
-    let unit = dxf.header.$INSUNITS
+    let unit = dxf.header?.$INSUNITS
     if (unit === undefined) {
       //unit = 1 // autocad defaults to Inches(1) if INSUNITS is missing    
       unit = 0 //but we use unitless here
     }
-    this.driver.scale(shape, INSUNITS[unit])
+    this.driver!.scale(shape, INSUNITS[unit])
     return shape
   }
 
@@ -139,7 +139,7 @@ export class Dxf2IgmTransformer implements ModelTransformer<ArrayBuffer | string
     const object = IGMDriver.newArc(
       center.x,
       center.y,
-      entity.radius,
+      entity.radius!,
       startAngle,
       endAngle,
       false)
@@ -150,21 +150,22 @@ export class Dxf2IgmTransformer implements ModelTransformer<ArrayBuffer | string
 
   private doEllipse(entity: DxfParser.EntityELLIPSE, dxf: DxfParser.DXFDocument): IgmObject {
     //ar color = getColor(entity, data);
-
-    const xrad = Math.sqrt(Math.pow(entity.majorAxisEndPoint.x, 2) + Math.pow(entity.majorAxisEndPoint.y, 2))
-    const yrad = xrad * entity.axisRatio
-    const rotation = Math.atan2(entity.majorAxisEndPoint.y, entity.majorAxisEndPoint.x)
+    const majorAxisEndPoint = entity.majorAxisEndPoint!
+    const xrad = Math.sqrt(Math.pow(majorAxisEndPoint.x, 2) + Math.pow(majorAxisEndPoint.y, 2))
+    const yrad = xrad * entity.axisRatio!
+    const rotation = Math.atan2(majorAxisEndPoint.y, majorAxisEndPoint.x)
+    const center = entity.center!
 
     const curve = new EllipseCurve(
-      entity.center.x, entity.center.y,
+      center.x, center.y,
       xrad, yrad,
-      entity.startAngle, entity.endAngle,
+      entity.startAngle!, entity.endAngle!,
       false, // Always counterclockwise
       rotation
     )
     const vectors: GCodeVector[] = []
     for (const v of curve.getPoints(50)) {
-      vectors.push(IGMDriver.newGCodeVector(v.x, v.y, entity.center.z))
+      vectors.push(IGMDriver.newGCodeVector(v.x, v.y, center.z))
     }
     const object = IGMDriver.newLine(vectors)
     object.comment = `DXF Entity ${entity.type} `
@@ -208,7 +209,7 @@ export class Dxf2IgmTransformer implements ModelTransformer<ArrayBuffer | string
   private doSpline(entity: DxfParser.EntitySPLINE, dxf: DxfParser.DXFDocument) {
     //var color = getColor(entity, data);
 
-    const points: Vector2[] = entity.controlPoints
+    const points = entity.controlPoints!
 
     let interpolatedPoints: Vector2[] = []
     if (entity.degreeOfSplineCurve == 2) {
@@ -228,10 +229,10 @@ export class Dxf2IgmTransformer implements ModelTransformer<ArrayBuffer | string
 
   private doDimension(entity: DxfParser.EntityDIMENSION, dxf: DxfParser.DXFDocument): IgmObject[] {
 
-    const block = dxf.blocks[entity.block]
+    const block = dxf.blocks![entity.block!]
 
     if (!block || !block.entities) {
-      return null
+      return []
     }
 
 

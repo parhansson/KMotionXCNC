@@ -1,6 +1,9 @@
-export class BlockPart {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.BlockPart = void 0;
+class BlockPart {
     constructor(value) {
         this.value = value;
     }
 }
-//# sourceMappingURL=block-part.js.map
+exports.BlockPart = BlockPart;

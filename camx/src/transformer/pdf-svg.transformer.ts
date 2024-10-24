@@ -52,9 +52,9 @@ export class Pdf2SvgTransformer implements ModelTransformer<ArrayBuffer, SVGElem
         for (let i = 1; i <= ii; i++) {
           if (page != i) { continue }
           //when anchor is not null svg will be rendered on screen for debugging
-          const anchor: HTMLAnchorElement = null// createAnchor(i)
+          const anchor: HTMLAnchorElement | null = null// createAnchor(i)
           // Using promise to fetch and render the next page
-          promise = promise.then(function (pageNum: number, anchor: HTMLElement) {
+          promise = promise.then(function (pageNum: number, anchor: HTMLElement | null) {
             return pdf.getPage(pageNum).then(page => {
               const viewport = page.getViewport({ scale, rotation })
 
@@ -64,7 +64,7 @@ export class Pdf2SvgTransformer implements ModelTransformer<ArrayBuffer, SVGElem
                 const svgGfx = new SVGGraphics(page.commonObjs, page.objs)
                 //apply monkey patch for zero width strokes
                 if(applyMokeyPatch){
-                  svgGfx._setStrokeAttributes = _setStrokeAttributes.bind(svgGfx)
+                  svgGfx._setStrokeAttributes = (element: SVGGraphicsElement, lineWidthScale:number) => _setStrokeAttributes(svgGfx, element, lineWidthScale)
                 }
                 svgGfx.embedFonts = true
                 return svgGfx.getSVG(opList, viewport).then(svg => {
@@ -94,7 +94,7 @@ export class Pdf2SvgTransformer implements ModelTransformer<ArrayBuffer, SVGElem
   }
   
 }
-function createContainer(pageNum: number, width: number, height: number, parentElement: HTMLElement) {
+function createContainer(pageNum: number, width: number, height: number, parentElement: HTMLElement | null) {
   if (parentElement) {
     const container = document.createElement('div')
     container.id = 'pageContainer' + pageNum
@@ -113,8 +113,8 @@ function createAnchor(pageNum: number): HTMLAnchorElement {
   document.body.appendChild(anchor)
   return anchor
 }
-function _setStrokeAttributes(element: SVGGraphicsElement, lineWidthScale = 1) {
-  const current = this.current
+function _setStrokeAttributes(svgGfx: SVGGraphics, element: SVGGraphicsElement, lineWidthScale = 1) {
+  const current = svgGfx.current
   let dashArray: number[] = current.dashArray
   if (lineWidthScale !== 1 && dashArray.length > 0) {
     dashArray = dashArray.map(value => lineWidthScale * value)

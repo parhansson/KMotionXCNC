@@ -1,3 +1,4 @@
+"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -7,35 +8,40 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { IGM, IGMDriver } from '../model/igm';
-import DxfParser from 'dxf-parser';
-import { KMXUtil } from '../util/kmxutil';
-import { EllipseCurve, SplineCurve, QuadraticBezierCurve } from '../model/vector';
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Dxf2IgmTransformer = void 0;
+const igm_1 = require("../model/igm");
+const dxf_parser_1 = __importDefault(require("dxf-parser"));
+const kmxutil_1 = require("../util/kmxutil");
+const vector_1 = require("../model/vector");
 const INSUNITS = {
     // https://www.autodesk.com/techpubs/autocad/acad2000/dxf/header_section_group_codes_dxf_02.htm
-    0: 1,
-    1: 25.4,
-    2: 304.8,
-    3: 1609344,
-    4: 1,
-    5: 10,
-    6: 1000,
-    7: 1000000,
-    8: 0.0000254,
-    9: 0.0254,
-    10: 914.4,
-    11: 1.0e-7,
-    12: 1.0e-6,
-    13: 0.001,
-    14: 100,
-    15: 10000,
-    16: 100000,
-    17: 1000000000000,
-    18: 1,
-    19: 1,
-    20: 1,
+    0: 1, // Unitless,
+    1: 25.4, // Inches
+    2: 304.8, // Feet
+    3: 1609344, // Miles
+    4: 1, // Millimeters
+    5: 10, // Centimeters
+    6: 1000, // Meters
+    7: 1000000, // Kilometers
+    8: 0.0000254, // Microinches 
+    9: 0.0254, // Mils
+    10: 914.4, // Yards
+    11: 1.0e-7, // Angstroms
+    12: 1.0e-6, // Nanometers
+    13: 0.001, // Microns
+    14: 100, // Decimeters
+    15: 10000, // Decameters
+    16: 100000, // Hectometers
+    17: 1000000000000, // Gigameters
+    18: 1, // Astronomical units
+    19: 1, // Light years
+    20: 1, // Parsecs
 };
-export class Dxf2IgmTransformer {
+class Dxf2IgmTransformer {
     constructor(settings) {
         this.settings = settings;
     }
@@ -43,17 +49,17 @@ export class Dxf2IgmTransformer {
         return __awaiter(this, void 0, void 0, function* () {
             let fileText;
             if (source instanceof ArrayBuffer) {
-                fileText = KMXUtil.ab2str(source);
+                fileText = kmxutil_1.KMXUtil.ab2str(source);
             }
             else {
                 fileText = source;
             }
-            const model = new IGM();
-            this.driver = new IGMDriver(model);
-            const parser = new DxfParser();
+            const model = new igm_1.IGM();
+            this.driver = new igm_1.IGMDriver(model);
+            const parser = new dxf_parser_1.default();
             try {
                 const dxf = parser.parseSync(fileText);
-                for (const entity of dxf.entities) {
+                for (const entity of dxf.entities || []) {
                     const shapes = this.doEntity(entity, dxf);
                     for (const shape of shapes) {
                         this.driver.addToLayerObject(entity.layer, this.scale(shape, dxf));
@@ -125,7 +131,8 @@ export class Dxf2IgmTransformer {
         return shapes;
     }
     scale(shape, dxf) {
-        let unit = dxf.header.$INSUNITS;
+        var _a;
+        let unit = (_a = dxf.header) === null || _a === void 0 ? void 0 : _a.$INSUNITS;
         if (unit === undefined) {
             //unit = 1 // autocad defaults to Inches(1) if INSUNITS is missing    
             unit = 0; //but we use unitless here
@@ -144,22 +151,24 @@ export class Dxf2IgmTransformer {
             endAngle = entity.endAngle;
         }
         const center = entity.center ? entity.center : { x: 0, y: 0 };
-        const object = IGMDriver.newArc(center.x, center.y, entity.radius, startAngle, endAngle, false);
+        const object = igm_1.IGMDriver.newArc(center.x, center.y, entity.radius, startAngle, endAngle, false);
         object.comment = `DXF Entity ${entity.type}`;
         return object;
     }
     doEllipse(entity, dxf) {
         //ar color = getColor(entity, data);
-        const xrad = Math.sqrt(Math.pow(entity.majorAxisEndPoint.x, 2) + Math.pow(entity.majorAxisEndPoint.y, 2));
+        const majorAxisEndPoint = entity.majorAxisEndPoint;
+        const xrad = Math.sqrt(Math.pow(majorAxisEndPoint.x, 2) + Math.pow(majorAxisEndPoint.y, 2));
         const yrad = xrad * entity.axisRatio;
-        const rotation = Math.atan2(entity.majorAxisEndPoint.y, entity.majorAxisEndPoint.x);
-        const curve = new EllipseCurve(entity.center.x, entity.center.y, xrad, yrad, entity.startAngle, entity.endAngle, false, // Always counterclockwise
+        const rotation = Math.atan2(majorAxisEndPoint.y, majorAxisEndPoint.x);
+        const center = entity.center;
+        const curve = new vector_1.EllipseCurve(center.x, center.y, xrad, yrad, entity.startAngle, entity.endAngle, false, // Always counterclockwise
         rotation);
         const vectors = [];
         for (const v of curve.getPoints(50)) {
-            vectors.push(IGMDriver.newGCodeVector(v.x, v.y, entity.center.z));
+            vectors.push(igm_1.IGMDriver.newGCodeVector(v.x, v.y, center.z));
         }
-        const object = IGMDriver.newLine(vectors);
+        const object = igm_1.IGMDriver.newLine(vectors);
         object.comment = `DXF Entity ${entity.type} `;
         return object;
     }
@@ -179,16 +188,16 @@ export class Dxf2IgmTransformer {
                 vectors.push.apply(vectors, bulgeGeometry.vertices);
             }
             else {
-                vectors.push(IGMDriver.newGCodeVector(v.x, v.y, v.z));
+                vectors.push(igm_1.IGMDriver.newGCodeVector(v.x, v.y, v.z));
             }
             i++;
         }
         //Close shapes
         if (entity.type != 'LINE' && entity.shape) {
             const startPoint = vectors[0];
-            vectors.push(IGMDriver.newGCodeVector(startPoint.x, startPoint.y, startPoint.z));
+            vectors.push(igm_1.IGMDriver.newGCodeVector(startPoint.x, startPoint.y, startPoint.z));
         }
-        const object = IGMDriver.newLine(vectors);
+        const object = igm_1.IGMDriver.newLine(vectors);
         object.comment = `DXF Entity ${entity.type} ${hasBulgeLines ? 'Bulges' : ''}`;
         return object;
     }
@@ -198,22 +207,22 @@ export class Dxf2IgmTransformer {
         let interpolatedPoints = [];
         if (entity.degreeOfSplineCurve == 2) {
             for (let i = 0; i + 2 < points.length; i = i + 2) {
-                const curve = new QuadraticBezierCurve(points[i], points[i + 1], points[i + 2]);
+                const curve = new vector_1.QuadraticBezierCurve(points[i], points[i + 1], points[i + 2]);
                 interpolatedPoints.push.apply(interpolatedPoints, curve.getPoints(50));
             }
         }
         else {
-            const curve = new SplineCurve(points);
+            const curve = new vector_1.SplineCurve(points);
             interpolatedPoints = curve.getPoints(100);
         }
-        const splineObject = IGMDriver.newLine(interpolatedPoints.map(v => IGMDriver.newGCodeVector(v.x, v.y, 0)));
+        const splineObject = igm_1.IGMDriver.newLine(interpolatedPoints.map(v => igm_1.IGMDriver.newGCodeVector(v.x, v.y, 0)));
         splineObject.comment = `DXF Entity ${entity.type} `;
         return splineObject;
     }
     doDimension(entity, dxf) {
         const block = dxf.blocks[entity.block];
         if (!block || !block.entities) {
-            return null;
+            return [];
         }
         const group = [];
         // if(entity.anchorPoint) {
@@ -230,6 +239,7 @@ export class Dxf2IgmTransformer {
         return group;
     }
 }
+exports.Dxf2IgmTransformer = Dxf2IgmTransformer;
 /**
  * Calculates points for a curve between two points
  * @param startPoint - the starting point of the curve
@@ -243,7 +253,7 @@ class BulgeGeometry {
         let p0;
         let p1;
         startPoint = p0 = startPoint || { x: 0, y: 0 };
-        endPoint = p1 = endPoint || IGMDriver.newGCodeVector(1, 0);
+        endPoint = p1 = endPoint || igm_1.IGMDriver.newGCodeVector(1, 0);
         bulge = bulge || 1;
         const distanceTo = (v1, v2) => {
             const dx = v1.x - v2.x;
@@ -256,10 +266,10 @@ class BulgeGeometry {
         segments = segments || Math.max(Math.abs(Math.ceil(angle / (Math.PI / 18))), 6); // By default want a segment roughly every 10 degrees
         const startAngle = this.angle2(center, p0);
         const thetaAngle = angle / segments;
-        this.vertices.push(IGMDriver.newGCodeVector(p0.x, p0.y, 0));
+        this.vertices.push(igm_1.IGMDriver.newGCodeVector(p0.x, p0.y, 0));
         for (let i = 1; i <= segments - 1; i++) {
             const vertex = this.polar(center, Math.abs(radius), startAngle + thetaAngle * i);
-            this.vertices.push(IGMDriver.newGCodeVector(vertex.x, vertex.y, 0));
+            this.vertices.push(igm_1.IGMDriver.newGCodeVector(vertex.x, vertex.y, 0));
         }
     }
     /**
@@ -271,8 +281,8 @@ class BulgeGeometry {
      * @return {Number} the angle
      */
     angle2(p1, p2) {
-        const v1 = IGMDriver.newGCodeVector(p1.x, p1.y);
-        const v2 = IGMDriver.newGCodeVector(p2.x, p2.y);
+        const v1 = igm_1.IGMDriver.newGCodeVector(p1.x, p1.y);
+        const v2 = igm_1.IGMDriver.newGCodeVector(p2.x, p2.y);
         this.sub(v2, v1); // sets v2 to be our chord
         this.normalize(v2); // normalize because cos(theta) =
         if (v2.y < 0) {
@@ -306,4 +316,3 @@ class BulgeGeometry {
         };
     }
 }
-//# sourceMappingURL=dxf-igm.transformer.js.map

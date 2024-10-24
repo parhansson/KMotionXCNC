@@ -3,9 +3,9 @@ import { IGMModelSettings } from '../model/model.settings';
 import { ModelTransformer } from './model.transformer';
 export declare class Igm2GcodeTransformer implements ModelTransformer<IGM, GCodeSource> {
     private settings;
-    name: 'IGM to G-Code';
-    inputMime: ['application/x-kmx-gcode'];
-    outputMime: 'application/x-gcode';
+    name: string;
+    inputMime: string[];
+    outputMime: string;
     constructor(settings: IGMModelSettings);
     transform(igm: IGM): Promise<GCodeSource>;
     /**

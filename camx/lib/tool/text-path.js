@@ -1,3 +1,4 @@
+"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -7,8 +8,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { FontLoaderService } from '../util';
-export class TextPathGenerator {
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.TextPathGenerator = void 0;
+exports.getTextSVG = getTextSVG;
+const util_1 = require("../util");
+class TextPathGenerator {
     requiredInput() {
         const inputs = [
             {
@@ -51,12 +55,13 @@ export class TextPathGenerator {
         return getTextSVG(values.text, values.fontName, values.fontSize);
     }
 }
-export function getTextSVG(text, fontName, fontSize = 12) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const fontLoader = new FontLoaderService();
+exports.TextPathGenerator = TextPathGenerator;
+function getTextSVG(text_1, fontName_1) {
+    return __awaiter(this, arguments, void 0, function* (text, fontName, fontSize = 12) {
+        const fontLoader = new util_1.FontLoaderService();
         const font = yield fontLoader.getFont(fontName);
         const path = font.getPath(text, 0, 0, fontSize);
-        const dPath = path.toPathData(undefined);
+        const dPath = path.toPathData(3);
         const svg = toSVG(dPath, fontSize);
         return svg;
     });
@@ -83,4 +88,3 @@ function toSVG(dPath, fontSize) {
     console.log('svg', svg);
     return svg;
 }
-//# sourceMappingURL=text-path.js.map

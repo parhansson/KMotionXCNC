@@ -10,7 +10,7 @@ export declare class SvgEditor2 {
         y: number;
     };
     BackDrop: Element;
-    DragTarget: SVGGraphicsElement;
+    DragTarget: SVGGraphicsElement | null;
     constructor(doc: SVGSVGElement);
     private Leave;
     private Grab;

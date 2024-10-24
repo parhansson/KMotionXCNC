@@ -12,14 +12,14 @@
     "experimentalDecorators": true,
     "lib": ["es2017", "dom"],
     "noImplicitAny": false, //todo true
-    "suppressImplicitAnyIndexErrors": true,
     "removeComments": false,
     "outDir": "dist/unbundled",
     "declaration": true,
     "baseUrl": "./",
     "paths": {
       "@kmx/*": [ "./src/app/*" ],
-      "@workers/*": [ "./src/workers/*" ]
+      "@workers/*": [ "./src/workers/*" ],
+      //"camx": [ "./camx/lib" ]
     }
   },
   "files": [

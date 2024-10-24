@@ -18,7 +18,7 @@ export declare class IGMModelSettings {
     calculateShortestPath: boolean;
     initCode: string;
     feedRate: number;
-    multipass: false;
+    multipass: boolean;
     materialThickness: number;
     passes: number;
 }
@@ -28,15 +28,15 @@ export declare class PDFModelSettings {
     scale: number;
 }
 export declare class DXFModelSettings {
-    includeDimension: true;
+    includeDimension: boolean;
 }
-export declare class Material {
+export type Material = {
     name: string;
     ppi: string;
     speed: string;
     passes: number;
     thickness: number;
-}
+};
 export declare class ModelSettings {
     svg: SVGModelSettings;
     pdf: PDFModelSettings;

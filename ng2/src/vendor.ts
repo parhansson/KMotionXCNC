@@ -16,17 +16,14 @@
 
 //import 'pdfjs-dist/build/pdf.js'
 //import 'pdfjs-dist/build/pdf.worker.js'
-
-import './styles.css'
-import 'font-awesome/css/font-awesome.css'
+import '@fortawesome/fontawesome-free'
+import '@fortawesome/fontawesome-free/js/solid'
+import '@fortawesome/free-solid-svg-icons'
+import '@fortawesome/fontawesome-free/css/all.css'
+//import '@fortawesome/fontawesome-free/webfonts/fa-solid-900.woff2'
 import 'bootstrap/dist/css/bootstrap.min.css'
+import './styles.css'
 
 //import 'script-loader!dxf-parser/dist/dxf-parser.js'
 
-//Modular ace implementation
-import 'brace'
-import 'brace/mode/c_cpp'
-import 'brace/mode/gcode'
-import 'brace/theme/chrome'
-import 'brace/ext/settings_menu'
-import 'brace/ext/searchbox'
+

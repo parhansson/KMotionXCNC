@@ -1,3 +1,4 @@
+"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -7,8 +8,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { IGMDriver } from '../model/igm';
-export class Igm2SvgTransformer {
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Igm2SvgTransformer = void 0;
+exports.igm2SVG = igm2SVG;
+const igm_1 = require("../model/igm");
+class Igm2SvgTransformer {
     constructor(settings) {
         this.settings = settings;
     }
@@ -18,10 +22,11 @@ export class Igm2SvgTransformer {
         });
     }
 }
-export function igm2SVG(model) {
+exports.Igm2SvgTransformer = Igm2SvgTransformer;
+function igm2SVG(model) {
     let svg = '';
     const res = 1;
-    const driver = new IGMDriver(model);
+    const driver = new igm_1.IGMDriver(model);
     const paths = driver.allVisibleObjects;
     driver.updateBounds(paths);
     const bounds = driver.getMaxBounds(paths);
@@ -51,12 +56,11 @@ const createPaths = (driver, dpiScale) => {
         const geometry = part.geometry;
         let path;
         if (geometry.type == 'LINE') {
-            path = linePath(geometry.vectors);
+            paths.push(linePath(geometry.vectors));
         }
         if (geometry.type == 'ARC') {
-            path = arcPath(driver.start(part), driver.end(part), geometry.radius, geometry.startAngle, geometry.endAngle, geometry.clockwise);
+            paths.push(arcPath(driver.start(part), driver.end(part), geometry.radius, geometry.startAngle, geometry.endAngle, geometry.clockwise));
         }
-        paths.push(path);
     }
     return paths;
 };
@@ -88,4 +92,3 @@ const arcPath = (start, end, radius, startAngle, endAngle, clockwise) => {
     ].join(' ');
     return d;
 };
-//# sourceMappingURL=igm-svg.transformer.js.map

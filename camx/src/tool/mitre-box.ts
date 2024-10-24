@@ -20,9 +20,9 @@ export interface MitreBoxInput {
 }
 export class MitreBox implements ModelGenerator<MitreBoxInput> {
 
-  private models: LineObject[]
+  private models: LineObject[] =  []
 
-  private cut_width: number
+  private cut_width: number = 0
 
   constructor() {
   }

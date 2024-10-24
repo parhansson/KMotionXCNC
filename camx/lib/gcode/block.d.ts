@@ -1,9 +1,8 @@
 import { BlockPart } from './block-part';
 import { Word } from './word';
-export declare class Block {
+export type Block = {
     text: string;
     line: number;
-    parts: Array<BlockPart<string | Word[]>>;
+    parts: BlockPart<string | Word[]>[];
     errors: string[];
-    constructor(text: string);
-}
+};

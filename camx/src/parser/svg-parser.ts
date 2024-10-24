@@ -12,22 +12,22 @@ export class SvgNode {
   path: Subpath[]
   xformToWorld: Matrix = [1, 0, 0, 1, 0, 0] //2d Transformation vector
   xform: Matrix = [1, 0, 0, 1, 0, 0]//2d Transformation vector
-  id: string
-  display: string
-  visibility: string
-  fill: string
-  stroke: string
-  color: string
-  opacity: number
-  fillOpacity: number
-  strokeOpacity: number
-  unsupported: boolean
+  id: string | undefined
+  display: string | undefined
+  visibility: string | undefined
+  fill: string | undefined
+  stroke: string | undefined
+  color: string | undefined
+  opacity: number | undefined
+  fillOpacity: number | undefined
+  strokeOpacity: number | undefined
+  unsupported: boolean | undefined
   defs: boolean = false
-  href: string
-  text: string = null
+  href: string | null = null
+  text: string | null = null
   fontSize: number = 1
-  fontFamily: string
-  fontStyle: string
+  fontFamily: string | undefined
+  fontStyle: string | undefined
   children: SvgNode[]
 
   constructor() {
@@ -249,7 +249,7 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
     'transform': (node: SvgNode, val: string) => {
       // http://www.w3.org/TR/SVG11/coords.html#EstablishingANewUserSpace
       const xforms: Matrix[] = []
-      const segs = val.match(/[a-z]+\s*\([^)]*\)/ig)
+      const segs = val.match(/[a-z]+\s*\([^)]*\)/ig) || []
       for (const seg of segs) {
         const kv = seg.split('(')
         const xformKind = this.strip(kv[0])
@@ -401,13 +401,13 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
     // Presentations Attributes
     ///////////////////////////
 
-    '__parseColor': (val: string, currentColor: string) => {
+    '__parseColor': (val: string, currentColor: string | undefined) => {
 
       if (val.charAt(0) == '#') {
         if (val.length == 4) {
           val = val.replace(/([^#])/g, '$1$1')
         }
-        const a = val.slice(1).match(/../g).map(
+        const a = val.slice(1).match(/../g)!.map(
           function (i) { return parseInt(i, 16) })
         return a.join('')
 
@@ -451,9 +451,9 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
       } else if (val == 'none') {
         return 'none'
       } else if (val == 'freeze') { // SMIL is evil, but so are we
-        return null
+        return undefined
       } else if (val == 'remove') {
-        return null
+        return undefined
       } else { // unknown value, maybe it's an ICC color
         return val
       }
@@ -515,7 +515,7 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
     __getPolyPath: async (tag: SVGElement) => {
       // has transform and style attributes
       const subpath = []
-      const vertnums = this.strip(tag.getAttribute('points').toString()).split(/[\s,]+/).map(parseFloat)
+      const vertnums = this.strip(tag.getAttribute('points')!.toString()).split(/[\s,]+/).map(parseFloat)
       if (vertnums.length % 2 == 0) {
         const d: PathDValue[] = ['M']
         d.push(vertnums[0])
@@ -527,6 +527,7 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
         return d
       } else {
         console.error('error', 'in __getPolyPath: odd number of verteces')
+        return []
       }
     },
 
@@ -577,7 +578,7 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
     circle: async (tag: SVGElement, node: SvgNode) => {
       // http://www.w3.org/TR/SVG11/shapes.html#CircleElement
       // has transform and style attributes
-      const r = this.parseUnit(tag.getAttribute('r'))
+      const r = this.parseUnit(tag.getAttribute('r')) || 0
       const cx = this.parseUnit(tag.getAttribute('cx')) || 0
       const cy = this.parseUnit(tag.getAttribute('cy')) || 0
 
@@ -595,11 +596,11 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
 
     ellipse: async (tag: SVGElement, node: SvgNode) => {
       // has transform and style attributes
-      const rx = this.parseUnit(tag.getAttribute('rx'))
-      const ry = this.parseUnit(tag.getAttribute('ry'))
+      const rx = this.parseUnit(tag.getAttribute('rx')) || 0
+      const ry = this.parseUnit(tag.getAttribute('ry')) || 0
       const cx = this.parseUnit(tag.getAttribute('cx')) || 0
       const cy = this.parseUnit(tag.getAttribute('cy')) || 0
-
+      
       if (rx > 0.0 && ry > 0.0) {
         const d = ['M', cx - rx, cy,
           'A', rx, ry, 0, 0, 0, cx, cy + ry,
@@ -616,7 +617,9 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
       // http://www.w3.org/TR/SVG11/paths.html
       // has transform and style attributes
       const d = tag.getAttribute('d')
-      this.addPath(d, node)
+      if(d){
+        this.addPath(d, node)
+      }
     },
 
     image: async (tag: SVGElement, node: SvgNode) => {
@@ -644,12 +647,15 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
       const ns = 'http://www.w3.org/1999/xlink'
       const href = tag.getAttributeNS(ns, 'href')
       node.href = href
-      const v = this.globalNodes[node.href]
+      if(node.href){
+        const v = this.globalNodes[node.href]
+        //node.unsupported = true;
+        console.log(node, v)
+        // not supported
+        // has transform and style attributes
 
-      //node.unsupported = true;
-      console.log(node, v)
-      // not supported
-      // has transform and style attributes
+      }
+
     },
 
     style: async (tag: SVGElement, node: SvgNode) => {
@@ -670,7 +676,7 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
       for (let ruleIndex = 0; ruleIndex < styleSheet.cssRules.length; ruleIndex++) {
         //for(const ruleIndex in styleSheet.cssRules){
         const rule =styleSheet.cssRules.item(ruleIndex)
-        if(rule.type == CSSRule.FONT_FACE_RULE){
+        if(rule?.type == CSSRule.FONT_FACE_RULE){
           const fontFaceRule = styleSheet.cssRules.item(ruleIndex) as CSSFontFaceRule
           const style = fontFaceRule.style
           const fontFamily = style.fontFamily
@@ -751,25 +757,25 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
           if (textAnchorAttr || baselineAttr) {
             const bounds = path.getBoundingBox()
             let alignX = 0
-            if (textAnchorAttr.nodeValue === 'middle') {
+            if (textAnchorAttr?.nodeValue === 'middle') {
               alignX = (bounds.x2 - bounds.x1) / 2
             }
-            if (textAnchorAttr.nodeValue === 'end') {
+            if (textAnchorAttr?.nodeValue === 'end') {
               alignX = (bounds.x2 - bounds.x1)
             }
             let alignY = 0
             //TODO middle or center?? need to check this
-            if (baselineAttr.nodeValue === 'middle' || baselineAttr.nodeValue === 'center') {
+            if (baselineAttr?.nodeValue === 'middle' || baselineAttr?.nodeValue === 'center') {
               alignY = (bounds.y2 - bounds.y1) / 2
             }
-            if (baselineAttr.nodeValue === 'hanging') {
+            if (baselineAttr?.nodeValue === 'hanging') {
               alignY = (bounds.y2 - bounds.y1)
             }
             node.xformToWorld = this.matrixMult(node.xformToWorld, [1, 0, 0, 1, -alignX, alignY])
 
           }
 
-          const dPath = path.toPathData(undefined)
+          const dPath = path.toPathData(3)
           if (dPath.length > 0) {
             this.addPath(dPath, node)
           }
@@ -809,7 +815,7 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
     //let d: DPath
     if (typeof dObject === 'string') {
       // parse path string
-      const mArr = dObject.match(/([A-Za-z]|-?[0-9]+\.?[0-9]*(?:e-?[0-9]*)?)/g)
+      const mArr = dObject.match(/([A-Za-z]|-?[0-9]+\.?[0-9]*(?:e-?[0-9]*)?)/g) || []
       for (const val of mArr) {
         const num = parseFloat(val)
         if (isNaN(num)) {
@@ -972,8 +978,8 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
             let x2
             let y2
             if (cmdPrev.match(/[CcSs]/)) {
-              x2 = x - (xPrevCp - x)
-              y2 = y - (yPrevCp - y)
+              x2 = x - (xPrevCp! - x)
+              y2 = y - (yPrevCp! - y)
             } else {
               x2 = x
               y2 = y
@@ -996,8 +1002,8 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
             let x2
             let y2
             if (cmdPrev.match(/[CcSs]/)) {
-              x2 = x - (xPrevCp - x)
-              y2 = y - (yPrevCp - y)
+              x2 = x - (xPrevCp! - x)
+              y2 = y - (yPrevCp! - y)
             } else {
               x2 = x
               y2 = y
@@ -1046,8 +1052,8 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
             let x2
             let y2
             if (cmdPrev.match(/[QqTt]/)) {
-              x2 = x - (xPrevCp - x)
-              y2 = y - (yPrevCp - y)
+              x2 = x - (xPrevCp! - x)
+              y2 = y - (yPrevCp! - y)
             } else {
               x2 = x
               y2 = y
@@ -1068,8 +1074,8 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
             let x2
             let y2
             if (cmdPrev.match(/[QqTt]/)) {
-              x2 = x - (xPrevCp - x)
-              y2 = y - (yPrevCp - y)
+              x2 = x - (xPrevCp! - x)
+              y2 = y - (yPrevCp! - y)
             } else {
               x2 = x
               y2 = y
@@ -1280,7 +1286,7 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
   // handle path data
   //////////////////////////////////////////////////////////////////////////
 
-  parseUnit(val: string) {
+  parseUnit(val: string | null) {
     if (val == null) {
       return null
     } else {

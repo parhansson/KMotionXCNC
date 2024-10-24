@@ -1,4 +1,10 @@
-export class Curve3 {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.CubicBezierCurve = exports.QuadraticBezierCurve = exports.SplineCurve = exports.ArcCurve = exports.EllipseCurve = exports.Curve3 = void 0;
+exports.CatmullRom = CatmullRom;
+exports.QuadraticBezier = QuadraticBezier;
+exports.CubicBezier = CubicBezier;
+class Curve3 {
     // Get sequence of points using getPoint( t )
     getPoints(divisions = 10) {
         const points = [];
@@ -8,10 +14,11 @@ export class Curve3 {
         return points;
     }
 }
+exports.Curve3 = Curve3;
 /**
  * EllipseCurve derived from THREE
  */
-export class EllipseCurve extends Curve3 {
+class EllipseCurve extends Curve3 {
     constructor(aX, aY, xRadius, yRadius, aStartAngle, aEndAngle, aClockwise, aRotation = 0) {
         super();
         this.aX = aX;
@@ -67,13 +74,15 @@ export class EllipseCurve extends Curve3 {
         return { x, y, z: 0 };
     }
 }
+exports.EllipseCurve = EllipseCurve;
 //ArcCurve is the same as EllipseCurve but radius is the same in both axes
-export class ArcCurve extends EllipseCurve {
+class ArcCurve extends EllipseCurve {
     constructor(aX, aY, aRadius, aStartAngle, aEndAngle, aClockwise) {
         super(aX, aY, aRadius, aRadius, aStartAngle, aEndAngle, aClockwise);
     }
 }
-export class SplineCurve extends Curve3 {
+exports.ArcCurve = ArcCurve;
+class SplineCurve extends Curve3 {
     constructor(points = []) {
         super();
         this.points = points;
@@ -94,7 +103,8 @@ export class SplineCurve extends Curve3 {
         };
     }
 }
-export class QuadraticBezierCurve extends Curve3 {
+exports.SplineCurve = SplineCurve;
+class QuadraticBezierCurve extends Curve3 {
     constructor(v0 = { x: 0, y: 0 }, v1 = { x: 0, y: 0 }, v2 = { x: 0, y: 0 }) {
         super();
         this.v0 = v0;
@@ -109,7 +119,8 @@ export class QuadraticBezierCurve extends Curve3 {
         };
     }
 }
-export class CubicBezierCurve extends Curve3 {
+exports.QuadraticBezierCurve = QuadraticBezierCurve;
+class CubicBezierCurve extends Curve3 {
     constructor(v0 = { x: 0, y: 0 }, v1 = { x: 0, y: 0 }, v2 = { x: 0, y: 0 }, v3 = { x: 0, y: 0 }) {
         super();
         this.v0 = v0;
@@ -125,19 +136,20 @@ export class CubicBezierCurve extends Curve3 {
         };
     }
 }
+exports.CubicBezierCurve = CubicBezierCurve;
 /**
  * Bezier Curves formulas obtained from
  * http://en.wikipedia.org/wiki/Bézier_curve
  * Also found in THREE
  */
-export function CatmullRom(t, p0, p1, p2, p3) {
+function CatmullRom(t, p0, p1, p2, p3) {
     const v0 = (p2 - p0) * 0.5;
     const v1 = (p3 - p1) * 0.5;
     const t2 = t * t;
     const t3 = t * t2;
     return (2 * p1 - 2 * p2 + v0 + v1) * t3 + (-3 * p1 + 3 * p2 - 2 * v0 - v1) * t2 + v0 * t + p1;
 }
-export function QuadraticBezier(t, p0, p1, p2) {
+function QuadraticBezier(t, p0, p1, p2) {
     const QuadraticBezierP0 = (t, p) => {
         const k = 1 - t;
         return k * k * p;
@@ -148,7 +160,7 @@ export function QuadraticBezier(t, p0, p1, p2) {
         QuadraticBezierP1(t, p1) +
         QuadraticBezierP2(t, p2);
 }
-export function CubicBezier(t, p0, p1, p2, p3) {
+function CubicBezier(t, p0, p1, p2, p3) {
     const CubicBezierP0 = (t, p) => {
         const k = 1 - t;
         return k * k * k * p;
@@ -164,4 +176,3 @@ export function CubicBezier(t, p0, p1, p2, p3) {
         CubicBezierP2(t, p2) +
         CubicBezierP3(t, p3);
 }
-//# sourceMappingURL=vector.js.map

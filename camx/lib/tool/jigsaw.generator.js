@@ -1,3 +1,6 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.JigsawGenerator = void 0;
 //import { toPath, toPoints } from 'svg-catmull-rom-spline'
 /**
  * Convert 'points' to catmull rom bezier spline
@@ -96,7 +99,7 @@ const templateOffsets = [
         }
     }
 ];
-export class JigsawGenerator {
+class JigsawGenerator {
     constructor() {
         this.rows = 3;
         this.columns = 3;
@@ -238,7 +241,7 @@ export class JigsawGenerator {
         const offset = templateOffsets.find(o => o.name === this.shapeOffsetName);
         if (!offset) {
             console.error(`No shape found for ${this.shapeOffsetName}`);
-            return;
+            return [];
         }
         const baselineOffsets = offset.baselineOffsets;
         const upperOffsets = offset.upperOffsets;
@@ -388,4 +391,4 @@ export class JigsawGenerator {
         });
     }
 }
-//# sourceMappingURL=jigsaw.generator.js.map
+exports.JigsawGenerator = JigsawGenerator;

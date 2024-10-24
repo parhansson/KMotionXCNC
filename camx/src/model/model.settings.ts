@@ -32,7 +32,7 @@ export class IGMModelSettings {
   calculateShortestPath:boolean = true
   initCode: string = 'M100 P200 Q100'
   feedRate: number = 250
-  multipass:false
+  multipass:boolean = false
   materialThickness: number = 10
   passes: number = 1
 }
@@ -42,9 +42,9 @@ export class PDFModelSettings {
   scale: number = 1.0
 }
 export class DXFModelSettings {
-  includeDimension:true
+  includeDimension:boolean = true
 }
-export class Material {
+export type Material = {
   name: string
   ppi: string
   speed: string

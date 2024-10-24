@@ -1,3 +1,4 @@
+"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -7,7 +8,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { IGMDriver, GCodeSource } from '../model/igm';
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Igm2GcodeTransformer = void 0;
+const igm_1 = require("../model/igm");
 class GCodeOutput {
     constructor(spindleOnCommand, spindleOffCommand, commentsOn, fractionalDigits) {
         this.spindleOnCommand = spindleOnCommand;
@@ -120,16 +123,19 @@ class GCodeOutput {
             v1.z.toFixed(fractionalDigits) === v2.z.toFixed(fractionalDigits));
     }
 }
-export class Igm2GcodeTransformer {
+class Igm2GcodeTransformer {
     constructor(settings) {
         this.settings = settings;
+        this.name = 'IGM to G-Code';
+        this.inputMime = ['application/x-kmx-gcode'];
+        this.outputMime = 'application/x-gcode';
     }
     transform(igm) {
         return __awaiter(this, void 0, void 0, function* () {
             const settings = this.settings;
             //settings.seekRate = settings.seekRate || 800;
             //settings.bitWidth = settings.bitWidth || 1; // in mm 
-            const driver = new IGMDriver(igm);
+            const driver = new igm_1.IGMDriver(igm);
             const shapes = driver.applyModifications(settings, true);
             const gcode = new GCodeOutput('M3 (laser on)', 'M5 (laser off)', true, this.settings.fractionalDigits);
             //const gcode = new GCodeOutput(null, null, false, this.settings.fractionalDigits)
@@ -166,7 +172,7 @@ export class Igm2GcodeTransformer {
                 //gcode.push('N 100 ');
                 if (!gcode.onPosition(startPoint)) {
                     gcode.spindleOff();
-                    gcode.g0(startPoint.x, startPoint.y);
+                    gcode.g0(startPoint.x, startPoint.y, null);
                 }
                 if (settings.multipass) {
                     this.passCut(driver, shape, gcode);
@@ -182,7 +188,7 @@ export class Igm2GcodeTransformer {
             // go home
             gcode.g0(0, 0, 0);
             gcode.endProgram();
-            return Promise.resolve(new GCodeSource(gcode.code));
+            return Promise.resolve(new igm_1.GCodeSource(gcode.code));
         });
     }
     /**
@@ -241,7 +247,7 @@ export class Igm2GcodeTransformer {
                 for (const point of geometry.vectors) {
                     //Hmm this will also filter out single points?
                     if (!gcode.onPosition(point)) {
-                        gcode.g1(point.x, point.y);
+                        gcode.g1(point.x, point.y, null);
                     }
                 }
                 break;
@@ -253,7 +259,9 @@ export class Igm2GcodeTransformer {
         return val * this.settings.scale;
     }
     describe(rect) {
-        return 'Width: ' + this.format(rect.width()) + ' Height: ' + this.format(rect.height()) + ' Area: ' + this.format(rect.area());
+        if (rect) {
+            return 'Width: ' + this.format(rect.width()) + ' Height: ' + this.format(rect.height()) + ' Area: ' + this.format(rect.area());
+        }
     }
     format(numb) {
         //fix fractional digits
@@ -264,4 +272,4 @@ export class Igm2GcodeTransformer {
         return numb;
     }
 }
-//# sourceMappingURL=igm-gcode.transformer.js.map
+exports.Igm2GcodeTransformer = Igm2GcodeTransformer;

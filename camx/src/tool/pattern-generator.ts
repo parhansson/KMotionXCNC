@@ -117,8 +117,8 @@ M2
 
 
     driver.updateBounds([shape, shape2])
-    const width = shape.bounds.width()
-    const height = shape.bounds.height()
+    const width = shape.bounds!.width()
+    const height = shape.bounds!.height()
 
     for (let row = 0; row < values.rows; row++) {
       for (let col = 0; col < values.columns; col++) {

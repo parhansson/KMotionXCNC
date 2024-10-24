@@ -3,10 +3,10 @@ import { Block, Word } from '../gcode';
 import { GCodeSource, GCodeVector } from '../model/igm';
 import { ModelTransformer } from './model.transformer';
 export declare class ModalGroup {
-    private groupCodes?;
-    constructor(initialState: string, groupCodes?: string[]);
+    private groupCodes;
+    constructor(initialState: string | null, groupCodes: string[]);
     changed: boolean;
-    code: string;
+    code: string | null;
     setActiveCode(newCode: string): void;
 }
 export declare class GCodeState {
@@ -20,17 +20,17 @@ export declare class GCodeState {
 export declare class State<ShapeType> extends GCodeState {
     scale: number;
     absolute: boolean;
-    currentShape: ShapeType;
+    currentShape: ShapeType | null;
     lineNo: number;
     onBlock(block: Block): void;
     handleWord(cmd: Word): void;
     private wordHandlers;
 }
 export declare abstract class GCodeTransformer<ShapeType, OutputType> implements ModelTransformer<GCodeSource, OutputType> {
-    protected disableWorker?: boolean;
-    output: OutputType;
-    protected state: State<ShapeType>;
-    constructor(disableWorker?: boolean);
+    protected disableWorker?: boolean | undefined;
+    output: OutputType | undefined;
+    protected state: State<ShapeType> | undefined;
+    constructor(disableWorker?: boolean | undefined);
     protected abstract createOutput(): OutputType;
     protected abstract startShape(): ShapeType;
     protected abstract endShape(): void;

@@ -1,3 +1,4 @@
+"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -7,10 +8,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { Curve3, ArcCurve } from '../model/vector';
-import { GCodeParser } from '../parser/gcode-parser';
-import { Word, WordParameters } from '../gcode';
-import { IGMDriver } from '../model/igm';
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.GCodeCurve3 = exports.GCodeTransformer = exports.State = exports.GCodeState = exports.ModalGroup = void 0;
+const vector_1 = require("../model/vector");
+const gcode_parser_1 = require("../parser/gcode-parser");
+const gcode_1 = require("../gcode");
+const igm_1 = require("../model/igm");
 //Copyright (c) 2014 par.hansson@gmail.com
 //Modal G codes 
 // Group 1	{G0, G1, G2, G3, G80, G81, G82, G83, G84, G85, G86, G87, G88, G89} - motion
@@ -29,9 +32,10 @@ import { IGMDriver } from '../model/igm';
 // Group 7	{M3, M4, M5} - spindle turning
 // Group 8	{M7, M8, M9} - coolant
 // Group 9	{M48, M49} - feed and speed override bypass
-export class ModalGroup {
+class ModalGroup {
     constructor(initialState, groupCodes) {
         this.groupCodes = groupCodes;
+        this.changed = false;
         this.code = initialState;
     }
     setActiveCode(newCode) {
@@ -45,9 +49,10 @@ export class ModalGroup {
         this.code = newCode;
     }
 }
+exports.ModalGroup = ModalGroup;
 //Kan användas vid generering av gcode i igm-gcode tranformern för att validera koden när den skapas
 //och hålla koll på positionen för att undvika att shapen gör en G1 rad på samma ställe som nyligen G0
-export class GCodeState {
+class GCodeState {
     constructor() {
         this.moveGroup = new ModalGroup('G0', ['G0', 'G1', 'G2', 'G3', 'G80', 'G81', 'G82', 'G83', 'G84', 'G85', 'G86', 'G87', 'G88', 'G89']);
         this.planeGroup = new ModalGroup('G17', ['G17', 'G18', 'G19']);
@@ -57,10 +62,11 @@ export class GCodeState {
         this.spindleSpeedGroup = new ModalGroup(null, ['G93', 'G94']);
         //units defaults to mm
         this.unitsGroup = new ModalGroup('G21', ['G20', 'G21']);
-        this.position = IGMDriver.newGCodeVector();
+        this.position = igm_1.IGMDriver.newGCodeVector();
     }
 }
-export class State extends GCodeState {
+exports.GCodeState = GCodeState;
+class State extends GCodeState {
     constructor() {
         //Motion group
         super(...arguments);
@@ -130,7 +136,8 @@ export class State extends GCodeState {
         handler(cmd);
     }
 }
-export class GCodeTransformer {
+exports.State = State;
+class GCodeTransformer {
     constructor(disableWorker) {
         this.disableWorker = disableWorker;
     }
@@ -141,7 +148,7 @@ export class GCodeTransformer {
             this.state = new State();
             //this transformer should Subject<Block> instead of GCodeSource
             return new Promise((resolve, reject) => {
-                GCodeParser.parse((block) => {
+                gcode_parser_1.GCodeParser.parse((block) => {
                     this.onBlock(block);
                 }, gcode.lines)
                     .then(() => {
@@ -189,12 +196,13 @@ export class GCodeTransformer {
         // G1 X10 Y10
         // X5 Y5
         // Move on second row is made in G1 mode
-        this.state.onBlock(block);
+        const state = this.state;
+        state.onBlock(block);
         for (const part of block.parts) {
-            if (part instanceof Word) {
-                this.state.handleWord(part);
+            if (part instanceof gcode_1.Word) {
+                state.handleWord(part);
             }
-            else if (part instanceof WordParameters) {
+            else if (part instanceof gcode_1.WordParameters) {
                 const params = {};
                 for (const word of part.value) {
                     params[word.literal] = word.address;
@@ -220,54 +228,57 @@ export class GCodeTransformer {
         if (newPosition == null) {
             return;
         }
-        if (this.state.moveGroup.changed
-            || this.state.currentShape == null
+        const state = this.state;
+        if (state.moveGroup.changed
+            || state.currentShape == null
             //hack to create new shape on arcs
-            || this.state.moveGroup.code === 'G2'
-            || this.state.moveGroup.code === 'G3') {
+            || state.moveGroup.code === 'G2'
+            || state.moveGroup.code === 'G3') {
             //End shape
             this.onEndShape();
             //start new Shape
-            this.state.currentShape = this.onStartShape();
-            if (this.state.moveGroup.code === 'G0' || this.state.moveGroup.code === 'G1') {
+            state.currentShape = this.onStartShape();
+            if (state.moveGroup.code === 'G0' || state.moveGroup.code === 'G1') {
                 // add startpoint on linear shapes
-                this.addLinearPoint(this.state.position, this.state.currentShape);
+                this.addLinearPoint(state.position, state.currentShape);
             }
         }
         //TODO if args X Y and Z is undefined then there is no vector in this Parameter object
-        switch (this.state.moveGroup.code) {
+        switch (state.moveGroup.code) {
             case ('G0'):
-                this.addLinearPoint(newPosition, this.state.currentShape);
+                this.addLinearPoint(newPosition, state.currentShape);
                 break;
             case ('G1'):
-                this.addLinearPoint(newPosition, this.state.currentShape);
+                this.addLinearPoint(newPosition, state.currentShape);
                 break;
             case ('G2'):
-                this.createCurve(args, this.state.position, newPosition, true, this.state.currentShape);
+                this.createCurve(args, state.position, newPosition, true, state.currentShape);
                 break;
             case ('G3'):
-                this.createCurve(args, this.state.position, newPosition, false, this.state.currentShape);
+                this.createCurve(args, state.position, newPosition, false, state.currentShape);
                 break;
         }
-        this.state.position = newPosition;
+        state.position = newPosition;
     }
     createCurve(args, position, newPosition, clockWise, currentShape) {
-        const scale = this.state.scale;
-        args.I *= scale;
-        args.J *= scale;
-        args.K *= scale;
-        args.R *= scale;
-        const curve = new GCodeCurve3(position, newPosition, args, clockWise, this.state.planeGroup.code || 'G18' || 'G19');
+        const state = this.state;
+        const scale = state.scale;
+        args.I && (args.I *= scale);
+        args.J && (args.J *= scale);
+        args.K && (args.K *= scale);
+        args.R && (args.R *= scale);
+        const curve = new GCodeCurve3(position, newPosition, args, clockWise, state.planeGroup.code || 'G18' || 'G19');
         this.addCurve(curve, currentShape);
     }
     getNewPosition(args) {
         if (!this.containsMoveData(args)) {
             return null;
         }
-        const position = this.state.position;
-        const scale = this.state.scale;
-        const absolute = this.state.absolute;
-        const newPosition = IGMDriver.newGCodeVector();
+        const state = this.state;
+        const position = state.position;
+        const scale = state.scale;
+        const absolute = state.absolute;
+        const newPosition = igm_1.IGMDriver.newGCodeVector();
         if (absolute) {
             newPosition.x = args.X !== undefined ? args.X * scale : position.x;
             newPosition.y = args.Y !== undefined ? args.Y * scale : position.y;
@@ -300,7 +311,8 @@ export class GCodeTransformer {
             || args.R !== undefined;
     }
 }
-export class GCodeCurve3 extends Curve3 {
+exports.GCodeTransformer = GCodeTransformer;
+class GCodeCurve3 extends vector_1.Curve3 {
     constructor(startPoint, endPoint, args, clockWise, plane) {
         super();
         this.startPoint = startPoint;
@@ -355,7 +367,7 @@ export class GCodeCurve3 extends Curve3 {
             }
         }
         //console.info("Curve ax, ay, radius, startangle, endangle",aX, aY, radius,aStartAngle,  aEndAngle);
-        this.delegate = new ArcCurve(centerX, centerY, radius, startAngle, endAngle, clockWise);
+        this.delegate = new vector_1.ArcCurve(centerX, centerY, radius, startAngle, endAngle, clockWise);
         //store deltaZ for later
         this.deltaZ = endPoint.z - startPoint.z;
         this.plane = plane;
@@ -388,4 +400,4 @@ export class GCodeCurve3 extends Curve3 {
         });
     }
 }
-//# sourceMappingURL=gcode.transformer.js.map
+exports.GCodeCurve3 = GCodeCurve3;

@@ -1,17 +1,20 @@
-import { IGM, IGMDriver } from '../model/igm';
-import { GCodeTransformer } from './gcode.transformer';
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Gcode2IgmTransformer = void 0;
+const igm_1 = require("../model/igm");
+const gcode_transformer_1 = require("./gcode.transformer");
 //Copyright (c) 2014 par.hansson@gmail.com
-export class Gcode2IgmTransformer extends GCodeTransformer {
+class Gcode2IgmTransformer extends gcode_transformer_1.GCodeTransformer {
     constructor(disableWorker) {
         super(disableWorker);
     }
     createOutput() {
-        const model = new IGM();
-        this.driver = new IGMDriver(model);
+        const model = new igm_1.IGM();
+        this.driver = new igm_1.IGMDriver(model);
         return model;
     }
     startShape() {
-        const shape = IGMDriver.newLine();
+        const shape = igm_1.IGMDriver.newLine();
         //shape.userData = { lineNo: this.state.lineNo }
         this.driver.addToLayerObject('layer1', shape);
         return shape;
@@ -26,8 +29,8 @@ export class Gcode2IgmTransformer extends GCodeTransformer {
     addCurve(curve, shape) {
         const vectors = curve.getPoints(50);
         for (const point of vectors) {
-            shape.geometry.vectors.push(IGMDriver.newGCodeVector(point.x, point.y, point.z));
+            shape.geometry.vectors.push(igm_1.IGMDriver.newGCodeVector(point.x, point.y, point.z));
         }
     }
 }
-//# sourceMappingURL=gcode-igm.transformer.js.map
+exports.Gcode2IgmTransformer = Gcode2IgmTransformer;

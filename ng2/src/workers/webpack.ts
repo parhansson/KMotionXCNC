@@ -6,7 +6,7 @@ export class WebpackWorker implements Worker{
     onmessage: ((this: Worker, ev: MessageEvent) => any) | null
     onmessageerror: ((this: Worker, ev: MessageEvent) => any) | null
     
-    postMessage(message: any, options?: PostMessageOptions | Transferable[]): void
+    postMessage(message: any, options?: WindowPostMessageOptions | Transferable[]): void
     postMessage(message: any, transfer: Transferable[]): void {}
 
     terminate(): void  {}

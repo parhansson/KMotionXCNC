@@ -1,6 +1,6 @@
 import { ModelGenerator } from './model-generator';
 import { GeneratorInput } from './generator-input';
-declare type Point = [number, number];
+type Point = [number, number];
 export interface JigsawGeneratorInput {
     rows: number;
     columns: number;

@@ -1,5 +1,9 @@
-export class KMXUtil {
-    static ab2str(buf) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.KMXUtil = void 0;
+exports.KMXUtil = {
+    createAnchor: {},
+    ab2str(buf) {
         const arr = new Uint8Array(buf);
         let str = '';
         for (let i = 0, l = arr.length; i < l; i++) {
@@ -9,16 +13,16 @@ export class KMXUtil {
         //Call stack too deep on certain browsers 
         //return String.fromCharCode.apply(null, new Uint8Array(buf)); //Uint16Array
         //Solution to this can be found in PDF.js
-    }
-    static str2ab(str) {
+    },
+    str2ab(str) {
         const buf = new ArrayBuffer(str.length * 2); // 2 bytes for each char
         const bufView = new Uint16Array(buf);
         for (let i = 0, strLen = str.length; i < strLen; i++) {
             bufView[i] = str.charCodeAt(i);
         }
         return buf;
-    }
-    static injectScript(source, loadedCondition) {
+    },
+    injectScript(source, loadedCondition) {
         return new Promise(function (resolve, reject) {
             if (loadedCondition === true) {
                 //TODO check if script tag is present instead of external loaded condition 
@@ -37,10 +41,10 @@ export class KMXUtil {
                 document.getElementsByTagName('head')[0].appendChild(script);
             }
         });
-    }
-    static getSingletonWorker(workerScript, messageHandler) {
-        return new Promise(function (resolve, reject) {
-            let worker = KMXUtil.workers[workerScript];
+    },
+    getSingletonWorker(workerScript, messageHandler) {
+        return new Promise((resolve, reject) => {
+            let worker = exports.KMXUtil.workers[workerScript];
             if (worker === undefined) {
                 try {
                     worker = new Worker(workerScript);
@@ -48,40 +52,40 @@ export class KMXUtil {
                 catch (error) {
                     reject(Error(error));
                 }
-                KMXUtil.workers[workerScript] = worker;
+                exports.KMXUtil.workers[workerScript] = worker;
             }
             //This needs to be set every time. Need to figure out why 
             worker.onmessage = messageHandler;
             resolve(worker);
-        }.bind(this));
-    }
+        });
+    },
+    workers: {},
+    //TODO REMOVE No used an a trouble maker
     // Returns a function, that, as long as it continues to be invoked, will not
     // be triggered. The function will be called after it stops being called for
     // N milliseconds. If `immediate` is passed, trigger the function on the
     // leading edge, instead of the trailing.
-    static debounce(func, wait, immediate) {
-        let timeout;
-        return function () {
-            const context = this, args = arguments;
-            const later = function () {
-                timeout = null;
-                if (!immediate) {
-                    func.apply(context, args);
-                }
-            };
-            const callNow = immediate && !timeout;
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-            if (callNow) {
-                func.apply(context, args);
-            }
-        };
-    }
-    static svgToString(svg) {
+    // debounce(func: (arg: any) => any, wait: number, immediate: boolean) {
+    //   let timeout: number | undefined
+    //   const context = this
+    //   const args = arguments
+    //   return function () {
+    //     const later = function () {
+    //       timeout = undefined
+    //       if (!immediate) {
+    //         func.apply(context, args)
+    //       }
+    //     }
+    //     const callNow = immediate && !timeout
+    //     clearTimeout(timeout)
+    //     timeout = setTimeout(later, wait)
+    //     if (callNow) {
+    //       func.apply(context, args)
+    //     }
+    //   }
+    // },
+    svgToString(svg) {
         // need to add namespace declarations for this to be a valid xml document
         return svg.outerHTML.replace('<svg:svg ', '<svg:svg xmlns:svg="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" ');
     }
-}
-KMXUtil.createAnchor = {};
-KMXUtil.workers = {};
-//# sourceMappingURL=kmxutil.js.map
+};

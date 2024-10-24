@@ -3,6 +3,7 @@ import { IGMModelSettings } from '../model/model.settings'
 import { ModelTransformer } from './model.transformer'
 import { Vector3 } from '../model/vector'
 
+type AxisCoordinate = number | null
 class GCodeOutput {
   code: string[] = []
   currentLocation: GCodeVector
@@ -40,34 +41,34 @@ class GCodeOutput {
   dwell(duration: number) {
     this.addBlocks(`G4 P${duration}`)
   }
-  comment(text: string) {
+  comment(text: string | undefined) {
     if (this.commentsOn && text) {
       this.addBlocks('(' + text + ')')
     }
   }
 
-  g0(x?: number, y?: number, z?: number) {
+  g0(x: AxisCoordinate, y: AxisCoordinate, z: AxisCoordinate) {
     this.addBlocks(this.moveTo('G0', x, y, z).join(' '))
   }
-  g1(x?: number, y?: number, z?: number) {
+  g1(x: AxisCoordinate, y: AxisCoordinate, z: AxisCoordinate) {
 
     this.addBlocks(this.moveTo('G1', x, y, z).join(' '))
   }
-  g2(x: number, y: number, z: number, i: number, j: number) {
+  g2(x: number, y: number, z: AxisCoordinate, i: number, j: number) {
     this.arcTo('G2', x, y, z, i, j)
   }
-  g3(x: number, y: number, z: number, i: number, j: number) {
+  g3(x: number, y: number, z: AxisCoordinate, i: number, j: number) {
     this.arcTo('G3', x, y, z, i, j)
   }
-  private arcTo(moveCode: string, x: number, y: number, z: number, i: number, j: number) {
+  private arcTo(moveCode: 'G2'| 'G3', x: number, y: number, z: AxisCoordinate, i: number, j: number) {
     const gc = this.moveTo(moveCode, x, y, z)
     gc.push(`I${this.format(i)}`)
     gc.push(`J${this.format(j)}`)
     this.addBlocks(gc.join(' '))
   }
 
-  private moveTo(moveCode: string, x?: number, y?: number, z?: number): string[] {
-    const gc = [moveCode]
+  private moveTo(moveCode: 'G0' | 'G1' | 'G2' | 'G3', x: AxisCoordinate, y: AxisCoordinate, z: AxisCoordinate): string[] {
+    const gc: string[] = [moveCode]
     const X = this.format(x)
     const Y = this.format(y)
     const Z = this.format(z)
@@ -94,7 +95,7 @@ class GCodeOutput {
     return gc
   }
 
-  format(numb: number) {
+  format(numb: AxisCoordinate) {
     //fix fractional digits
     if (numb == null) {
       return null
@@ -131,9 +132,9 @@ class GCodeOutput {
 }
 
 export class Igm2GcodeTransformer implements ModelTransformer<IGM, GCodeSource>{
-  name: 'IGM to G-Code'
-  inputMime: ['application/x-kmx-gcode']
-  outputMime: 'application/x-gcode'
+  name = 'IGM to G-Code'
+  inputMime = ['application/x-kmx-gcode']
+  outputMime = 'application/x-gcode'
   constructor(private settings: IGMModelSettings) {
 
   }
@@ -193,7 +194,7 @@ export class Igm2GcodeTransformer implements ModelTransformer<IGM, GCodeSource>{
       //gcode.push('N 100 ');
       if (!gcode.onPosition(startPoint)) {
         gcode.spindleOff()
-        gcode.g0(startPoint.x, startPoint.y)
+        gcode.g0(startPoint.x, startPoint.y, null)
       }
       if (settings.multipass) {
         this.passCut(driver, shape, gcode)
@@ -226,7 +227,7 @@ export class Igm2GcodeTransformer implements ModelTransformer<IGM, GCodeSource>{
     const reversePath = !gcode.onPosition(endPoint)
 
     //cache reverse clone 
-    let reverseClone: IgmObject = null
+    let reverseClone: IgmObject | null = null
 
     for (let p = passWidth; p <= settings.materialThickness; p += passWidth) {
       gcode.comment(this.describe(shape.bounds))
@@ -261,8 +262,8 @@ export class Igm2GcodeTransformer implements ModelTransformer<IGM, GCodeSource>{
     // }
     switch (geometry.type) {
       case 'ARC':
-        const start = geometry.limit.start
-        const end = geometry.limit.end
+        const start = geometry.limit!.start
+        const end = geometry.limit!.end
 
         if (geometry.clockwise) {
           gcode.g2(end.x, end.y, null, geometry.x - start.x, geometry.y - start.y)
@@ -275,7 +276,7 @@ export class Igm2GcodeTransformer implements ModelTransformer<IGM, GCodeSource>{
         for (const point of geometry.vectors) {
           //Hmm this will also filter out single points?
           if (!gcode.onPosition(point)) {
-            gcode.g1(point.x, point.y)
+            gcode.g1(point.x, point.y, null)
           }
         }
         break
@@ -287,8 +288,10 @@ export class Igm2GcodeTransformer implements ModelTransformer<IGM, GCodeSource>{
     //TODO only used for tool moves. maybe scale should be inverted to avoid z scaling
     return val * this.settings.scale
   }
-  private describe(rect: BoundRect) {
-    return 'Width: ' + this.format(rect.width()) + ' Height: ' + this.format(rect.height()) + ' Area: ' + this.format(rect.area())
+  private describe(rect: BoundRect | null) {
+    if(rect){
+      return 'Width: ' + this.format(rect.width()) + ' Height: ' + this.format(rect.height()) + ' Area: ' + this.format(rect.area())
+    }
   }
   private format(numb: number) {
     //fix fractional digits

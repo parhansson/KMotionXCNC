@@ -1,3 +1,4 @@
+"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -7,9 +8,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { IGMDriver, IGM } from '../model';
-import { igm2SVG } from '../transformer/igm-svg.transformer';
-export class PatternGenerator {
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.PatternGenerator = void 0;
+const model_1 = require("../model");
+const igm_svg_transformer_1 = require("../transformer/igm-svg.transformer");
+class PatternGenerator {
     constructor() {
     }
     requiredInput() {
@@ -59,16 +62,16 @@ export class PatternGenerator {
     }
     rect(width, height) {
         const vectors = [];
-        vectors.push(IGMDriver.newGCodeVector(0, 0));
-        vectors.push(IGMDriver.newGCodeVector(width, 0));
-        vectors.push(IGMDriver.newGCodeVector(width, height));
-        vectors.push(IGMDriver.newGCodeVector(0, height));
-        vectors.push(IGMDriver.newGCodeVector(0, 0));
-        return IGMDriver.newLine(vectors);
+        vectors.push(model_1.IGMDriver.newGCodeVector(0, 0));
+        vectors.push(model_1.IGMDriver.newGCodeVector(width, 0));
+        vectors.push(model_1.IGMDriver.newGCodeVector(width, height));
+        vectors.push(model_1.IGMDriver.newGCodeVector(0, height));
+        vectors.push(model_1.IGMDriver.newGCodeVector(0, 0));
+        return model_1.IGMDriver.newLine(vectors);
     }
     generateSVG(values) {
         return __awaiter(this, void 0, void 0, function* () {
-            return igm2SVG(yield this.generate(values));
+            return (0, igm_svg_transformer_1.igm2SVG)(yield this.generate(values));
         });
     }
     generate(values) {
@@ -98,11 +101,11 @@ export class PatternGenerator {
         G0 X0 Y0 Z0
         M2
             // */
-            const igm = new IGM();
-            const driver = new IGMDriver(igm);
+            const igm = new model_1.IGM();
+            const driver = new model_1.IGMDriver(igm);
             const shape = this.rect(53, 38);
             const shape2 = this.rect(43.5, 11.5);
-            driver.translate(shape2, IGMDriver.newGCodeVector(4.75, 13.25));
+            driver.translate(shape2, model_1.IGMDriver.newGCodeVector(4.75, 13.25));
             // const shape = this.rect(38,53)
             // const shape2 = this.rect(11.5,43.5)
             // shape2.translate(new GCodeVector(13.25,4.75))
@@ -111,7 +114,7 @@ export class PatternGenerator {
             const height = shape.bounds.height();
             for (let row = 0; row < values.rows; row++) {
                 for (let col = 0; col < values.columns; col++) {
-                    const translate = IGMDriver.newGCodeVector(col * (width + values.colSpacing), row * (height + values.rowSpacing));
+                    const translate = model_1.IGMDriver.newGCodeVector(col * (width + values.colSpacing), row * (height + values.rowSpacing));
                     driver.addToLayerObject('one', driver.translate(driver.clone(shape), translate));
                     driver.addToLayerObject('one', driver.translate(driver.clone(shape2), translate));
                 }
@@ -120,4 +123,4 @@ export class PatternGenerator {
         });
     }
 }
-//# sourceMappingURL=pattern-generator.js.map
+exports.PatternGenerator = PatternGenerator;

@@ -1,3 +1,4 @@
+"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -7,9 +8,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Pdf2SvgTransformer = void 0;
 //SVGGraphics comes from types-merge
-import { getDocument, SVGGraphics } from 'pdfjs-dist/webpack';
-export class Pdf2SvgTransformer {
+const webpack_1 = require("pdfjs-dist/webpack");
+class Pdf2SvgTransformer {
     constructor(transformerSettings) {
         this.transformerSettings = transformerSettings;
     }
@@ -30,7 +33,7 @@ export class Pdf2SvgTransformer {
             const rotation = transformer.transformerSettings.pdf.rotate;
             const resultPromise = new Promise((resolve, reject) => {
                 //PDFJS.getDocument(source).promise.then((pdf) => {
-                getDocument({
+                (0, webpack_1.getDocument)({
                     data: new Uint8Array(source),
                     disableFontFace: false,
                     fontExtraProperties: true
@@ -56,10 +59,10 @@ export class Pdf2SvgTransformer {
                                 const viewport = page.getViewport({ scale, rotation });
                                 const container = createContainer(pageNum, viewport.width, viewport.height, anchor);
                                 return page.getOperatorList().then(opList => {
-                                    const svgGfx = new SVGGraphics(page.commonObjs, page.objs);
+                                    const svgGfx = new webpack_1.SVGGraphics(page.commonObjs, page.objs);
                                     //apply monkey patch for zero width strokes
                                     if (applyMokeyPatch) {
-                                        svgGfx._setStrokeAttributes = _setStrokeAttributes.bind(svgGfx);
+                                        svgGfx._setStrokeAttributes = (element, lineWidthScale) => _setStrokeAttributes(svgGfx, element, lineWidthScale);
                                     }
                                     svgGfx.embedFonts = true;
                                     return svgGfx.getSVG(opList, viewport).then(svg => {
@@ -91,6 +94,7 @@ export class Pdf2SvgTransformer {
         console.log('PDF-SVG', container.innerHTML);
     }
 }
+exports.Pdf2SvgTransformer = Pdf2SvgTransformer;
 function createContainer(pageNum, width, height, parentElement) {
     if (parentElement) {
         const container = document.createElement('div');
@@ -110,8 +114,8 @@ function createAnchor(pageNum) {
     document.body.appendChild(anchor);
     return anchor;
 }
-function _setStrokeAttributes(element, lineWidthScale = 1) {
-    const current = this.current;
+function _setStrokeAttributes(svgGfx, element, lineWidthScale = 1) {
+    const current = svgGfx.current;
     let dashArray = current.dashArray;
     if (lineWidthScale !== 1 && dashArray.length > 0) {
         dashArray = dashArray.map(value => lineWidthScale * value);
@@ -154,4 +158,3 @@ function pf(value) {
     } while (s[i] === '0');
     return s.substring(0, s[i] === '.' ? i : i + 1);
 }
-//# sourceMappingURL=pdf-svg.transformer.js.map

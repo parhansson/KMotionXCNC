@@ -1,8 +1,15 @@
-export { Block } from './block';
-export { BlockPart } from './block-part';
-export { Comment } from './comment';
-export { ControlWord } from './control-word';
-export { ParamWord } from './param-word';
-export { Word } from './word';
-export { WordParameters } from './word-parameters';
-//# sourceMappingURL=index.js.map
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.WordParameters = exports.Word = exports.ParamWord = exports.ControlWord = exports.Comment = exports.BlockPart = void 0;
+var block_part_1 = require("./block-part");
+Object.defineProperty(exports, "BlockPart", { enumerable: true, get: function () { return block_part_1.BlockPart; } });
+var comment_1 = require("./comment");
+Object.defineProperty(exports, "Comment", { enumerable: true, get: function () { return comment_1.Comment; } });
+var control_word_1 = require("./control-word");
+Object.defineProperty(exports, "ControlWord", { enumerable: true, get: function () { return control_word_1.ControlWord; } });
+var param_word_1 = require("./param-word");
+Object.defineProperty(exports, "ParamWord", { enumerable: true, get: function () { return param_word_1.ParamWord; } });
+var word_1 = require("./word");
+Object.defineProperty(exports, "Word", { enumerable: true, get: function () { return word_1.Word; } });
+var word_parameters_1 = require("./word-parameters");
+Object.defineProperty(exports, "WordParameters", { enumerable: true, get: function () { return word_parameters_1.WordParameters; } });

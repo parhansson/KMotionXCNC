@@ -10,6 +10,7 @@ module.exports = {
   entry: {
     'polyfills': './src/polyfills.ts',
     'vendor': './src/vendor.ts',
+    'brace': './src/brace.ts',
     'app': './src/main.ts',
    // 'pdf.worker': 'pdfjs-dist/build/pdf.worker.entry'
   },
@@ -17,34 +18,14 @@ module.exports = {
     runtimeChunk: 'single',
     splitChunks: {
       chunks: "all",
-      // chunks: "initial",
-      // cacheGroups: {
-      // //     default: false,
-      // //     vendors: false,
-      //   commons: {
-      //     test: /[\\/]node_modules[\\/]/,
-      //     name: "vendors",
-      //     chunks: "all"
-      //   }            
-      // },
     },
-    noEmitOnErrors: false, // NoEmitOnErrorsPlugin
+    emitOnErrors: true, // NoEmitOnErrorsPlugin
     concatenateModules: true //ModuleConcatenationPlugin
   },
   plugins: [
-    new webpack.ContextReplacementPlugin(
-      // The (\\|\/) piece accounts for path separators in *nix and Windows
-    
-      // For Angular 5, see also https://github.com/angular/angular/issues/20357#issuecomment-343683491
-      // /\@angular(\\|\/)core(\\|\/)fesm2015/,
-      /\@angular(\\|\/)core(\\|\/)fesm5/,
-      helpers.root('src'), // location of your src
-      {
-        // your Angular Async Route paths relative to this root directory
-      }
-    ),
     new HtmlWebpackPlugin({
-      template: 'src/index.html'
+      template: 'src/index.html',
+      'base': process.env.NODE_ENV === 'development' ? '/' : '/'
     }),
     /*
         new webpack.ProvidePlugin({
@@ -53,15 +34,13 @@ module.exports = {
         */
   ],  
   resolve: {
-    //added es2015 for use with angular instead of esm5
-    //mainFields: ["browser", "es2015", "module", "main"],
-    
     extensions: ['.js', '.ts'],
     alias: {
       ...rxPaths(),
       '@workers': helpers.root('src/workers'),
       '@kmx': helpers.root('src/app'),
       "camx": "camx/lib",
+      //"camx": path.resolve(__dirname, 'camx/lib'),
     }
   },
   module: {
@@ -98,55 +77,42 @@ module.exports = {
       {
         test: /\.ts$/,
         exclude: /\.component.ts|\.worker.ts$/,
+        //exclude: /\.component.ts|\.worker.ts|node_modules$/,
         loader: 'ts-loader'
       },
       {
         test: /\.html$/,
-        loader: 'html-loader'
+        loader: 'html-loader',
+        options: {
+          esModule: false,
+        },
       },
       {
         //fontawesome
         test: /\.(png|jpe?g|gif|svg|woff|woff2|ttf|eot|ico)$/,
         loader: 'file-loader',
-        options: { name: 'assets/[name].[hash].[ext]' }
+        options: { 
+          name: 'assets/[name].[hash].[ext]',
+          esModule: false
+        }
       },
       {
+        // Handle import './styles.css' statements
         test: /\.css$/,
+        exclude: /\.component.css$/,
+        use: [
+          MiniCssExtractPlugin.loader, // extract CSS
+          'css-loader' // load CSS-files
+        ]
+      },
+      {
+        //This is for styleUrls in components
+        test: /\.component.css$/,
         use: [
           'to-string-loader',
-          {
-            loader: MiniCssExtractPlugin.loader,
-            options: {
-              //hmr: process.env.NODE_ENV === 'development',
-              // publicPath: (resourcePath, context) => {
-              //   // publicPath is the relative path of the resource to the context
-              //   // e.g. for ./css/admin/main.css the publicPath will be ../../
-              //   // while for ./css/main.css the publicPath will be ../
-              //   return path.relative(path.dirname(resourcePath), context) + '/';
-              // },
-            },
-          },
           'css-loader',
         ]
       },
-      // {
-      //   test: /\.css$/,
-      //   exclude: helpers.root('src', 'app'),
-      //   loader: ExtractTextPlugin.extract({ 
-      //     fallback: 'style-loader', 
-      //     use: { 
-      //       loader: 'css-loader',
-      //       options: {
-      //         sourceMap: true
-      //       }
-      //     } 
-      //   })
-      // },
-      // {
-      //   test: /\.css$/,
-      //   include: helpers.root('src', 'app'),
-      //   loader: 'raw-loader'
-      // }
     ],
     noParse: [
        /pdfjs-dist\/build\/pdf\.js$/,

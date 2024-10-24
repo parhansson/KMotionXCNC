@@ -29,7 +29,7 @@ export interface LINE extends Geometry {
     vectors: GCodeVector[];
 }
 export interface IgmObject {
-    bounds: BoundRect;
+    bounds: BoundRect | null;
     comment?: string;
     geometry: ARC | LINE;
 }
@@ -86,7 +86,7 @@ export declare class IGMDriver {
     end(shape: IgmObject): GCodeVector;
     addRaw(raw: string): void;
     addUnsupported(obj: any): void;
-    addToLayerObject(layerKey: string, obj: IgmObject | IgmObject[]): void;
+    addToLayerObject(layerKey: string | undefined, obj: IgmObject | IgmObject[]): void;
     get allVisibleObjects(): IgmObject[];
     get allObjectsFlat(): IgmObject[];
     setLayerStatus(status: LayerStatus): void;
