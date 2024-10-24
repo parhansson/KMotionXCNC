@@ -3,9 +3,9 @@
 // should work with these tsconfig options (but does not)
 // allowSyntheticDefaultImports :true,
 // esModuleInterop : true,
-declare module "@workers/*" {
-  class WebpackWorker extends Worker {
-    constructor();
-  }
-  export default WebpackWorker;
-}
+// declare module "@workers/*" {
+//   class WebpackWorker extends Worker {
+//     constructor();
+//   }
+//   export default WebpackWorker;
+// }

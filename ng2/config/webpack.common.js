@@ -63,21 +63,8 @@ module.exports = {
         ]
       },
       {
-        test: /workers\/.*\.worker\.ts$/,
-        use: [
-          { 
-            loader: 'worker-loader',
-            options: { 
-              filename: '[name].[hash].js',
-             }
-          },
-          { loader: 'ts-loader' }
-        ],
-      },
-      {
         test: /\.ts$/,
-        exclude: /\.component.ts|\.worker.ts$/,
-        //exclude: /\.component.ts|\.worker.ts|node_modules$/,
+        exclude: /\.component.ts$/,
         loader: 'ts-loader'
       },
       {
