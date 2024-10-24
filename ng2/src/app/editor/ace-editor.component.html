@@ -1,15 +1,21 @@
 <file-dialog #fd (selectedFile)="onFile($event)" (saveAsFile)="onSaveAs($event)" [resource]="resource"></file-dialog>
 <div>
   <span class="glyphButtonBar">
-      <span class="btn btn-primary fa-solid fa-folder-open" title="Open" (click)="fd.openDialog(false)"></span>
-      <span class="btn btn-primary fa-solid fa-save" title="Save" (click)="onSave()"></span>
-      <span class="btn btn-primary" ><span class="fa-solid fa-save" title="Save As" (click)="fd.openDialog(true)"></span>...</span>
+    <span class="btn btn-primary" title="Open" (click)="fd.openDialog(false)">
+      <span class="fa-solid fa-folder-open"></span>
+    </span>
+    <span class="btn btn-primary" title="Save" (click)="onSave()">
+      <span class="fa-solid fa-save"></span>
+    </span>
+    <span class="btn btn-primary" title="Save As" (click)="fd.openDialog(true)">
+      <span class="fa-solid fa-save">...</span>
+    </span>
   </span>
   <ng-content select="div[buttons]"></ng-content>
 </div>
 <div file-dropzone (dropped)="onFile($event)">
-  <span *ngIf="dirty">*</span><file-path [resource]="resource"></file-path>  
+  <span *ngIf="dirty">*</span><file-path [resource]="resource"></file-path>
   <div class="codeEditor">
-    <div aceEditor [mode]="mode" [theme]="theme" [text]="" (textChanged)="onContentChange($event)" ></div>
+    <div aceEditor [mode]="mode" [theme]="theme" [text]="" (textChanged)="onContentChange($event)"></div>
   </div>
 </div>

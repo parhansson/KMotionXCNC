@@ -1,6 +1,4 @@
-const webpack = require('webpack');
 const helpers = require('./helpers');
-const rxPaths = require('rxjs/_esm2015/path-mapping');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const path = require('path');
@@ -36,11 +34,9 @@ module.exports = {
   resolve: {
     extensions: ['.js', '.ts'],
     alias: {
-      ...rxPaths(),
       '@workers': helpers.root('src/workers'),
       '@kmx': helpers.root('src/app'),
       "camx": "camx/lib",
-      //"camx": path.resolve(__dirname, 'camx/lib'),
     }
   },
   module: {
