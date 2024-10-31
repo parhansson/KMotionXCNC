@@ -3,6 +3,7 @@
     "allowSyntheticDefaultImports":true,
     "downlevelIteration": true,
     "esModuleInterop": true,
+    "skipLibCheck": true,
     "importHelpers": true,
     "target": "es2015", 
     "module": "es2020",
@@ -17,8 +18,8 @@
     "declaration": true,
     "baseUrl": "./",
     "paths": {
-      "@kmx/*": [ "./src/app/*" ],
-      "@workers/*": [ "./src/workers/*" ],
+      //"@kmx/*": [ "./src/app/*" ],
+      //"@workers/*": [ "./src/workers/*" ],
       //"camx": [ "./camx/lib" ]
     }
   },

@@ -1,11 +1,14 @@
-var webpackMerge = require('webpack-merge');
-var ExtractTextPlugin = require('extract-text-webpack-plugin');
-var prodConfig = require('./webpack.prod.js');
-var helpers = require('./helpers');
-var BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+import { merge } from 'webpack-merge';
+import prodConfig from './webpack.prod.js';
+import {BundleAnalyzerPlugin}  from 'webpack-bundle-analyzer';
 
-module.exports = webpackMerge(prodConfig, {
+
+
+
+const config = merge(prodConfig, {
   plugins: [
     new BundleAnalyzerPlugin()
   ]
 });
+
+export default config; // Exporting the merged configuration

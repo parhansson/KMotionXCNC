@@ -1,19 +1,19 @@
-const webpack = require('webpack');
-const { merge } = require('webpack-merge');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const commonConfig = require('./webpack.common.js');
-const helpers = require('./helpers');
+//import webpack from 'webpack';
+import { merge } from 'webpack-merge';
+import MiniCssExtractPlugin from 'mini-css-extract-plugin';
+import commonConfig from './webpack.common.js';
+import { root } from './helpers.js';
 // Base Href same as in index.html
 
 //This is for npm run serve
 const baseHref = '/'
 
-module.exports = merge(commonConfig, {
+const config = merge(commonConfig, {
   mode: 'development',
   devtool: 'cheap-module-source-map',
 
   output: {
-    path: helpers.root('dist'),
+    path: root('dist'),
     pathinfo: true,
     publicPath: baseHref,
     filename: '[name].js',
@@ -54,3 +54,5 @@ module.exports = merge(commonConfig, {
     ],
   }
 });
+
+export default config; // Exporting the merged configuration

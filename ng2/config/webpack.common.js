@@ -1,16 +1,17 @@
-const helpers = require('./helpers');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const path = require('path');
 
-module.exports = {
+import { root } from './helpers.js'; // Ensure this uses the ES module export
+import HtmlWebpackPlugin from 'html-webpack-plugin';
+import MiniCssExtractPlugin from 'mini-css-extract-plugin';
+// import ESLintPlugin from 'eslint-webpack-plugin';
+
+const commonConfig = {
 
   entry: {
     'polyfills': './src/polyfills.ts',
     'vendor': './src/vendor.ts',
     'brace': './src/brace.ts',
     'app': './src/main.ts',
-   // 'pdf.worker': 'pdfjs-dist/build/pdf.worker.entry'
+    // 'pdf.worker': 'pdfjs-dist/build/pdf.worker.entry'
   },
   optimization: {
     runtimeChunk: 'single',
@@ -21,6 +22,12 @@ module.exports = {
     concatenateModules: true //ModuleConcatenationPlugin
   },
   plugins: [
+    // new ESLintPlugin({
+    //   overrideConfigFile: './eslint.config.mjs',
+    //   files: 'src/**/*.ts', // *.{ts,tsx}Inkludera .ts och .tsx-filer
+    //   extensions: ['js', 'ts'], // Include relevant file extensions
+    //   emitWarning: true, // För att skriva ut varningar      
+    // }),
     new HtmlWebpackPlugin({
       template: 'src/index.html',
       'base': process.env.NODE_ENV === 'development' ? '/' : '/'
@@ -30,27 +37,25 @@ module.exports = {
           "StringView": "vendor/mozilla/stringview.js"
         }) 
         */
-  ],  
+  ],
   resolve: {
     extensions: ['.js', '.ts'],
     alias: {
-      '@workers': helpers.root('src/workers'),
-      '@kmx': helpers.root('src/app'),
       "camx": "camx/lib",
     }
   },
   module: {
     rules: [
-      {
-        test: /\.ts$/,
-        enforce: "pre",
-        loader: 'tslint-loader',
-        options: {
-          configFile: './tslint.json',
-          emitErrors: false,
-          failOnHint: false
-        }
-      },
+      // {
+      //   test: /\.ts$/,
+      //   enforce: "pre",
+      //   loader: 'tslint-loader',
+      //   options: {
+      //     configFile: './tslint.json',
+      //     emitErrors: false,
+      //     failOnHint: false
+      //   }
+      // },
       {
         test: /\.component.ts$/,
         use: [
@@ -74,7 +79,7 @@ module.exports = {
         //fontawesome
         test: /\.(png|jpe?g|gif|svg|woff|woff2|ttf|eot|ico)$/,
         loader: 'file-loader',
-        options: { 
+        options: {
           name: 'assets/[name].[hash].[ext]',
           esModule: false
         }
@@ -98,12 +103,12 @@ module.exports = {
       },
     ],
     noParse: [
-       /pdfjs-dist\/build\/pdf\.js$/,
-    //   /pdfjs-dist\/build\/pdf\.min\.js$/,
-    //   /pdfjs-dist\/build\/pdf\.worker\.js$/
+      /pdfjs-dist\/build\/pdf\.js$/,
+      //   /pdfjs-dist\/build\/pdf\.min\.js$/,
+      //   /pdfjs-dist\/build\/pdf\.worker\.js$/
     ],
   }
 
 };
-
+export default commonConfig; // Exporting the merged configuration
 

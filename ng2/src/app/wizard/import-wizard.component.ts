@@ -13,8 +13,8 @@ import {
 } from '../resources'
 import { TransformingFileStore } from '../model/transforming-file-store.service'
 import { IGM, LayerStatus, IGMDriver, igm2SVG, Pdf2SvgTransformer, Igm2GcodeTransformer, Svg2IgmTransformer, Dxf2IgmTransformer, Gcode2IgmTransformer } from 'camx'
-import { InputBase } from '@kmx/form/input-base'
-import { ModelSettingsService } from '@kmx/model/model.settings.service'
+import { InputBase } from '../form/input-base'
+import { ModelSettingsService } from '../model/model.settings.service'
 
 @Component({
   selector: 'import-wizard',

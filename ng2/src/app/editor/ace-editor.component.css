@@ -1,5 +1,5 @@
 .ace_gutter-active-line::before {
-  font-family: 'FontAwesome';
+  font-family: 'Font Awesome 6 Free';
   content: "\f0da";
 }
 div[file-dropzone] {

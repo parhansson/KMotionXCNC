@@ -83,7 +83,7 @@ module.exports = {
         extensions: ['.js', '.ts'],
         alias: {
             ...rxPaths(),
-            '@workers': helpers.root('src/workers'),
+            //'@workers': helpers.root('src/workers'),
             '@kmx': helpers.root('src/app'),
             "camx": "camx/lib",
         }
