@@ -10,7 +10,7 @@
     "ng": "ng",
     "lint": "npx eslint",
     "tsc": "tsc",
-    "serve": "webpack-dev-server --progress --profile --stats-children --port 8081",
+    "dev": "webpack-dev-server --progress --profile --stats-children --port 8081",
     "aot": "webpack --config config/webpack.aot.babel.js --progress --profile --bail",
     "aot:serve": "webpack-dev-server --config config/webpack.aot.babel.js --progress --profile --bail  --port 8081",
     "build": "rimraf ../kmx && webpack --config config/webpack.prod.js --progress --profile --bail",

@@ -10,8 +10,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Pdf2SvgTransformer = void 0;
-//SVGGraphics comes from types-merge
 const webpack_1 = require("pdfjs-dist/webpack");
+//import { SVGGraphics } from 'pdfjs-dist/types/src/pdf'
 class Pdf2SvgTransformer {
     constructor(transformerSettings) {
         this.transformerSettings = transformerSettings;
@@ -55,26 +55,25 @@ class Pdf2SvgTransformer {
                         const anchor = null; // createAnchor(i)
                         // Using promise to fetch and render the next page
                         promise = promise.then(function (pageNum, anchor) {
-                            return pdf.getPage(pageNum).then(page => {
+                            return __awaiter(this, void 0, void 0, function* () {
+                                const page = yield pdf.getPage(pageNum);
                                 const viewport = page.getViewport({ scale, rotation });
                                 const container = createContainer(pageNum, viewport.width, viewport.height, anchor);
-                                return page.getOperatorList().then(opList => {
-                                    const svgGfx = new webpack_1.SVGGraphics(page.commonObjs, page.objs);
-                                    //apply monkey patch for zero width strokes
-                                    if (applyMokeyPatch) {
-                                        svgGfx._setStrokeAttributes = (element, lineWidthScale) => _setStrokeAttributes(svgGfx, element, lineWidthScale);
-                                    }
-                                    svgGfx.embedFonts = true;
-                                    return svgGfx.getSVG(opList, viewport).then(svg => {
-                                        transformer.logSvg(svg);
-                                        if (container) {
-                                            container.appendChild(svg);
-                                        }
-                                        //targetObserver.next(svg)
-                                        resolve(svg);
-                                        return svg;
-                                    });
-                                });
+                                const opList = yield page.getOperatorList();
+                                const svgGfx = new webpack_1.SVGGraphics(page.commonObjs, page.objs);
+                                //apply monkey patch for zero width strokes
+                                if (applyMokeyPatch) {
+                                    svgGfx._setStrokeAttributes = (element_1, lineWidthScale) => _setStrokeAttributes(svgGfx, element_1, lineWidthScale);
+                                }
+                                svgGfx.embedFonts = true;
+                                const svg = yield svgGfx.getSVG(opList, viewport);
+                                transformer.logSvg(svg);
+                                if (container) {
+                                    container.appendChild(svg);
+                                }
+                                //targetObserver.next(svg)
+                                resolve(svg);
+                                return svg;
                             });
                         }.bind(this, i, anchor));
                     }
@@ -121,7 +120,7 @@ function _setStrokeAttributes(svgGfx, element, lineWidthScale = 1) {
         dashArray = dashArray.map(value => lineWidthScale * value);
     }
     element.setAttributeNS(null, 'stroke', current.strokeColor);
-    element.setAttributeNS(null, 'stroke-opacity', current.strokeAlpha);
+    element.setAttributeNS(null, 'stroke-opacity', '' + current.strokeAlpha);
     element.setAttributeNS(null, 'stroke-miterlimit', pf(current.miterLimit));
     element.setAttributeNS(null, 'stroke-linecap', current.lineCap);
     element.setAttributeNS(null, 'stroke-linejoin', current.lineJoin);

@@ -1,7 +1,10 @@
 import { ModelSettings } from '../model/model.settings'
 import { ModelTransformer } from './model.transformer'
+import { getDocument, SVGGraphics as SVGGraphicsAny } from 'pdfjs-dist/webpack'
+import { PDFDocumentLoadingTask } from 'pdfjs-dist'
 //SVGGraphics comes from types-merge
-import { getDocument, SVGGraphics } from 'pdfjs-dist/webpack'
+import { SVGGraphics } from '../pdfjs-types'
+//import { SVGGraphics } from 'pdfjs-dist/types/src/pdf'
 
 export class Pdf2SvgTransformer implements ModelTransformer<ArrayBuffer, SVGElement> {
 
@@ -11,10 +14,10 @@ export class Pdf2SvgTransformer implements ModelTransformer<ArrayBuffer, SVGElem
   }
 
   async transform(source: ArrayBuffer): Promise<SVGElement> {
-        
+
     //this will use base64 encoded instead of bloburls for images
     //PDFJS.disableCreateObjectURL = true
-    
+
     //PDFJS.disableWorker = false
     //currently does not work. fake worker is used
     //PDFJS.GlobalWorkerOptions.workerSrc = 'pdf.worker.js'
@@ -30,14 +33,14 @@ export class Pdf2SvgTransformer implements ModelTransformer<ArrayBuffer, SVGElem
 
     const resultPromise: Promise<SVGElement> = new Promise<SVGElement>((resolve, reject) => {
       //PDFJS.getDocument(source).promise.then((pdf) => {
-        
-        getDocument({ 
-          data: new Uint8Array(source),
-          disableFontFace: false,
-          fontExtraProperties: true
-          //disableWorker:false
 
-        }).promise.then((pdf) => {
+      (getDocument({
+        data: new Uint8Array(source),
+        disableFontFace: false,
+        fontExtraProperties: true
+        //disableWorker:false
+
+      }) as PDFDocumentLoadingTask).promise.then((pdf) => {
 
         const numPages = pdf.numPages
         // Using promise to fetch the page
@@ -48,36 +51,31 @@ export class Pdf2SvgTransformer implements ModelTransformer<ArrayBuffer, SVGElem
         const svgPages = []
         const applyMokeyPatch = false
 
-        let promise = Promise.resolve()
+        let promise:Promise<void | SVGElement> = Promise.resolve()
         for (let i = 1; i <= ii; i++) {
           if (page != i) { continue }
           //when anchor is not null svg will be rendered on screen for debugging
           const anchor: HTMLAnchorElement | null = null// createAnchor(i)
           // Using promise to fetch and render the next page
-          promise = promise.then(function (pageNum: number, anchor: HTMLElement | null) {
-            return pdf.getPage(pageNum).then(page => {
-              const viewport = page.getViewport({ scale, rotation })
-
-              const container = createContainer(pageNum, viewport.width, viewport.height, anchor)
-
-              return page.getOperatorList().then(opList => {
-                const svgGfx = new SVGGraphics(page.commonObjs, page.objs)
-                //apply monkey patch for zero width strokes
-                if(applyMokeyPatch){
-                  svgGfx._setStrokeAttributes = (element: SVGGraphicsElement, lineWidthScale:number) => _setStrokeAttributes(svgGfx, element, lineWidthScale)
-                }
-                svgGfx.embedFonts = true
-                return svgGfx.getSVG(opList, viewport).then(svg => {
-                  transformer.logSvg(svg)
-                  if (container) {
-                    container.appendChild(svg)
-                  }
-                  //targetObserver.next(svg)
-                  resolve(svg)
-                  return svg
-                })
-              })
-            })
+          promise = promise.then(async function (pageNum: number, anchor: HTMLElement | null) {
+            const page = await pdf.getPage(pageNum)
+            const viewport = page.getViewport({ scale, rotation })
+            const container = createContainer(pageNum, viewport.width, viewport.height, anchor)
+            const opList = await page.getOperatorList()
+            const svgGfx: SVGGraphics = new SVGGraphicsAny(page.commonObjs, page.objs)
+            //apply monkey patch for zero width strokes
+            if (applyMokeyPatch) {
+              svgGfx._setStrokeAttributes = (element_1: SVGGraphicsElement, lineWidthScale: number) => _setStrokeAttributes(svgGfx, element_1, lineWidthScale)
+            }
+            svgGfx.embedFonts = true
+            const svg = await svgGfx.getSVG(opList, viewport)
+            transformer.logSvg(svg)
+            if (container) {
+              container.appendChild(svg)
+            }
+            //targetObserver.next(svg)
+            resolve(svg)
+            return svg
           }.bind(this, i, anchor))
         }
         //Destroy worker
@@ -92,7 +90,7 @@ export class Pdf2SvgTransformer implements ModelTransformer<ArrayBuffer, SVGElem
     container.appendChild(svg)
     console.log('PDF-SVG', container.innerHTML)
   }
-  
+
 }
 function createContainer(pageNum: number, width: number, height: number, parentElement: HTMLElement | null) {
   if (parentElement) {
@@ -120,7 +118,7 @@ function _setStrokeAttributes(svgGfx: SVGGraphics, element: SVGGraphicsElement, 
     dashArray = dashArray.map(value => lineWidthScale * value)
   }
   element.setAttributeNS(null, 'stroke', current.strokeColor)
-  element.setAttributeNS(null, 'stroke-opacity', current.strokeAlpha)
+  element.setAttributeNS(null, 'stroke-opacity', ''+current.strokeAlpha)
   element.setAttributeNS(null, 'stroke-miterlimit', pf(current.miterLimit))
   element.setAttributeNS(null, 'stroke-linecap', current.lineCap)
   element.setAttributeNS(null, 'stroke-linejoin', current.lineJoin)
@@ -129,13 +127,11 @@ function _setStrokeAttributes(svgGfx: SVGGraphics, element: SVGGraphicsElement, 
     element.setAttributeNS(null, 'stroke-width', pf(lineWidthScale * 1) + 'px')
     element.setAttributeNS(null, 'vector-effect', 'non-scaling-stroke')
   } else {
-    element.setAttributeNS(null, 'stroke-width',
-      pf(lineWidthScale * current.lineWidth) + 'px')
+    element.setAttributeNS(null, 'stroke-width', pf(lineWidthScale * current.lineWidth) + 'px')
   }
-  element.setAttributeNS(null, 'stroke-dasharray',
-    dashArray.map(pf).join(' '))
-  element.setAttributeNS(null, 'stroke-dashoffset',
-    pf(lineWidthScale * current.dashPhase) + 'px')
+  element.setAttributeNS(null, 'stroke-dasharray', dashArray.map(pf).join(' '))
+  element.setAttributeNS(null, 'stroke-dashoffset', pf(lineWidthScale * current.dashPhase) + 'px')
+
 }
 /**
  * Format a float number as a string.

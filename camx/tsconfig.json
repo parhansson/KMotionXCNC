@@ -11,10 +11,8 @@
     "lib": ["es2017", "dom"],
     "noImplicitAny": false,
     "types": [
-      "./types-merge",
       "./node_modules/dxf-parser-typings/dxf-parser"
-    ]    
+    ] 
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "lib"]
 }
