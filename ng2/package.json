@@ -26,7 +26,7 @@
     "@angular/platform-browser-dynamic": "^11.2.3",
     "@angular/platform-server": "^11.2.3",
     "@angular/router": "^11.2.3",
-    "bootstrap": "^4.3.1",
+    "bootstrap": "^5.0.0",
     "brace": "^0.11.1",
     "core-js": "^3.9.0",
     "decimal.js": "^10.2.0",
