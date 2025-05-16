@@ -1,6 +1,7 @@
 import webpack from 'webpack';
 import { merge } from 'webpack-merge';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
+import HtmlWebpackPlugin from 'html-webpack-plugin';
 import commonConfig from './webpack.common.js';
 import { root } from './helpers.js';
 
@@ -9,7 +10,7 @@ import { root } from './helpers.js';
 
 const ENV = process.env.NODE_ENV = process.env.ENV = 'production';
 
-const baseHref = '/'
+const baseHref = './'
 
 const config = merge(commonConfig, {
   mode: 'production',
@@ -26,6 +27,10 @@ const config = merge(commonConfig, {
   },
 
   plugins: [
+    new HtmlWebpackPlugin({
+      template: 'src/index.html',
+      base: './'
+    }),
     new MiniCssExtractPlugin({
       filename: '[name].[chunkhash].css',
       //allChunks: true

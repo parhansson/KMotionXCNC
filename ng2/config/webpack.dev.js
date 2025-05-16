@@ -1,6 +1,7 @@
 //import webpack from 'webpack';
 import { merge } from 'webpack-merge';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
+import HtmlWebpackPlugin from 'html-webpack-plugin';
 import commonConfig from './webpack.common.js';
 import { root } from './helpers.js';
 // Base Href same as in index.html
@@ -21,6 +22,10 @@ const config = merge(commonConfig, {
   },
 
   plugins: [
+    new HtmlWebpackPlugin({
+      template: 'src/index.html',
+      base: '/'
+    }),
     new MiniCssExtractPlugin(
       {
         filename: '[name].css',

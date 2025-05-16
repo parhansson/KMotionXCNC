@@ -1,6 +1,5 @@
 
 import { root } from './helpers.js'; // Ensure this uses the ES module export
-import HtmlWebpackPlugin from 'html-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 // import ESLintPlugin from 'eslint-webpack-plugin';
 
@@ -28,10 +27,10 @@ const commonConfig = {
     //   extensions: ['js', 'ts'], // Include relevant file extensions
     //   emitWarning: true, // För att skriva ut varningar      
     // }),
-    new HtmlWebpackPlugin({
-      template: 'src/index.html',
-      'base': process.env.NODE_ENV === 'development' ? '/' : '/'
-    }),
+    // new HtmlWebpackPlugin({
+    //   template: 'src/index.html',
+    //   'base': process.env.NODE_ENV === 'development' ? '/' : './'
+    // }),
     /*
         new webpack.ProvidePlugin({
           "StringView": "vendor/mozilla/stringview.js"
