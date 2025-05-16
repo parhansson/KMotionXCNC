@@ -22,12 +22,13 @@
         <li class="nav-item"><a class="nav-link" routerLink="/debug" routerLinkActive="active">Debug</a></li>
         <li class="nav-item"><a class="nav-link" routerLink="/laser" routerLinkActive="active">Laser</a></li>
         <li class="nav-item"><a class="nav-link importer" routerLink="/import" routerLinkActive="active">Import</a></li>
-
+        
+        <li><span>Connected:&nbsp;{{intStatus?.connected}}</span></li>
         <!--<li><a href="javascript:$('#aboutModal').modal();">About</a></li>-->
           <li><a><slide-switch [state]="intStatus?.simulating" (switched)="onSimulate()"></slide-switch></a></li>
         <!--
           -->
-          <li><span>Uptime:&nbsp;{{intStatus?.timeStamp}}</span></li>
+        <li><span>Uptime:&nbsp;{{intStatus?.timeStamp}}</span></li>
         </ul>
         
     </div>      
