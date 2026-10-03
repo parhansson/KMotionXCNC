@@ -21,6 +21,10 @@ import { BackendService } from './backend/backend.service'
 })
 export class KmxComponent {
     intStatus: KmxStatus
+    // KFLOP's time since power up, in whole seconds
+    get uptime() {
+        return this.intStatus && Math.floor(this.intStatus.timeStamp)
+    }
     constructor(//private router:Router,
         socketService: SocketService, private backend: BackendService,
         private route: ActivatedRoute, private router: Router) {

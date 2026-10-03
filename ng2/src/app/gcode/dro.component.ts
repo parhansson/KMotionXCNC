@@ -43,13 +43,25 @@ export class DroComponent {
         this.settingsService.subject.subscribe((machine) => this.machine = machine)
     }
 
+    // Settings store jogVel and maxVel in inches/sec and countsPerUnit in counts/inch,
+    // but KFLOP's Jog command takes counts/sec
+    private jogCountsPerSec(axis: number) {
+        const settings = this.machine.axes[axis]
+        let vel = Number(settings.jogVel) || 0
+        const maxVel = Number(settings.maxVel)
+        if (maxVel > 0) {
+            vel = Math.min(vel, maxVel)
+        }
+        return Math.round(vel * (Number(settings.countsPerUnit) || 0))
+    }
+
     jogStartPos(axis: number) {
-        this.backendService.jog(axis, +this.machine.axes[axis].jogVel)
+        this.backendService.jog(axis, this.jogCountsPerSec(axis))
         this.jogging = true
     }
 
     jogStartNeg(axis: number) {
-        this.backendService.jog(axis, -this.machine.axes[axis].jogVel)
+        this.backendService.jog(axis, -this.jogCountsPerSec(axis))
         this.jogging = true
     }
 
