@@ -25,11 +25,11 @@ import { ModelTransformer } from './model.transformer'
 // Group 9	{M48, M49} - feed and speed override bypass
 
 export class ModalGroup {
-  constructor(initialState: string, private groupCodes?: string[]) {
+  constructor(initialState: string | null, private groupCodes: string[]) {
     this.code = initialState
   }
-  changed: boolean
-  code: string
+  changed: boolean = false
+  code: string | null
   setActiveCode(newCode: string) {
     //TODO throw error if state literal is not allowed in this group
     //also check line number (block) if two or more states are set in the same block
@@ -60,7 +60,7 @@ export class State<ShapeType> extends GCodeState {
 
   scale = 1.0
   absolute = true
-  currentShape: ShapeType = null
+  currentShape: ShapeType | null= null
   lineNo = -1
   onBlock(block: Block) {
     this.lineNo = block.line
@@ -127,8 +127,8 @@ export class State<ShapeType> extends GCodeState {
 
 export abstract class GCodeTransformer<ShapeType, OutputType> implements ModelTransformer<GCodeSource, OutputType>{
   // Create the final Object3d to add to the scene
-  output: OutputType
-  protected state: State<ShapeType>
+  output: OutputType | undefined
+  protected state: State<ShapeType> | undefined
 
   constructor(protected disableWorker?: boolean) {
 
@@ -153,7 +153,7 @@ export abstract class GCodeTransformer<ShapeType, OutputType> implements ModelTr
         }, gcode.lines)
         .then(() => {
           this.onEndProgram()
-          resolve(this.output)
+          resolve(this.output!)
         }, err => reject(err))
     })
 
@@ -199,10 +199,11 @@ export abstract class GCodeTransformer<ShapeType, OutputType> implements ModelTr
     // G1 X10 Y10
     // X5 Y5
     // Move on second row is made in G1 mode
-    this.state.onBlock(block)
+    const state = this.state!
+    state.onBlock(block)
     for (const part of block.parts) {
       if (part instanceof Word) {
-        this.state.handleWord(part)
+        state.handleWord(part)
       } else if (part instanceof WordParameters) {
         const params: MoveArguments = {}
         for (const word of part.value) {
@@ -233,63 +234,65 @@ export abstract class GCodeTransformer<ShapeType, OutputType> implements ModelTr
     if (newPosition == null) {
       return
     }
-
-    if (this.state.moveGroup.changed
-      || this.state.currentShape == null
+    const state = this.state!
+    if (state.moveGroup.changed
+      || state.currentShape == null
       //hack to create new shape on arcs
-      || this.state.moveGroup.code === 'G2'
-      || this.state.moveGroup.code === 'G3') {
+      || state.moveGroup.code === 'G2'
+      || state.moveGroup.code === 'G3') {
       //End shape
       this.onEndShape()
       //start new Shape
-      this.state.currentShape = this.onStartShape()
-      if (this.state.moveGroup.code === 'G0' || this.state.moveGroup.code === 'G1') {
+      state.currentShape = this.onStartShape()
+      if (state.moveGroup.code === 'G0' || state.moveGroup.code === 'G1') {
         // add startpoint on linear shapes
-        this.addLinearPoint(this.state.position, this.state.currentShape)
+        this.addLinearPoint(state.position, state.currentShape)
       }
     }
 
     //TODO if args X Y and Z is undefined then there is no vector in this Parameter object
 
-    switch (this.state.moveGroup.code) {
+    switch (state.moveGroup.code) {
       case ('G0'):
-        this.addLinearPoint(newPosition, this.state.currentShape)
+        this.addLinearPoint(newPosition, state.currentShape)
         break
       case ('G1'):
-        this.addLinearPoint(newPosition, this.state.currentShape)
+        this.addLinearPoint(newPosition, state.currentShape)
         break
       case ('G2'):
-        this.createCurve(args, this.state.position, newPosition, true, this.state.currentShape)
+        this.createCurve(args, state.position, newPosition, true, state.currentShape)
         break
       case ('G3'):
-        this.createCurve(args, this.state.position, newPosition, false, this.state.currentShape)
+        this.createCurve(args, state.position, newPosition, false, state.currentShape)
         break
     }
 
-    this.state.position = newPosition
+    state.position = newPosition
   }
 
   private createCurve(args: MoveArcArguments, position: GCodeVector, newPosition: GCodeVector, clockWise: boolean, currentShape: ShapeType) {
-    const scale = this.state.scale
-    args.I *= scale
-    args.J *= scale
-    args.K *= scale
-    args.R *= scale
+    const state = this.state!
+    const scale = state.scale
+    args.I && (args.I *= scale)
+    args.J && (args.J *= scale)
+    args.K && (args.K *= scale)
+    args.R && (args.R *= scale)
     const curve = new GCodeCurve3(
       position,
       newPosition,
       args,
       clockWise,
-      this.state.planeGroup.code as 'G17' || 'G18' || 'G19')
+      state.planeGroup.code as 'G17' || 'G18' || 'G19')
     this.addCurve(curve, currentShape)
   }
   private getNewPosition(args: MoveArguments) {
     if (!this.containsMoveData(args)) {
       return null
     }
-    const position = this.state.position
-    const scale = this.state.scale
-    const absolute = this.state.absolute
+    const state = this.state!
+    const position = state.position
+    const scale = state.scale
+    const absolute = state.absolute
     const newPosition = IGMDriver.newGCodeVector()
     if (absolute) {
       newPosition.x = args.X !== undefined ? args.X * scale : position.x

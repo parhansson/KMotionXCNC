@@ -253,7 +253,7 @@ export class JigsawGenerator implements ModelGenerator<JigsawGeneratorInput> {
     const offset = templateOffsets.find(o => o.name === this.shapeOffsetName)
     if (!offset) {
       console.error(`No shape found for ${this.shapeOffsetName}`)
-      return
+      return []
     }
     const baselineOffsets = offset.baselineOffsets
     const upperOffsets = offset.upperOffsets
@@ -339,7 +339,7 @@ export class JigsawGenerator implements ModelGenerator<JigsawGeneratorInput> {
   private buildPieces(rowCount: number, columnCount: number): Piece[] {
     const rowHeight = this.height / rowCount
     const columnWidth = this.width / columnCount
-    const pieces = []
+    const pieces:Piece[] = []
     const rows = this.buildDistributions(rowCount, columnCount)
     this.offsetPoints(rows, (point, j, i) => {
       return this.offsetPoint(point, j, i, columnWidth, rowHeight)
@@ -350,7 +350,7 @@ export class JigsawGenerator implements ModelGenerator<JigsawGeneratorInput> {
     })
     for (let rowIndex = 1; rowIndex <= rowCount; rowIndex++) {
       for (let columnIndex = 0; columnIndex < columnCount; columnIndex++) {
-        const edges = []
+        const edges: Piece = []
         edges.push(rows[rowIndex - 1][columnIndex])
         edges.push(columns[columnIndex + 1][rowIndex - 1])
         edges.push(rows[rowIndex][columnIndex].slice().reverse())

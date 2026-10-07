@@ -1,3 +1,4 @@
+"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -7,9 +8,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-//SVGGraphics comes from types-merge
-import { getDocument, SVGGraphics } from 'pdfjs-dist/webpack';
-export class Pdf2SvgTransformer {
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Pdf2SvgTransformer = void 0;
+const webpack_1 = require("pdfjs-dist/webpack");
+//import { SVGGraphics } from 'pdfjs-dist/types/src/pdf'
+class Pdf2SvgTransformer {
     constructor(transformerSettings) {
         this.transformerSettings = transformerSettings;
     }
@@ -30,7 +33,7 @@ export class Pdf2SvgTransformer {
             const rotation = transformer.transformerSettings.pdf.rotate;
             const resultPromise = new Promise((resolve, reject) => {
                 //PDFJS.getDocument(source).promise.then((pdf) => {
-                getDocument({
+                (0, webpack_1.getDocument)({
                     data: new Uint8Array(source),
                     disableFontFace: false,
                     fontExtraProperties: true
@@ -52,26 +55,25 @@ export class Pdf2SvgTransformer {
                         const anchor = null; // createAnchor(i)
                         // Using promise to fetch and render the next page
                         promise = promise.then(function (pageNum, anchor) {
-                            return pdf.getPage(pageNum).then(page => {
+                            return __awaiter(this, void 0, void 0, function* () {
+                                const page = yield pdf.getPage(pageNum);
                                 const viewport = page.getViewport({ scale, rotation });
                                 const container = createContainer(pageNum, viewport.width, viewport.height, anchor);
-                                return page.getOperatorList().then(opList => {
-                                    const svgGfx = new SVGGraphics(page.commonObjs, page.objs);
-                                    //apply monkey patch for zero width strokes
-                                    if (applyMokeyPatch) {
-                                        svgGfx._setStrokeAttributes = _setStrokeAttributes.bind(svgGfx);
-                                    }
-                                    svgGfx.embedFonts = true;
-                                    return svgGfx.getSVG(opList, viewport).then(svg => {
-                                        transformer.logSvg(svg);
-                                        if (container) {
-                                            container.appendChild(svg);
-                                        }
-                                        //targetObserver.next(svg)
-                                        resolve(svg);
-                                        return svg;
-                                    });
-                                });
+                                const opList = yield page.getOperatorList();
+                                const svgGfx = new webpack_1.SVGGraphics(page.commonObjs, page.objs);
+                                //apply monkey patch for zero width strokes
+                                if (applyMokeyPatch) {
+                                    svgGfx._setStrokeAttributes = (element_1, lineWidthScale) => _setStrokeAttributes(svgGfx, element_1, lineWidthScale);
+                                }
+                                svgGfx.embedFonts = true;
+                                const svg = yield svgGfx.getSVG(opList, viewport);
+                                transformer.logSvg(svg);
+                                if (container) {
+                                    container.appendChild(svg);
+                                }
+                                //targetObserver.next(svg)
+                                resolve(svg);
+                                return svg;
                             });
                         }.bind(this, i, anchor));
                     }
@@ -91,6 +93,7 @@ export class Pdf2SvgTransformer {
         console.log('PDF-SVG', container.innerHTML);
     }
 }
+exports.Pdf2SvgTransformer = Pdf2SvgTransformer;
 function createContainer(pageNum, width, height, parentElement) {
     if (parentElement) {
         const container = document.createElement('div');
@@ -110,14 +113,14 @@ function createAnchor(pageNum) {
     document.body.appendChild(anchor);
     return anchor;
 }
-function _setStrokeAttributes(element, lineWidthScale = 1) {
-    const current = this.current;
+function _setStrokeAttributes(svgGfx, element, lineWidthScale = 1) {
+    const current = svgGfx.current;
     let dashArray = current.dashArray;
     if (lineWidthScale !== 1 && dashArray.length > 0) {
         dashArray = dashArray.map(value => lineWidthScale * value);
     }
     element.setAttributeNS(null, 'stroke', current.strokeColor);
-    element.setAttributeNS(null, 'stroke-opacity', current.strokeAlpha);
+    element.setAttributeNS(null, 'stroke-opacity', '' + current.strokeAlpha);
     element.setAttributeNS(null, 'stroke-miterlimit', pf(current.miterLimit));
     element.setAttributeNS(null, 'stroke-linecap', current.lineCap);
     element.setAttributeNS(null, 'stroke-linejoin', current.lineJoin);
@@ -154,4 +157,3 @@ function pf(value) {
     } while (s[i] === '0');
     return s.substring(0, s[i] === '.' ? i : i + 1);
 }
-//# sourceMappingURL=pdf-svg.transformer.js.map

@@ -27,12 +27,12 @@ http://svg-whiz.com/svg/DragAndDrop.svg
 export class SvgEditor2 {
 
 
-  svgDoc: SVGSVGElement = null
-  svgRoot: SVGSVGElement = null
+  svgDoc: SVGSVGElement
+  svgRoot: SVGSVGElement
   TrueCoords = { x: 0, y: 0 }
   GrabPoint = { x: 0, y: 0 }
-  BackDrop: Element = null
-  DragTarget: SVGGraphicsElement = null
+  BackDrop: Element
+  DragTarget: SVGGraphicsElement | null = null
 
   constructor(doc: SVGSVGElement/*evt*/) {
 
@@ -54,10 +54,10 @@ export class SvgEditor2 {
     //    from being inadvertantly dropped when the mouse is moved rapidly
     this.BackDrop = this.svgRoot.getElementById('BackDrop')
 
-    this.svgDoc.addEventListener('mousedown', this.Grab, true)
+    this.svgDoc.addEventListener('mousedown', this.Grab as any, true)
     this.svgDoc.addEventListener('mousemove', this.Drag, true)
-    this.svgDoc.addEventListener('mouseup', this.Drop, true)
-    this.svgDoc.addEventListener('mouseleave', this.Leave, true)
+    this.svgDoc.addEventListener('mouseup', this.Drop as any, true)
+    this.svgDoc.addEventListener('mouseleave', this.Leave as any, true)
     //this.svgDoc.addEventListener('click', this.select, true)
   }
   private Leave = (evt: MouseEvent & { target: SVGGraphicsElement & { ownerSVGElement: any } }) => {
@@ -78,7 +78,7 @@ export class SvgEditor2 {
       //    always over other elements (exception: in this case, elements that are
       //    "in the folder" (children of the folder group) with only maintain
       //    hierarchy within that group
-      this.DragTarget.parentNode.appendChild(this.DragTarget)
+      this.DragTarget.parentNode!.appendChild(this.DragTarget)
 
       // turn off all pointer events to the dragged element, this does 2 things:
       //    1) allows us to drag text elements without selecting the text
@@ -89,8 +89,10 @@ export class SvgEditor2 {
       //    so that we only apply the differential between the current location
       //    and the new location
       const transMatrix = this.DragTarget.getCTM()
-      this.GrabPoint.x = this.TrueCoords.x - Number(transMatrix.e)
-      this.GrabPoint.y = this.TrueCoords.y - Number(transMatrix.f)
+      if(transMatrix){
+        this.GrabPoint.x = this.TrueCoords.x - Number(transMatrix.e)
+        this.GrabPoint.y = this.TrueCoords.y - Number(transMatrix.f)
+      }
 
     }
   }
@@ -126,7 +128,7 @@ export class SvgEditor2 {
       if ('Folder' == (targetElement.parentNode as SVGElement).id) {
         // if the dragged element is dropped on an element that is a child
         //    of the folder group, it is inserted as a child of that group
-        targetElement.parentNode.appendChild(this.DragTarget)
+        targetElement.parentNode!.appendChild(this.DragTarget)
         console.log(this.DragTarget.id + ' has been dropped into a folder, and has been inserted as a child of the containing group.')
       }
       else {

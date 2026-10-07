@@ -26,7 +26,8 @@ export function toUserUnits2(value: string | number, unit: UserUnit){
   }
   const convertFactor = UnitsPerInch[unit]
   const result = new Decimal(value).mul(convertFactor)
-  return result.toSignificantDigits(17).valueOf()
+  // 15 digits hides the rounding left by toInches2 so a typed 100 shows as 100, not 99.999999999999999
+  return result.toSignificantDigits(15).valueOf()
 }
 
 

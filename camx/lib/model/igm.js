@@ -1,6 +1,9 @@
-import { ArcCurve } from './vector';
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.BoundRect = exports.GCodeSource = exports.IGMDriver = exports.IGM = void 0;
+const vector_1 = require("./vector");
 // Intermediate Gcode Model
-export class IGM {
+class IGM {
     constructor(metric = true) {
         this.metric = metric;
         //TODO Changing IGM to interface will break instanceof when transforming
@@ -12,13 +15,11 @@ export class IGM {
         this.layerStatus = {};
     }
 }
+exports.IGM = IGM;
 /**
  * All operations on an IGM should be done via IGMDriver operations
  */
-export class IGMDriver {
-    constructor(igm) {
-        this.igm = igm;
-    }
+class IGMDriver {
     static newLine(vectors) {
         return this.newIgmObject({
             type: 'LINE',
@@ -42,6 +43,9 @@ export class IGMDriver {
         const object = {
             geometry,
             bounds: null,
+            //replace bounds with min and max. this will include all axes
+            // min: GCodeVector
+            // max: GCodeVector
         };
         return object;
     }
@@ -64,6 +68,9 @@ export class IGMDriver {
             b: b || 0,
             c: c || 0
         };
+    }
+    constructor(igm) {
+        this.igm = igm;
     }
     reverse(shape) {
         const geometry = shape.geometry;
@@ -93,7 +100,7 @@ export class IGMDriver {
         };
     }
     updateArcLimit(geometry) {
-        const curve = new ArcCurve(geometry.x, geometry.y, geometry.radius, geometry.startAngle, geometry.endAngle, geometry.clockwise);
+        const curve = new vector_1.ArcCurve(geometry.x, geometry.y, geometry.radius, geometry.startAngle, geometry.endAngle, geometry.clockwise);
         const start = curve.getPoint(0);
         const end = curve.getPoint(1);
         geometry.limit = {
@@ -301,6 +308,7 @@ export class IGMDriver {
             const g = shape.geometry;
             return IGMDriver.newArc(g.x, g.y, g.radius, g.startAngle, g.endAngle, g.clockwise);
         }
+        throw new Error('Cloning shape type not supported');
     }
     updateBounds(shapes) {
         shapes.forEach(shape => {
@@ -322,7 +330,7 @@ export class IGMDriver {
         if (geometry.type === 'ARC') {
             //need to explode arc into vectors
             //32 vectors should be enough to approximate bounds
-            return new ArcCurve(geometry.x, geometry.y, geometry.radius, geometry.startAngle, geometry.endAngle, geometry.clockwise).getPoints(32);
+            return new vector_1.ArcCurve(geometry.x, geometry.y, geometry.radius, geometry.startAngle, geometry.endAngle, geometry.clockwise).getPoints(32);
         }
         return [];
     }
@@ -371,7 +379,8 @@ export class IGMDriver {
         let last = shapes[idx++];
         while (idx < shapes.length) {
             const next = shapes[idx];
-            if (next.geometry) {
+            //TODO test this must be a bug. This statement below was inverted if (next.geometry)
+            if (!next.geometry) {
                 idx++;
                 continue;
             }
@@ -471,7 +480,8 @@ export class IGMDriver {
         return nearest;
     }
 }
-export class GCodeSource {
+exports.IGMDriver = IGMDriver;
+class GCodeSource {
     constructor(gcode) {
         if (Array.isArray(gcode)) {
             this.lines = gcode;
@@ -483,7 +493,8 @@ export class GCodeSource {
         }
     }
 }
-export class BoundRect {
+exports.GCodeSource = GCodeSource;
+class BoundRect {
     constructor() {
         this.x = Infinity;
         this.y = Infinity;
@@ -531,4 +542,4 @@ export class BoundRect {
         return width;
     }
 }
-//# sourceMappingURL=igm.js.map
+exports.BoundRect = BoundRect;

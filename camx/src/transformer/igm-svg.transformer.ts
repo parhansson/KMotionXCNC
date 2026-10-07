@@ -47,18 +47,18 @@ const createPaths = (driver: IGMDriver, dpiScale: number) => {
     const geometry = part.geometry
     let path: string
     if (geometry.type == 'LINE') {
-      path = linePath(geometry.vectors)
+      paths.push(linePath(geometry.vectors))
     }
     if (geometry.type == 'ARC') {
-      path = arcPath(
+      paths.push(arcPath(
         driver.start(part),
         driver.end(part),
         geometry.radius,
         geometry.startAngle,
         geometry.endAngle,
-        geometry.clockwise)
+        geometry.clockwise))
     }
-    paths.push(path)
+    
   }
   return paths
 }

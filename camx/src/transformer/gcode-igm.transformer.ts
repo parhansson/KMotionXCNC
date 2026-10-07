@@ -6,7 +6,7 @@ import { GCodeTransformer, State } from './gcode.transformer'
 
 
 export class Gcode2IgmTransformer extends GCodeTransformer<LineObject, IGM>{
-  private driver: IGMDriver
+  private driver: IGMDriver | undefined
   constructor(disableWorker?: boolean) { 
     super(disableWorker) 
   }
@@ -19,7 +19,7 @@ export class Gcode2IgmTransformer extends GCodeTransformer<LineObject, IGM>{
   protected startShape() {
     const shape = IGMDriver.newLine()
     //shape.userData = { lineNo: this.state.lineNo }
-    this.driver.addToLayerObject('layer1',shape)
+    this.driver!.addToLayerObject('layer1',shape)
     return shape
   }
 

@@ -1,8 +1,10 @@
-export class KMXUtil {
-  static createAnchor = {}
+
+type WorkerMap = { [key: string]: Worker }
+export const KMXUtil ={
+  createAnchor: {},
 
 
-  static ab2str(buf: ArrayBuffer) {
+  ab2str(buf: ArrayBuffer) {
     const arr = new Uint8Array(buf)
     let str = ''
     for (let i = 0, l = arr.length; i < l; i++) {
@@ -12,18 +14,18 @@ export class KMXUtil {
     //Call stack too deep on certain browsers 
     //return String.fromCharCode.apply(null, new Uint8Array(buf)); //Uint16Array
     //Solution to this can be found in PDF.js
-  }
+  },
 
-  static str2ab(str: string) {
+  str2ab(str: string) {
     const buf = new ArrayBuffer(str.length * 2) // 2 bytes for each char
     const bufView = new Uint16Array(buf)
     for (let i = 0, strLen = str.length; i < strLen; i++) {
       bufView[i] = str.charCodeAt(i)
     }
     return buf
-  }
+  },
 
-  static injectScript(source: string, loadedCondition: boolean) {
+  injectScript(source: string, loadedCondition: boolean) {
     return new Promise(function (resolve, reject) {
       if (loadedCondition === true) {
         //TODO check if script tag is present instead of external loaded condition 
@@ -43,15 +45,16 @@ export class KMXUtil {
 
 
     })
-  }
+  },
 
-  static getSingletonWorker(workerScript: string, messageHandler: (this: Worker, ev: MessageEvent) => any) {
-    return new Promise<Worker>(function (resolve: (value?: Worker | PromiseLike<Worker>) => void, reject: (reason?: any) => void) {
+  getSingletonWorker(workerScript: string, messageHandler: (this: Worker, ev: MessageEvent) => any) {
+
+    return new Promise<Worker>((resolve, reject) => {
       let worker = KMXUtil.workers[workerScript]
       if (worker === undefined) {
         try {
           worker = new Worker(workerScript)
-        } catch (error) {
+        } catch (error:any) {
           reject(Error(error))
         }
         KMXUtil.workers[workerScript] = worker
@@ -59,34 +62,36 @@ export class KMXUtil {
       //This needs to be set every time. Need to figure out why 
       worker.onmessage = messageHandler
       resolve(worker)
-    }.bind(this))
+    } )
+  },
 
-  }
+  workers: {} as WorkerMap,
 
-  static workers: { [key: string]: Worker } = {}
+  //TODO REMOVE No used an a trouble maker
   // Returns a function, that, as long as it continues to be invoked, will not
   // be triggered. The function will be called after it stops being called for
   // N milliseconds. If `immediate` is passed, trigger the function on the
   // leading edge, instead of the trailing.
-  static debounce(func: (arg: any) => any, wait: number, immediate: boolean) {
-    let timeout: number
-    return function () {
-      const context = this, args = arguments
-      const later = function () {
-        timeout = null
-        if (!immediate) {
-          func.apply(context, args)
-        }
-      }
-      const callNow = immediate && !timeout
-      clearTimeout(timeout)
-      timeout = setTimeout(later, wait)
-      if (callNow) {
-        func.apply(context, args)
-      }
-    }
-  }
-  static svgToString(svg: SVGElement): string {
+  // debounce(func: (arg: any) => any, wait: number, immediate: boolean) {
+  //   let timeout: number | undefined
+  //   const context = this
+  //   const args = arguments
+  //   return function () {
+  //     const later = function () {
+  //       timeout = undefined
+  //       if (!immediate) {
+  //         func.apply(context, args)
+  //       }
+  //     }
+  //     const callNow = immediate && !timeout
+  //     clearTimeout(timeout)
+  //     timeout = setTimeout(later, wait)
+  //     if (callNow) {
+  //       func.apply(context, args)
+  //     }
+  //   }
+  // },
+  svgToString(svg: SVGElement): string {
     // need to add namespace declarations for this to be a valid xml document
     return (svg as any).outerHTML.replace('<svg:svg ', '<svg:svg xmlns:svg="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" ')
   }

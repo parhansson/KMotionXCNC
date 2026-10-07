@@ -30,7 +30,7 @@ export class FontLoaderService {
           console.log(`Failed to load font ${fontUrl}`)
           reject('Could not load font: ' + err)
         } else {
-          resolve(font)
+          resolve(font!)
         }
       })
     })

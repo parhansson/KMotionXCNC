@@ -1,9 +1,12 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.GCodeParser = void 0;
 // Copyright (c) 2016 par.hansson@gmail.com
 /**
  * Parses a string of gcode instructions, and invokes codeHandlers for each type of
  * command or values.
  */
-import { Block, WordParameters, Comment, ControlWord, ParamWord } from '../gcode';
+const gcode_1 = require("../gcode");
 class ParseValue {
     constructor() {
         this.val = '';
@@ -13,11 +16,13 @@ class ParseValue {
     toPart() {
         switch (this.type) {
             case (ParseValue.Comment):
-                return new Comment(this.val);
+                return new gcode_1.Comment(this.val);
             case (ParseValue.ParamWord):
-                return new ParamWord(this.letter, parseFloat(this.val));
+                return new gcode_1.ParamWord(this.letter, parseFloat(this.val));
             case (ParseValue.ControlWord):
-                return new ControlWord(this.letter, parseFloat(this.val));
+                return new gcode_1.ControlWord(this.letter, parseFloat(this.val));
+            default:
+                throw new Error('Invalid type for part');
         }
     }
     next(block, nextType, nextLetter) {
@@ -28,7 +33,7 @@ class ParseValue {
             block.parts.push(this.toPart());
         }
         if (ParseValue.ParamWord === nextType && this.type !== ParseValue.ParamWord) {
-            block.parts.push(new WordParameters());
+            block.parts.push(new gcode_1.WordParameters());
         }
         this.letter = nextLetter;
         this.type = nextType;
@@ -39,9 +44,9 @@ ParseValue.None = 0;
 ParseValue.Comment = 1;
 ParseValue.ControlWord = 2;
 ParseValue.ParamWord = 3;
-export class GCodeParser {
+class GCodeParser {
     static parseBlock(rawText) {
-        const block = new Block(rawText);
+        const block = { text: rawText, line: NaN, errors: [], parts: [] };
         const text = rawText.toUpperCase();
         const len = text.length;
         const part = new ParseValue();
@@ -106,6 +111,7 @@ export class GCodeParser {
         });
     }
 }
+exports.GCodeParser = GCodeParser;
 // Search for codes without space between them
 GCodeParser.skipCodes = {
     N: 'Line number'
@@ -140,4 +146,3 @@ GCodeParser.blockCommentDepth = {
     ';': Infinity
 };
 GCodeParser.blockCommentEnd = ')';
-//# sourceMappingURL=gcode-parser.js.map

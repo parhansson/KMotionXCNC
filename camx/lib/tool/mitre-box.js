@@ -1,3 +1,4 @@
+"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -7,10 +8,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { IGM, IGMDriver } from '../model/igm';
-import { igm2SVG } from '../transformer/igm-svg.transformer';
-export class MitreBox {
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.MitreBox = void 0;
+const igm_1 = require("../model/igm");
+const igm_svg_transformer_1 = require("../transformer/igm-svg.transformer");
+class MitreBox {
     constructor() {
+        this.models = [];
+        this.cut_width = 0;
     }
     requiredInput() {
         const inputs = [
@@ -69,7 +74,7 @@ export class MitreBox {
     }
     generateSVG(values) {
         return __awaiter(this, void 0, void 0, function* () {
-            return Promise.resolve(igm2SVG(yield this.generate(values)));
+            return Promise.resolve((0, igm_svg_transformer_1.igm2SVG)(yield this.generate(values)));
         });
     }
     generate(values) {
@@ -119,8 +124,8 @@ export class MitreBox {
         }
         this.EndDoc();
         //console.log(this.svg);
-        const igm = new IGM();
-        const driver = new IGMDriver(igm);
+        const igm = new igm_1.IGM();
+        const driver = new igm_1.IGMDriver(igm);
         driver.addToLayerObject('', this.models);
         return Promise.resolve(igm);
     }
@@ -317,13 +322,13 @@ export class MitreBox {
         this.PolyEnd();
     }
     PolyStart() {
-        this.models.push(IGMDriver.newLine());
+        this.models.push(igm_1.IGMDriver.newLine());
     }
     getLast() {
         return this.models[this.models.length - 1];
     }
     PolyPoint(x, y) {
-        this.getLast().geometry.vectors.push(IGMDriver.newGCodeVector(x, y));
+        this.getLast().geometry.vectors.push(igm_1.IGMDriver.newGCodeVector(x, y));
     }
     PolyEnd() {
     }
@@ -332,4 +337,4 @@ export class MitreBox {
     EndDoc() {
     }
 }
-//# sourceMappingURL=mitre-box.js.map
+exports.MitreBox = MitreBox;

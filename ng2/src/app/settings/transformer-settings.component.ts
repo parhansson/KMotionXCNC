@@ -1,7 +1,7 @@
 import { Component, Inject } from '@angular/core'
 import { ModelSettings, PDFModelSettings, SVGModelSettings, IGMModelSettings, DXFModelSettings } from 'camx'
 import { ModelSettingsService } from '../model/model.settings.service'
-import { InputBase } from '@kmx/form/input-base'
+import { InputBase } from '../form/input-base'
 
 @Component({
   selector: 'transformer-settings',

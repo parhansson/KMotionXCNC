@@ -1,3 +1,4 @@
+"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -7,12 +8,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { FontLoaderService } from '../util';
-export class SvgNode {
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.SvgParser = exports.SvgNode = void 0;
+const util_1 = require("../util");
+class SvgNode {
     constructor() {
         this.xformToWorld = [1, 0, 0, 1, 0, 0]; //2d Transformation vector
         this.xform = [1, 0, 0, 1, 0, 0]; //2d Transformation vector
         this.defs = false;
+        this.href = null;
         this.text = null;
         this.fontSize = 1;
         this.path = [];
@@ -44,6 +48,7 @@ export class SvgNode {
         return node;
     }
 }
+exports.SvgNode = SvgNode;
 class SVGElementWalker {
     constructor(elementFilter) {
         this.elementFilter = elementFilter;
@@ -99,11 +104,11 @@ class SVGElementWalker {
  *   Load different fonts
  *   complete defs an use
  */
-export class SvgParser extends SVGElementWalker {
+class SvgParser extends SVGElementWalker {
     constructor(elementFilter, renderText) {
         super(elementFilter);
         this.renderText = renderText;
-        this.fontService = new FontLoaderService();
+        this.fontService = new util_1.FontLoaderService();
         this.DEG_TO_RAD = Math.PI / 180;
         this.RAD_TO_DEG = 180 / Math.PI;
         this.globalNodes = {};
@@ -124,7 +129,7 @@ export class SvgParser extends SVGElementWalker {
             'transform': (node, val) => {
                 // http://www.w3.org/TR/SVG11/coords.html#EstablishingANewUserSpace
                 const xforms = [];
-                const segs = val.match(/[a-z]+\s*\([^)]*\)/ig);
+                const segs = val.match(/[a-z]+\s*\([^)]*\)/ig) || [];
                 for (const seg of segs) {
                     const kv = seg.split('(');
                     const xformKind = this.strip(kv[0]);
@@ -327,10 +332,10 @@ export class SvgParser extends SVGElementWalker {
                     return 'none';
                 }
                 else if (val == 'freeze') { // SMIL is evil, but so are we
-                    return null;
+                    return undefined;
                 }
                 else if (val == 'remove') {
-                    return null;
+                    return undefined;
                 }
                 else { // unknown value, maybe it's an ICC color
                     return val;
@@ -391,6 +396,7 @@ export class SvgParser extends SVGElementWalker {
                 }
                 else {
                     console.error('error', 'in __getPolyPath: odd number of verteces');
+                    return [];
                 }
             }),
             rect: (tag, node) => __awaiter(this, void 0, void 0, function* () {
@@ -442,7 +448,7 @@ export class SvgParser extends SVGElementWalker {
             circle: (tag, node) => __awaiter(this, void 0, void 0, function* () {
                 // http://www.w3.org/TR/SVG11/shapes.html#CircleElement
                 // has transform and style attributes
-                const r = this.parseUnit(tag.getAttribute('r'));
+                const r = this.parseUnit(tag.getAttribute('r')) || 0;
                 const cx = this.parseUnit(tag.getAttribute('cx')) || 0;
                 const cy = this.parseUnit(tag.getAttribute('cy')) || 0;
                 if (r > 0.0) {
@@ -457,8 +463,8 @@ export class SvgParser extends SVGElementWalker {
             }),
             ellipse: (tag, node) => __awaiter(this, void 0, void 0, function* () {
                 // has transform and style attributes
-                const rx = this.parseUnit(tag.getAttribute('rx'));
-                const ry = this.parseUnit(tag.getAttribute('ry'));
+                const rx = this.parseUnit(tag.getAttribute('rx')) || 0;
+                const ry = this.parseUnit(tag.getAttribute('ry')) || 0;
                 const cx = this.parseUnit(tag.getAttribute('cx')) || 0;
                 const cy = this.parseUnit(tag.getAttribute('cy')) || 0;
                 if (rx > 0.0 && ry > 0.0) {
@@ -475,7 +481,9 @@ export class SvgParser extends SVGElementWalker {
                 // http://www.w3.org/TR/SVG11/paths.html
                 // has transform and style attributes
                 const d = tag.getAttribute('d');
-                this.addPath(d, node);
+                if (d) {
+                    this.addPath(d, node);
+                }
             }),
             image: (tag, node) => __awaiter(this, void 0, void 0, function* () {
                 // not supported
@@ -499,11 +507,13 @@ export class SvgParser extends SVGElementWalker {
                 const ns = 'http://www.w3.org/1999/xlink';
                 const href = tag.getAttributeNS(ns, 'href');
                 node.href = href;
-                const v = this.globalNodes[node.href];
-                //node.unsupported = true;
-                console.log(node, v);
-                // not supported
-                // has transform and style attributes
+                if (node.href) {
+                    const v = this.globalNodes[node.href];
+                    //node.unsupported = true;
+                    console.log(node, v);
+                    // not supported
+                    // has transform and style attributes
+                }
             }),
             style: (tag, node) => __awaiter(this, void 0, void 0, function* () {
                 //node.unsupported = true;
@@ -522,7 +532,7 @@ export class SvgParser extends SVGElementWalker {
                 for (let ruleIndex = 0; ruleIndex < styleSheet.cssRules.length; ruleIndex++) {
                     //for(const ruleIndex in styleSheet.cssRules){
                     const rule = styleSheet.cssRules.item(ruleIndex);
-                    if (rule.type == CSSRule.FONT_FACE_RULE) {
+                    if ((rule === null || rule === void 0 ? void 0 : rule.type) == CSSRule.FONT_FACE_RULE) {
                         const fontFaceRule = styleSheet.cssRules.item(ruleIndex);
                         const style = fontFaceRule.style;
                         const fontFamily = style.fontFamily;
@@ -689,23 +699,23 @@ export class SvgParser extends SVGElementWalker {
                         if (textAnchorAttr || baselineAttr) {
                             const bounds = path.getBoundingBox();
                             let alignX = 0;
-                            if (textAnchorAttr.nodeValue === 'middle') {
+                            if ((textAnchorAttr === null || textAnchorAttr === void 0 ? void 0 : textAnchorAttr.nodeValue) === 'middle') {
                                 alignX = (bounds.x2 - bounds.x1) / 2;
                             }
-                            if (textAnchorAttr.nodeValue === 'end') {
+                            if ((textAnchorAttr === null || textAnchorAttr === void 0 ? void 0 : textAnchorAttr.nodeValue) === 'end') {
                                 alignX = (bounds.x2 - bounds.x1);
                             }
                             let alignY = 0;
                             //TODO middle or center?? need to check this
-                            if (baselineAttr.nodeValue === 'middle' || baselineAttr.nodeValue === 'center') {
+                            if ((baselineAttr === null || baselineAttr === void 0 ? void 0 : baselineAttr.nodeValue) === 'middle' || (baselineAttr === null || baselineAttr === void 0 ? void 0 : baselineAttr.nodeValue) === 'center') {
                                 alignY = (bounds.y2 - bounds.y1) / 2;
                             }
-                            if (baselineAttr.nodeValue === 'hanging') {
+                            if ((baselineAttr === null || baselineAttr === void 0 ? void 0 : baselineAttr.nodeValue) === 'hanging') {
                                 alignY = (bounds.y2 - bounds.y1);
                             }
                             node.xformToWorld = this.matrixMult(node.xformToWorld, [1, 0, 0, 1, -alignX, alignY]);
                         }
-                        const dPath = path.toPathData(undefined);
+                        const dPath = path.toPathData(3);
                         if (dPath.length > 0) {
                             this.addPath(dPath, node);
                         }
@@ -741,7 +751,7 @@ export class SvgParser extends SVGElementWalker {
         //let d: DPath
         if (typeof dObject === 'string') {
             // parse path string
-            const mArr = dObject.match(/([A-Za-z]|-?[0-9]+\.?[0-9]*(?:e-?[0-9]*)?)/g);
+            const mArr = dObject.match(/([A-Za-z]|-?[0-9]+\.?[0-9]*(?:e-?[0-9]*)?)/g) || [];
             for (const val of mArr) {
                 const num = parseFloat(val);
                 if (isNaN(num)) {
@@ -1260,4 +1270,4 @@ export class SvgParser extends SVGElementWalker {
         return val.replace(/^\s+|\s+$/g, '');
     }
 }
-//# sourceMappingURL=svg-parser.js.map
+exports.SvgParser = SvgParser;

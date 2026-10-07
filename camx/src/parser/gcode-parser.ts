@@ -21,7 +21,7 @@ class ParseValue {
   static ParamWord = 3
 
   val: string = ''
-  letter: string = null
+  letter: string | undefined | null = null
   type: number = ParseValue.None
 
   constructor() { }
@@ -31,9 +31,11 @@ class ParseValue {
       case (ParseValue.Comment):
         return new Comment(this.val)
       case (ParseValue.ParamWord):
-        return new ParamWord(this.letter, parseFloat(this.val))
+        return new ParamWord(this.letter!, parseFloat(this.val))
       case (ParseValue.ControlWord):
-        return new ControlWord(this.letter, parseFloat(this.val))
+        return new ControlWord(this.letter!, parseFloat(this.val))
+      default:
+        throw new Error('Invalid type for part')
     }
   }
   next(block: Block, nextType: number, nextLetter?: string) {
@@ -93,7 +95,7 @@ export class GCodeParser {
   private static blockCommentEnd = ')'
 
   public static parseBlock(rawText: string) {
-    const block = new Block(rawText)
+    const block: Block = {text:rawText, line:NaN, errors:[], parts:[]}
     const text = rawText.toUpperCase()
     const len = text.length
     const part = new ParseValue()

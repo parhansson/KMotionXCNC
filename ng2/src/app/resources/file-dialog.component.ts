@@ -101,7 +101,7 @@ export class FileDialogComponent {
     this.selectedFile.emit(payload)
   }
 
-  protected setFileResource(file: FileResource) {
+  public setFileResource(file: FileResource) {
     this.selectedFile.emit(file)
     this.hide()
   }

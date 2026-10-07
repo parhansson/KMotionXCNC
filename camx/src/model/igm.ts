@@ -33,7 +33,7 @@ export interface LINE extends Geometry {
 }
 
 export interface IgmObject {
-  bounds: BoundRect
+  bounds: BoundRect | null
   comment?: string
   geometry: ARC | LINE
   //TODO replace bounds with min and max. this will include all axes
@@ -111,7 +111,7 @@ export class IGMDriver {
       clockwise
     }) as ArcObject
   }
-  private static newIgmObject(geometry?: ARC | LINE): IgmObject {
+  private static newIgmObject(geometry: ARC | LINE): IgmObject {
     const object = {
       geometry,
       bounds: null,
@@ -193,11 +193,11 @@ export class IGMDriver {
 
   public start(shape: IgmObject) {
     //this.updateLimit(shape.geometry)
-    return shape.geometry.limit.start
+    return shape.geometry.limit!.start
   }
   public end(shape: IgmObject) {
     //this.updateLimit(shape.geometry)
-    return shape.geometry.limit.end
+    return shape.geometry.limit!.end
   }
 
   public addRaw(raw: string) {
@@ -206,7 +206,7 @@ export class IGMDriver {
   public addUnsupported(obj: any) {
     this.igm.unsupported.push(obj)
   }
-  public addToLayerObject(layerKey: string, obj: IgmObject | IgmObject[]) {
+  public addToLayerObject(layerKey: string | undefined, obj: IgmObject | IgmObject[]) {
     if (layerKey === undefined) {
       layerKey = 'undefined'
     }
@@ -435,6 +435,7 @@ export class IGMDriver {
       const g = shape.geometry
       return IGMDriver.newArc(g.x, g.y, g.radius, g.startAngle, g.endAngle, g.clockwise)
     }
+    throw new Error('Cloning shape type not supported')
 
   }
 
@@ -476,8 +477,8 @@ export class IGMDriver {
     let idx = shapes.length
     while (idx--) {
       const shape = shapes[idx]
-      maxBounds.include(shape.bounds.vec1())
-      maxBounds.include(shape.bounds.vec2())
+      maxBounds.include(shape.bounds!.vec1())
+      maxBounds.include(shape.bounds!.vec2())
     }
     return maxBounds
   }
@@ -518,7 +519,8 @@ export class IGMDriver {
     let last = shapes[idx++]
     while (idx < shapes.length) {
       const next = shapes[idx]
-      if (next.geometry) {
+      //TODO test this must be a bug. This statement below was inverted if (next.geometry)
+      if (!next.geometry) {
         idx++
         continue
       }

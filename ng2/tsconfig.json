@@ -3,6 +3,7 @@
     "allowSyntheticDefaultImports":true,
     "downlevelIteration": true,
     "esModuleInterop": true,
+    "skipLibCheck": true,
     "importHelpers": true,
     "target": "es2015", 
     "module": "es2020",
@@ -12,16 +13,23 @@
     "experimentalDecorators": true,
     "lib": ["es2017", "dom"],
     "noImplicitAny": false, //todo true
-    "suppressImplicitAnyIndexErrors": true,
     "removeComments": false,
     "outDir": "dist/unbundled",
     "declaration": true,
     "baseUrl": "./",
     "paths": {
-      "@kmx/*": [ "./src/app/*" ] 
-      //"@workers/*": [ "./src/workers/*" ]
+      //"@kmx/*": [ "./src/app/*" ],
+      //"@workers/*": [ "./src/workers/*" ],
+      //"camx": [ "./camx/lib" ]
     }
   },
+  "files": [
+    //"src/main.aot.ts",
+    "src/main.ts",
+    "src/polyfills.ts",
+    "src/vendor.ts",
+    "src/workers/socket.worker.ts"
+  ],
   "exclude": [
     "dist",
     "vendor",

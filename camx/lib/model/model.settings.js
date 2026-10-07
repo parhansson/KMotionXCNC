@@ -1,4 +1,7 @@
-export class SVGModelSettings {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ModelSettings = exports.DXFModelSettings = exports.PDFModelSettings = exports.IGMModelSettings = exports.SVGModelSettings = void 0;
+class SVGModelSettings {
     constructor() {
         this.UnitsPerInch = {
             mm: 25.4,
@@ -20,7 +23,8 @@ export class SVGModelSettings {
         }
     }
 }
-export class IGMModelSettings {
+exports.SVGModelSettings = SVGModelSettings;
+class IGMModelSettings {
     constructor() {
         this.scale = 1;
         this.unit = 'mm';
@@ -34,22 +38,27 @@ export class IGMModelSettings {
         this.calculateShortestPath = true;
         this.initCode = 'M100 P200 Q100';
         this.feedRate = 250;
+        this.multipass = false;
         this.materialThickness = 10;
         this.passes = 1;
     }
 }
-export class PDFModelSettings {
+exports.IGMModelSettings = IGMModelSettings;
+class PDFModelSettings {
     constructor() {
         this.page = 1;
         this.rotate = 90; // rotate 90 degrees to fit machine area
         this.scale = 1.0;
     }
 }
-export class DXFModelSettings {
+exports.PDFModelSettings = PDFModelSettings;
+class DXFModelSettings {
+    constructor() {
+        this.includeDimension = true;
+    }
 }
-export class Material {
-}
-export class ModelSettings {
+exports.DXFModelSettings = DXFModelSettings;
+class ModelSettings {
     constructor() {
         this.svg = new SVGModelSettings();
         this.pdf = new PDFModelSettings();
@@ -70,4 +79,4 @@ export class ModelSettings {
         Object.setPrototypeOf(this.svg, SVGModelSettings.prototype);
     }
 }
-//# sourceMappingURL=model.settings.js.map
+exports.ModelSettings = ModelSettings;

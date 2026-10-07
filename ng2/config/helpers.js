@@ -1,7 +1,9 @@
-const path = require('path');
-const _root = path.resolve(__dirname, '..');
-function root(args) {
-  args = Array.prototype.slice.call(arguments, 0);
-  return path.join.apply(path, [_root].concat(args));
+import path from 'path';
+
+const _root = path.resolve(new URL('.', import.meta.url).pathname, '..');
+
+export function root(...args) {
+    const resolved = path.join(_root, ...args);
+    console.log(resolved);
+    return resolved;
 }
-exports.root = root;

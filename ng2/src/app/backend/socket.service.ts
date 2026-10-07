@@ -4,10 +4,10 @@ import { LogService, LogLevel } from '../log'
 import { SerializedObject } from '../util'
 import { KmxStatus, ControlMessagePayload, ControlMessage } from '../hal/kflop'
 import { LogMessage } from './socket/messages'
-
 import { FileResource } from '../resources'
 
-import SocketWorker from '@workers/socket.worker'
+import {baseUrl} from '../../main'
+
 
 @Injectable()
 export class SocketService {
@@ -25,8 +25,10 @@ export class SocketService {
     this.data.timeStamp = -1
     this.data.simulating = false
     this.data.currentLine = -1
-    
-    this.socketWorker = new SocketWorker() //new (SocketWorker as any)()
+
+    //We can not use variables in URL. webpack can not analyze it
+    this.socketWorker = new Worker(new URL('../../workers/socket.worker', import.meta.url))
+    //this.socketWorker = new SocketWorker() //new (SocketWorker as any)()
     this.socketWorker.addEventListener('message', (event) => {this.onWorkerMessage(event)})
     //does not seem to work, at least not in chrome
     //      window.onbeforeunload = function(){
@@ -69,7 +71,7 @@ export class SocketService {
 
   private onTextMessage(textMessage: string) {
     if (textMessage === 'WorkerReady') {
-      const url = 'ws://' + window.location.host + '/ws'
+      const url =  baseUrl.replace('https://','wss://').replace('http://','ws://') + '/ws'
       this.socketWorker.postMessage({ command: 'connect', url })
     }
   }

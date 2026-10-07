@@ -1,6 +1,6 @@
 import { Component, Inject, Input, Output, ViewChild, ElementRef } from '@angular/core'
 import { SvgPreviewComponent } from './svg-preview.component'
-import { InputBase } from '@kmx/form/input-base'
+import { InputBase } from '../form/input-base'
 import { ModelGenerator } from 'camx'
 
 

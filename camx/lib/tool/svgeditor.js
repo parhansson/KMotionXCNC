@@ -1,3 +1,6 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.SvgEditor2 = void 0;
 //http://svg-whiz.com/svg/DragAndDropGroup.svg
 /*
 http://svg-whiz.com/svg/DragAndDrop.svg
@@ -23,13 +26,10 @@ http://svg-whiz.com/svg/DragAndDrop.svg
 
 </svg>
 */
-export class SvgEditor2 {
+class SvgEditor2 {
     constructor(doc /*evt*/) {
-        this.svgDoc = null;
-        this.svgRoot = null;
         this.TrueCoords = { x: 0, y: 0 };
         this.GrabPoint = { x: 0, y: 0 };
-        this.BackDrop = null;
         this.DragTarget = null;
         this.Leave = (evt) => {
             if (this.svgRoot == evt.target) {
@@ -56,8 +56,10 @@ export class SvgEditor2 {
                 //    so that we only apply the differential between the current location
                 //    and the new location
                 const transMatrix = this.DragTarget.getCTM();
-                this.GrabPoint.x = this.TrueCoords.x - Number(transMatrix.e);
-                this.GrabPoint.y = this.TrueCoords.y - Number(transMatrix.f);
+                if (transMatrix) {
+                    this.GrabPoint.x = this.TrueCoords.x - Number(transMatrix.e);
+                    this.GrabPoint.y = this.TrueCoords.y - Number(transMatrix.f);
+                }
             }
         };
         this.Drag = (evt) => {
@@ -126,4 +128,4 @@ export class SvgEditor2 {
         this.TrueCoords.y = (evt.clientY - translation.y) / newScale;
     }
 }
-//# sourceMappingURL=svgeditor.js.map
+exports.SvgEditor2 = SvgEditor2;

@@ -1,12 +1,15 @@
-import { IGM, IGMDriver } from '../model/igm';
-import { SvgParser } from '../parser/svg-parser';
-export class Svg2IgmTransformer {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Svg2IgmTransformer = void 0;
+const igm_1 = require("../model/igm");
+const svg_parser_1 = require("../parser/svg-parser");
+class Svg2IgmTransformer {
     constructor(settings) {
         this.settings = settings;
     }
     transform(svgRootElement) {
-        const igm = new IGM();
-        const driver = new IGMDriver(igm);
+        const igm = new igm_1.IGM();
+        const driver = new igm_1.IGMDriver(igm);
         // let the fun begin
         const contentFilterDissalowed = [
         //'style', 
@@ -15,7 +18,7 @@ export class Svg2IgmTransformer {
         const contentFilter = (element) => {
             return contentFilterDissalowed.indexOf(element.localName) < 0;
         };
-        return new SvgParser(contentFilter, this.settings.renderText).parse(svgRootElement).then(node => {
+        return new svg_parser_1.SvgParser(contentFilter, this.settings.renderText).parse(svgRootElement).then(node => {
             this.makeModel(node, driver);
             return igm;
         });
@@ -50,10 +53,10 @@ export class Svg2IgmTransformer {
         for (const subpath of node.path) {
             const vectors = [];
             for (const point of subpath) {
-                vectors.push(IGMDriver.newGCodeVector(point[0], point[1], 0));
+                vectors.push(igm_1.IGMDriver.newGCodeVector(point[0], point[1], 0));
                 //TODO clip on clipPath here. this will be extremely difficult
             }
-            const shape = IGMDriver.newLine(vectors);
+            const shape = igm_1.IGMDriver.newLine(vectors);
             driver.scale(shape, dpiScaleFactor);
             if (node.unsupported === true) {
                 driver.addUnsupported(subpath);
@@ -65,4 +68,4 @@ export class Svg2IgmTransformer {
         }
     }
 }
-//# sourceMappingURL=svg-igm.transformer.js.map
+exports.Svg2IgmTransformer = Svg2IgmTransformer;

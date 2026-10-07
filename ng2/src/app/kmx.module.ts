@@ -2,7 +2,7 @@
 import { NgModule } from '@angular/core'
 import { enableProdMode } from '@angular/core'
 import { BrowserModule } from '@angular/platform-browser'
-import { HttpClientModule } from '@angular/common/http'
+import { provideHttpClient, withInterceptorsFromDi, withFetch } from '@angular/common/http'
 import { FormsModule } from '@angular/forms'
 import { RouteReuseStrategy } from '@angular/router'
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
@@ -31,7 +31,6 @@ import { DynamicFormModule } from './form/dynamic-form.module'
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
-    HttpClientModule,
     TabsModule.forRoot(),
     BsDropdownModule.forRoot(),
     FormsModule,
@@ -53,6 +52,7 @@ import { DynamicFormModule } from './form/dynamic-form.module'
   ], // directives, components, and pipes owned by this NgModule
   providers: [
     appRoutingProviders,
+    provideHttpClient(withInterceptorsFromDi(), withFetch()),
     SocketService,
     LogService,
     SettingsService,

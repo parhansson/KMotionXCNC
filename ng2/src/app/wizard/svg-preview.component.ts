@@ -12,7 +12,7 @@ export class SvgPreviewComponent {
   private previewContainer: ElementRef
   private svgEditor: SvgEditor
   private svgDoc: SVGSVGElement
-  private rotationAngle: number
+  public rotationAngle: number
   constructor(private staticTransformer: StaticTransformer) {
     this.svgEditor = new SvgEditor()
     this.rotationAngle = 45

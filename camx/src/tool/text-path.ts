@@ -62,7 +62,7 @@ export async function getTextSVG(text: string,
   const font = await fontLoader.getFont(fontName)
 
   const path = font.getPath(text, 0, 0, fontSize)
-  const dPath = path.toPathData(undefined)
+  const dPath = path.toPathData(3)
   const svg = toSVG(dPath, fontSize)
   return svg
 }

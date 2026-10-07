@@ -1,7 +1,10 @@
-import { BlockPart } from './block-part';
-export class Comment extends BlockPart {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Comment = void 0;
+const block_part_1 = require("./block-part");
+class Comment extends block_part_1.BlockPart {
     constructor(value) {
         super(value);
     }
 }
-//# sourceMappingURL=comment.js.map
+exports.Comment = Comment;

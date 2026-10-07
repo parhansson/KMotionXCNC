@@ -1,4 +1,7 @@
-import { Word } from './word';
-export class ParamWord extends Word {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ParamWord = void 0;
+const word_1 = require("./word");
+class ParamWord extends word_1.Word {
 }
-//# sourceMappingURL=param-word.js.map
+exports.ParamWord = ParamWord;

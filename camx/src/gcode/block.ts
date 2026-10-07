@@ -1,11 +1,11 @@
 import { BlockPart } from './block-part'
 import { Word } from './word'
 
-export class Block {
+export type Block = {
+  text: string
   line: number
-  parts: Array<BlockPart<string | Word[]>> = []
-  errors: string[] = []
-  constructor(public text: string) { }
+  parts: BlockPart<string | Word[]>[]
+  errors: string[]
 
 }
 
