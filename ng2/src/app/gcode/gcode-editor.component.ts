@@ -8,7 +8,7 @@ import { BackendService } from '../backend/backend.service'
 @Component({
   selector: 'gcode-editor',
   template: `
-        <code-editor mode="gcode"></code-editor>
+        <code-editor mode="gcode" defaultDirectory="./gcode"></code-editor>
   `,
   styles : [
     `
@@ -40,7 +40,6 @@ export class GCodeEditorComponent implements AfterViewInit{
     
     
     ngAfterViewInit() {
-      this.editorComponent.onFile(new FileResource('./gcode'))
       //this.editorComponent.onContentChange()
       this.socketService.status.subscribe(status => {
         // if(status.interpreting){
@@ -50,6 +49,7 @@ export class GCodeEditorComponent implements AfterViewInit{
         // }
       })
       this.socketService.gcodeFileSubject.subscribe(gcodeFile => {
+        if (!gcodeFile.file) return
         this.editorComponent.resource = gcodeFile
         const subscription = this.fileBackend.loadFile(gcodeFile.canonical).subscribe(
           payload => {

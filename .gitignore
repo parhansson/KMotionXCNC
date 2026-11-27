@@ -5,5 +5,5 @@ bin/
 config\.mak
 
 config\.h
-
+*.out
 kmx/

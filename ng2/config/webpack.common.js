@@ -41,6 +41,9 @@ const commonConfig = {
     extensions: ['.js', '.ts'],
     alias: {
       "camx": "camx/lib",
+      // camx is npm-linked (symlink), so webpack would otherwise bundle a second
+      // copy of three from camx/node_modules. Force a single instance.
+      "three": root('node_modules/three'),
     }
   },
   module: {

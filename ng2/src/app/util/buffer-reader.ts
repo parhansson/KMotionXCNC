@@ -33,47 +33,13 @@ export class BufferReader {
   }
   string(): string {
     const len = this.int()
-    const val = this.readUtf8String(new Uint8Array(this.dv.buffer), this.off, len)
-    //TODO len is not always the same as byteLen on utf-8;
+    // The protocol length is bytes, not decoded characters. A zero-length
+    // filename means no program is selected; never consume its timestamp.
+    if (len > this.dv.byteLength - this.off) {
+      throw new RangeError('Truncated status string')
+    }
+    const val = new TextDecoder('utf-8').decode(new Uint8Array(this.buf, this.off, len))
     this.off += len
     return val
-  }
-
-  /* tslint:disable:no-bitwise */
-  private readUtf8String(array: Uint8Array, offset: number, chars: number) {
-    let out: string, i: number, len: number
-    let char1: number, char2: number, char3: number
-
-    out = ''
-    len = array.byteLength
-    i = offset
-    while (i < len) {
-      char1 = array[i++]
-      switch (char1 >> 4) {
-        case 0: case 1: case 2: case 3: case 4: case 5: case 6: case 7:
-          // 0xxxxxxx
-          out += String.fromCharCode(char1)
-          break
-        case 12: case 13:
-          // 110x xxxx   10xx xxxx
-          char2 = array[i++]
-          out += String.fromCharCode(((char1 & 0x1F) << 6) | (char2 & 0x3F))
-          break
-        case 14:
-          // 1110 xxxx  10xx xxxx  10xx xxxx
-          char2 = array[i++]
-          char3 = array[i++]
-          out += String.fromCharCode(
-            ((char1 & 0x0F) << 12) |
-            ((char2 & 0x3F) << 6) |
-            ((char3 & 0x3F) << 0))
-          break
-      }
-      if (out.length >= chars) {
-        return out
-      }
-    }
-
-    return out
   }
 }

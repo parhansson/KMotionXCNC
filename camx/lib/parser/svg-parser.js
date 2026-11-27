@@ -683,7 +683,7 @@ class SvgParser extends SVGElementWalker {
                 }
                 else {
                     console.log('Fallback to Arial');
-                    font = yield this.fontService.getFont('/settings/arialuni.ttf');
+                    font = yield this.fontService.getFont('/settings/fonts/arialuni.ttf');
                 }
                 if (font) {
                     if (tag.textContent !== null) {

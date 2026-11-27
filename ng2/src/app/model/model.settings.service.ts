@@ -15,7 +15,7 @@ export class ModelSettingsService extends JsonFileStore<ModelSettings>{
     return this.obj
   }
   get fileName(): string {
-    return './settings/import.cnf'
+    return './settings/importcnf.json'
   }
   onSave(){
 
@@ -25,6 +25,5 @@ export class ModelSettingsService extends JsonFileStore<ModelSettings>{
     
   }
 }
-
 
 

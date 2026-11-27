@@ -25,6 +25,11 @@ export class AceEditorComponent {
 
   @Input() mode: string
   @Input() theme: string
+  @Input() set defaultDirectory(directory: string) {
+    // Initialize before the child file dialog binds its resource. Doing this
+    // from the parent's AfterViewInit leaves the dialog stale in production.
+    if (!this.resource.file) this.resource = new FileResource(directory)
+  }
   resource: FileResource
   dirty: boolean
 
