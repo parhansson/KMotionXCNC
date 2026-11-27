@@ -28,7 +28,7 @@ const config = merge(commonConfig, {
 
   plugins: [
     new HtmlWebpackPlugin({
-      template: 'src/index.html',
+      template: '!!html-loader!src/index.html',
       base: './'
     }),
     new MiniCssExtractPlugin({
