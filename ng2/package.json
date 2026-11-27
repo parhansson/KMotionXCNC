@@ -7,6 +7,7 @@
   "browser": "app/main",
   "type": "module",
   "scripts": {
+    "test": "node --test config/*.test.js",
     "ng": "ng",
     "lint": "npx eslint",
     "tsc": "tsc",

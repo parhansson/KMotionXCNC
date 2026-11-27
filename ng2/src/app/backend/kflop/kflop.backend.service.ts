@@ -26,19 +26,10 @@ export class KFlopBackendService extends BackendService implements IFileBackend 
     const progress$ = new Observable<number>(observer => { progressObserver = observer })
     const formData: FormData = new FormData()
 
-    if (File.constructor === Function) {
-      const files: File[] = []
-      files.push(new File([content], name))
-      for (let i = 0; i < files.length; i++) {
-        formData.append('file' + i, files[i], files[i].name)
-      }
-    } else {
-      console.info('File has no constructor. Fallback to blob')
-      //Some browsers (IE and Edge) does not support File constructor.
-      const blob = new Blob([content], { type: 'plain/text' })
-      formData.append('file', blob, name)
-
-    }
+    // Pass the machine-relative path explicitly; do not rely on File.name
+    // preserving directory components.
+    const blob = new Blob([content], { type: 'application/octet-stream' })
+    formData.append('file', blob, name)
 
     //return new Promise((resolve, reject) => {
 

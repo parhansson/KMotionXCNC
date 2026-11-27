@@ -6,7 +6,7 @@ import { FileResource, FileStoreToken, FileStore, DefaultFileStore } from '../re
 @Component({
   selector: 'ccode-editor',
   template: `
-    <code-editor mode="c_cpp" >
+    <code-editor mode="c_cpp" defaultDirectory="./c-programs">
       <div buttons>
         <span class="btn btn-primary" title="Compile" (click)="onCompile()">
           <span class="fa-solid fa-link"></span>
@@ -38,7 +38,6 @@ export class CCodeEditorComponent {
   constructor() { }
 
   ngAfterViewInit() {
-    this.editorComponent.onFile(new FileResource('./settings/c-programs'))
   }
   onCompile() {
     console.warn('Compile not implemented')

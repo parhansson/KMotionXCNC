@@ -739,7 +739,7 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
         font = await this.fontService.getFont(node.fontFamily)
       } else {
         console.log('Fallback to Arial')
-        font = await this.fontService.getFont('/settings/arialuni.ttf')
+        font = await this.fontService.getFont('/settings/fonts/arialuni.ttf')
       }
       if (font) {
         if (tag.textContent !== null) {
@@ -1348,4 +1348,3 @@ export class SvgParser extends SVGElementWalker<SvgNode> {
     return val.replace(/^\s+|\s+$/g, '')
   }
 }
-

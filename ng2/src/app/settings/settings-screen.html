@@ -5,13 +5,9 @@
   <a ng-click="showMachine($event)">Show machine configuration</a>
   -->
   <div class="row">
-    <file-dialog #fd (selectedFile)="onFile($event)" [resource]="resource"></file-dialog>
     <div class="col-sm"></div>
     <div class="col-sm">
       <span class="glyphButtonBar">
-          <span class="btn btn-primary" title="Open" (click)="fd.openDialog(false)">
-            <span class="fa-solid fa-folder-open"></span> Open
-          </span>
           <span class="btn btn-primary" title="Save" (click)="onSave()">
             <span class="fa-solid fa-save"></span> Save
           </span>

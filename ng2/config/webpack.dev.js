@@ -39,20 +39,20 @@ const config = merge(commonConfig, {
       index: '/index.html'
     },
     proxy: [
-      // {
-      //   context: ['/ws'],
-      //   ws: true,
-      //   target: 'ws://localhost:8080',
-      //   secure: false
-      // },
       {
-        context: ['/api/**', '/settings/**'],
-        target: 'http://localhost:8080',
+        context: ['/ws'],
+        ws: true,
+        target: 'http://127.0.0.1:8080',
+        secure: false
+      },
+      {
+        context: ['/api/**', '/settings/fonts/**', '/settings/textures/**'],
+        target: 'http://127.0.0.1:8080',
         secure: false
       },
       {
         context: ['/upload'],
-        target: 'http://localhost:8080',
+        target: 'http://127.0.0.1:8080',
         changeOrigin: true,
         secure: false
       }

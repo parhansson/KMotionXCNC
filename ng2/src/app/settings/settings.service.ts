@@ -77,7 +77,7 @@ export class TPlanner {
 @Injectable()
 export class SettingsService extends JsonFileStore<Machine>{
 
-  public readonly DefaultPath = 'settings/machines'
+  public readonly DefaultPath = 'settings'
 
   constructor(
     private kmxBackend: BackendService,
@@ -86,7 +86,7 @@ export class SettingsService extends JsonFileStore<Machine>{
     super(fileBackend, SettingsService.update({} as Machine, {} as Machine))
     this.socketService.machineSetupFileSubject.subscribe(machineFile => {
       //console.log(machineFile, machineFile.canonical)
-      this.load(machineFile.canonical)
+      this.load(this.fileName)
 
     })
   }
@@ -94,15 +94,13 @@ export class SettingsService extends JsonFileStore<Machine>{
     return this.obj
   }
   get fileName(): string {
-    return `${this.DefaultPath}/${this.machine.name}.cnf`
+    return `${this.DefaultPath}/machine.json`
   }
   onSave(){
     this.kmxBackend.onUpdateMotionParams()
-    this.kmxBackend.setMachineFile(this.fileName)
   }
   onLoad(machine: Machine) {
     SettingsService.update(this.obj, machine)
-    this.kmxBackend.setMachineFile(this.fileName)
   }
 
 
@@ -180,4 +178,3 @@ export class SettingsService extends JsonFileStore<Machine>{
   }
 
 }
-

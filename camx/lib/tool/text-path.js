@@ -21,10 +21,10 @@ class TextPathGenerator {
                 name: 'fontName',
                 label: 'Font',
                 options: [
-                    { key: '/settings/arial.ttf', value: 'Arial' },
+                    { key: '/settings/fonts/arial.ttf', value: 'Arial' },
                     { key: 'unknown', value: 'Unknown' },
                 ],
-                value: '/settings/arial.ttf',
+                value: '/settings/fonts/arial.ttf',
                 required: true,
                 order: 3
             }, {
