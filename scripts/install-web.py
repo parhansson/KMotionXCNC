@@ -36,7 +36,7 @@ def install(mode, source, prefix, sharedir=None, destdir=""):
             shutil.rmtree(destination)
         return destination
     if not (source / "index.html").is_file():
-        raise ValueError("Production bundle missing: run ./build-web.sh prod first")
+        raise ValueError("Production bundle missing: run ./build-web.sh prod (or npm run build) first")
     if source.is_symlink() or any(path.is_symlink() for path in source.rglob("*")):
         raise ValueError("Production bundle must not contain symlinks")
     if destination.resolve() == source.resolve():
@@ -68,7 +68,7 @@ if __name__ == "__main__":
     parser.add_argument("--sharedir", default=os.environ.get("SHAREDIR"))
     args = parser.parse_args()
     try:
-        target = install(args.mode, Path(__file__).resolve().parents[1] / "kmx",
+        target = install(args.mode, Path(__file__).resolve().parents[1] / "apps/web/dist",
                          args.prefix, args.sharedir, os.environ.get("DESTDIR", ""))
         print(f"{args.mode}: {target}")
     except (OSError, ValueError) as error:

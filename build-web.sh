@@ -1,16 +1,13 @@
 #!/usr/bin/env bash
 #
-# Builds the KMotionXCNC web GUI (camx library + ng2 Angular app).
+# Builds, tests, and installs the KMXCNC web application (apps/web/dist)
+# for local same-origin serving by kmxWeb.
 #
-# ng2 depends on the local "camx" library ("file:../camx" in ng2/package.json),
-# which is not published to npm. camx must be built before ng2 can use it.
-# npm ci in ng2 links ng2/node_modules/camx to ../camx.
-#
-# Usage: ./build-web.sh [dev|prod|serve|test|install|uninstall] [options]
-#   dev    Development build into ng2/dist (default)
-#   prod   Production build into ./kmx (served by kmxWeb)
-#   serve  Start webpack-dev-server on http://localhost:8081/
-#   test   Run frontend and installation tests (dependencies must be installed)
+# Usage: ./build-web.sh [prod|dev|serve|test|install|uninstall] [options]
+#   prod       Production build into apps/web/dist (default)
+#   dev        Same as prod
+#   serve      Start Vite dev server
+#   test       Run TypeScript typecheck, Vitest unit tests, and installer tests
 #   install/uninstall  Manage the existing prod bundle in PREFIX/share/kmx/web
 #   Options: --prefix=DIR, --sharedir=DIR; DESTDIR stages installation.
 #   install does not build. Run prod first. Machine files are never installed.
@@ -18,7 +15,7 @@
 
 set -euo pipefail
 
-MODE="${1:-dev}"
+MODE="${1:-prod}"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if [ "$#" -gt 0 ]; then shift; fi
 
@@ -36,6 +33,7 @@ case "$MODE" in
     exit 1
     ;;
 esac
+
 if [ "$#" -gt 0 ]; then
   echo "Options are only supported for install/uninstall" >&2
   exit 1
@@ -48,30 +46,23 @@ fi
 
 step() { printf '\n==> %s\n' "$*"; }
 
-if [ "$MODE" = "test" ]; then
-  npm --prefix "$ROOT/ng2" test
-  python3 "$ROOT/scripts/test_install_web.py"
-  exit 0
-fi
-
-step "[1/3] Installing and building camx"
-cd "$ROOT/camx"
-npm ci
-npm run build
-
-step "[2/3] Installing ng2 dependencies (links camx)"
-cd "$ROOT/ng2"
-npm ci
-npm test
-python3 "$ROOT/scripts/test_install_web.py"
-
-step "[3/3] Building ng2 ($MODE)"
 case "$MODE" in
-  dev) npm run build:dev ;;
-  prod) npm run build ;;
-  serve) npm run dev ;;
+  test)
+    step "Running typecheck, unit tests, and install tests"
+    npm --prefix "$ROOT" run typecheck
+    npm --prefix "$ROOT" test
+    python3 "$ROOT/scripts/test_install_web.py"
+    ;;
+  dev | prod)
+    if [ ! -d "$ROOT/node_modules" ]; then
+      step "Installing locked npm dependencies"
+      npm --prefix "$ROOT" ci --no-audit --no-fund
+    fi
+    step "Building KMXCNC production bundle (apps/web/dist)"
+    npm --prefix "$ROOT" run build
+    step "Done. Install with: ./build-web.sh install"
+    ;;
+  serve)
+    npm --prefix "$ROOT" run dev
+    ;;
 esac
-
-if [ "$MODE" != "serve" ]; then
-  step "Done"
-fi

@@ -1,0 +1,212 @@
+@import "tailwindcss";
+@import "dockview/dist/styles/dockview.css";
+
+/* ==========================================================================
+   KMXCNC Workshop Design System — Dark Workshop (default) + Light Theme
+   ========================================================================== */
+
+:root,
+[data-theme="dark"] {
+  --bg-app: #0b0f14;
+  --bg-surface: #121821;
+  --bg-panel: #161e29;
+  --bg-elevated: #1d2736;
+  --bg-input: #0e141c;
+  --bg-hover: #243144;
+
+  --border-subtle: #222e3e;
+  --border-default: #2e3d52;
+  --border-strong: #415570;
+
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+
+  --accent-primary: #f59e0b;     /* Workshop amber */
+  --accent-primary-hover: #fbbf24;
+  --accent-cyan: #22d3ee;        /* Toolpath cut cyan */
+  --accent-emerald: #10b981;     /* Ready / Cycle Start / OK */
+  --accent-amber: #f59e0b;       /* Feed Hold / Warning / Rapid */
+  --accent-red: #ef4444;         /* E-Stop / Alarm / Error */
+  --accent-red-strong: #dc2626;
+  --accent-blue: #3b82f6;        /* Simulating / Info */
+  --accent-purple: #a855f7;      /* Rotary / Geometry */
+
+  --dro-bg: #090d12;
+  --dro-text: #38bdf8;
+  --dro-work: #34d399;
+  --dro-machine: #fbbf24;
+
+  --control-height: 2rem;
+  --control-height-lg: 2.5rem;
+  --jog-btn-size: 2.75rem;
+  --panel-padding: 0.625rem;
+  --font-size-dro: 1.375rem;
+
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  --bg-app: #e8edf3;
+  --bg-surface: #f4f7fa;
+  --bg-panel: #ffffff;
+  --bg-elevated: #eef2f7;
+  --bg-input: #f8fafc;
+  --bg-hover: #e2e8f0;
+
+  --border-subtle: #d8e0ea;
+  --border-default: #c0ccd9;
+  --border-strong: #94a3b8;
+
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+
+  --accent-primary: #d97706;
+  --accent-primary-hover: #b45309;
+  --accent-cyan: #0891b2;
+  --accent-emerald: #059669;
+  --accent-amber: #d97706;
+  --accent-red: #dc2626;
+  --accent-red-strong: #b91c1c;
+  --accent-blue: #2563eb;
+  --accent-purple: #7c3aed;
+
+  --dro-bg: #0f172a;
+  --dro-text: #38bdf8;
+  --dro-work: #34d399;
+  --dro-machine: #fbbf24;
+
+  color-scheme: light;
+}
+
+/* Scalable UI Density: Touch mode for workshop tablets / touch-big-jog */
+[data-density="touch"] {
+  --control-height: 2.875rem;
+  --control-height-lg: 3.5rem;
+  --jog-btn-size: 4.5rem;
+  --panel-padding: 0.75rem;
+  --font-size-dro: 1.75rem;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.font-mono-tabular {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Scrollbar polish */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-app);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-default);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-strong);
+}
+
+/* ==========================================================================
+   Dockview Workshop Theme Integration
+   ========================================================================== */
+.kmx-dockview {
+  --dv-paneview-header-border-color: var(--border-subtle);
+  --dv-tabs-and-actions-container-background-color: var(--bg-surface);
+  --dv-activegroup-visiblepanel-tab-background-color: var(--bg-panel);
+  --dv-activegroup-hiddenpanel-tab-background-color: var(--bg-surface);
+  --dv-inactivegroup-visiblepanel-tab-background-color: var(--bg-panel);
+  --dv-inactivegroup-hiddenpanel-tab-background-color: var(--bg-surface);
+  --dv-tab-divider-color: var(--border-subtle);
+  --dv-activegroup-visiblepanel-tab-color: var(--text-primary);
+  --dv-activegroup-hiddenpanel-tab-color: var(--text-secondary);
+  --dv-inactivegroup-visiblepanel-tab-color: var(--text-primary);
+  --dv-inactivegroup-hiddenpanel-tab-color: var(--text-muted);
+  --dv-separator-border: var(--border-subtle);
+  --dv-paneview-active-outline-color: var(--accent-primary);
+  --dv-tabs-and-actions-container-height: 32px;
+  --dv-tabs-and-actions-container-font-size: 12px;
+  --dv-group-view-background-color: var(--bg-panel);
+  --dv-background-color: var(--bg-app);
+  --dv-drag-over-background-color: rgba(245, 158, 11, 0.16);
+  --dv-drag-over-border-color: var(--accent-primary);
+}
+
+.kmx-dockview .dv-tab {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  font-size: 11px;
+  padding: 0 10px;
+}
+
+.kmx-dockview .dv-active-tab {
+  border-top: 2px solid var(--accent-primary);
+}
+
+/* ==========================================================================
+   CodeMirror 6 Highlight Classes
+   ========================================================================== */
+.cm-editor {
+  height: 100%;
+  font-size: 13px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.cm-active-exec-line {
+  background-color: rgba(16, 185, 129, 0.22) !important;
+  border-left: 3px solid #10b981;
+}
+
+.cm-selected-3d-line {
+  background-color: rgba(245, 158, 11, 0.24) !important;
+  border-left: 3px solid #f59e0b;
+}
+
+/* Workshop button helpers */
+.btn-workshop {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  min-height: var(--control-height);
+  padding: 0 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border: 1px solid var(--border-default);
+  background-color: var(--bg-elevated);
+  color: var(--text-primary);
+  transition: background-color 120ms ease, border-color 120ms ease, transform 60ms ease;
+  cursor: pointer;
+  user-select: none;
+}
+
+.btn-workshop:hover:not(:disabled) {
+  background-color: var(--bg-hover);
+  border-color: var(--border-strong);
+}
+
+.btn-workshop:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.btn-workshop:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}

@@ -1,0 +1,23 @@
+{
+  "name": "kmxcnc-monorepo",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "plugins/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=@kmxcnc/web",
+    "build": "npm run build --workspace=@kmxcnc/web",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.typecheck.json",
+    "install-web": "python3 scripts/install-web.py install",
+    "uninstall-web": "python3 scripts/install-web.py uninstall"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.5"
+  }
+}

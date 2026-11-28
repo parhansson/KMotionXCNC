@@ -7,3 +7,8 @@ config\.mak
 config\.h
 *.out
 kmx/
+node_modules/
+apps/web/dist/
+dist/
+*.tsbuildinfo
+.DS_Store
